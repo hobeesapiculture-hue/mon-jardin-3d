@@ -1124,7 +1124,6 @@
           const netGroup = new THREE.Group();
           const netBaseY = WALL_H;
           const archR = Math.max(0.45, totalW * 0.46);
-          const archH = Math.max(0.75, archR * 0.95);
           const len = Math.max(0.6, totalD - 0.12);
 
           const tunnelGeo = new THREE.CylinderGeometry(
@@ -1629,8 +1628,7 @@
 
       function csvEscape(val) {
         const str = String(val == null ? "" : val);
-        if (/[",
-]/.test(str)) {
+        if (/[",\r\n]/.test(str)) {
           return `"${str.replace(/"/g, '""')}"`;
         }
         return str;
@@ -1661,17 +1659,13 @@
             } else if (ch === ",") {
               row.push(cur);
               cur = "";
-            } else if (ch === "
-" && next === "
-") {
+            } else if (ch === "\r" && next === "\n") {
               row.push(cur);
               rows.push(row);
               row = [];
               cur = "";
               i++;
-            } else if (ch === "
-" || ch === "
-") {
+            } else if (ch === "\n" || ch === "\r") {
               row.push(cur);
               rows.push(row);
               row = [];
@@ -1710,8 +1704,7 @@
             csvEscape(b.notes || "")
           ].join(","));
         }
-        return lines.join("
-");
+        return lines.join("\r\n");
       }
 
       function importCSVText(text) {
@@ -1851,4 +1844,5 @@
     })();
   </script>
 </body>
+
 </html>
