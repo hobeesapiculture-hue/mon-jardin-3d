@@ -1082,71 +1082,78 @@
       } else if (spec.name === 'Fraise') {
         const leafMat = new THREE.MeshStandardMaterial({ color: 0x4c8c2b, roughness: 0.76 });
         const darkLeafMat = new THREE.MeshStandardMaterial({ color: 0x3a7320, roughness: 0.8 });
+        const lightLeafMat = new THREE.MeshStandardMaterial({ color: 0x62a838, roughness: 0.72 });
         const stemMat = new THREE.MeshStandardMaterial({ color: 0x6b9e37, roughness: 0.85 });
         const berryMat = new THREE.MeshStandardMaterial({
           color: spec.fruitAccent || 0xd91e36,
           roughness: 0.34,
           metalness: 0.04
         });
+        const unripeBerryMat = new THREE.MeshStandardMaterial({ color: 0x8fb86e, roughness: 0.65 });
         const petalMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.55 });
         const centerMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
 
+        // Touffe compacte contenue dans 1 case de 30x30 cm (rayon max ~0.12 m)
         const coreMound = new THREE.Mesh(
-          new THREE.DodecahedronGeometry(0.072, 1),
+          new THREE.DodecahedronGeometry(0.076, 1),
           darkLeafMat
         );
-        coreMound.scale.set(1.15, 0.72, 1.15);
-        coreMound.position.set(0, 0.058, 0);
+        coreMound.scale.set(1.15, 0.76, 1.15);
+        coreMound.position.set(0, 0.062, 0);
         coreMound.castShadow = true;
+        coreMound.receiveShadow = true;
         g.add(coreMound);
 
-        const leafAngles = [0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4];
+        // Feuillage trifolié dense en dôme remontant
+        const leafAngles = [0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6];
         leafAngles.forEach((ang, idx) => {
-          const rDist = idx % 2 === 0 ? 0.058 : 0.042;
-          const yPos = idx % 2 === 0 ? 0.068 : 0.088;
+          const rDist = idx % 2 === 0 ? 0.062 : 0.044;
+          const yPos = idx % 2 === 0 ? 0.076 : 0.098;
           const leafCluster = new THREE.Mesh(
-            new THREE.ConeGeometry(0.036, 0.055, 6),
-            idx % 2 === 0 ? leafMat : darkLeafMat
+            new THREE.ConeGeometry(0.038, 0.062, 6),
+            idx % 3 === 0 ? lightLeafMat : idx % 2 === 0 ? leafMat : darkLeafMat
           );
-          leafCluster.scale.set(1.25, 0.65, 0.55);
+          leafCluster.scale.set(1.22, 0.68, 0.52);
           leafCluster.position.set(
             Math.cos(ang) * rDist,
             yPos,
             Math.sin(ang) * rDist
           );
           leafCluster.rotation.y = -ang;
-          leafCluster.rotation.z = -0.72;
+          leafCluster.rotation.z = -0.68;
           leafCluster.castShadow = true;
           g.add(leafCluster);
         });
 
+        // Petites fleurs blanches à cœur jaune
         const flowerCoords = [
-          [0.055, 0.115, 0.045],
-          [-0.05, 0.105, -0.045],
-          [0.02, 0.125, -0.062]
+          [0.056, 0.124, 0.046],
+          [-0.052, 0.114, -0.046],
+          [0.022, 0.136, -0.062],
+          [-0.064, 0.092, 0.036]
         ];
         flowerCoords.forEach(([fx, fy, fz]) => {
           const fGroup = new THREE.Group();
           const stalk = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.0025, 0.003, 0.045, 5),
+            new THREE.CylinderGeometry(0.0022, 0.0028, 0.048, 5),
             stemMat
           );
-          stalk.position.y = -0.02;
+          stalk.position.y = -0.022;
           fGroup.add(stalk);
 
           for (let p = 0; p < 5; p++) {
             const pAng = (p / 5) * Math.PI * 2;
             const petal = new THREE.Mesh(
-              new THREE.SphereGeometry(0.008, 6, 6),
+              new THREE.SphereGeometry(0.0085, 6, 6),
               petalMat
             );
             petal.scale.set(1.2, 0.35, 0.8);
-            petal.position.set(Math.cos(pAng) * 0.008, 0.002, Math.sin(pAng) * 0.008);
+            petal.position.set(Math.cos(pAng) * 0.0085, 0.002, Math.sin(pAng) * 0.0085);
             petal.rotation.y = -pAng;
             fGroup.add(petal);
           }
           const core = new THREE.Mesh(
-            new THREE.SphereGeometry(0.005, 6, 6),
+            new THREE.SphereGeometry(0.0052, 6, 6),
             centerMat
           );
           core.scale.y = 0.6;
@@ -1157,26 +1164,28 @@
           g.add(fGroup);
         });
 
+        // Fraises rouges des bois légèrement pendantes autour de la touffe
         const berrySpots = [
-          [0.072, 0.068, 0.048, 0.35, -0.25],
-          [-0.074, 0.062, 0.042, 0.25, 0.35],
-          [0.032, 0.055, -0.078, -0.32, 0.15],
-          [-0.048, 0.076, -0.064, -0.22, 0.28],
-          [0.082, 0.048, -0.015, 0.1, -0.4],
-          [-0.018, 0.045, 0.082, 0.42, 0.08]
+          [0.074, 0.072, 0.048, 0.36, -0.25, false],
+          [-0.076, 0.066, 0.042, 0.26, 0.35, false],
+          [0.034, 0.06, -0.08, -0.32, 0.15, false],
+          [-0.05, 0.082, -0.064, -0.22, 0.28, false],
+          [0.084, 0.052, -0.015, 0.12, -0.4, false],
+          [-0.02, 0.048, 0.084, 0.42, 0.08, false],
+          [0.062, 0.105, -0.045, -0.18, -0.22, true]
         ];
-        berrySpots.forEach(([bx, by, bz, rx, rz]) => {
+        berrySpots.forEach(([bx, by, bz, rx, rz, isUnripe]) => {
           const bGroup = new THREE.Group();
           const pedicel = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.0022, 0.0028, 0.035, 5),
+            new THREE.CylinderGeometry(0.002, 0.0026, 0.038, 5),
             stemMat
           );
-          pedicel.position.y = 0.016;
+          pedicel.position.y = 0.018;
           bGroup.add(pedicel);
 
           const berry = new THREE.Mesh(
-            new THREE.ConeGeometry(0.015, 0.028, 8),
-            berryMat
+            new THREE.ConeGeometry(0.0155, 0.029, 8),
+            isUnripe ? unripeBerryMat : berryMat
           );
           berry.rotation.x = Math.PI;
           berry.castShadow = true;
@@ -1185,6 +1194,115 @@
           bGroup.position.set(bx, by, bz);
           bGroup.rotation.set(rx, 0, rz);
           g.add(bGroup);
+        });
+      } else if (spec.name === 'Physalis') {
+        // Physalis (1 case de 30x30 cm / 1x1) : tige dressée feuillue et calices-lanternes orange, ambrés et verts
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0x5c8a32, roughness: 0.84 });
+        const leafMat = new THREE.MeshStandardMaterial({ color: 0x589c34, roughness: 0.76 });
+        const lightLeafMat = new THREE.MeshStandardMaterial({ color: 0x73b543, roughness: 0.74 });
+        const orangeLanternMat = new THREE.MeshStandardMaterial({
+          color: spec.fruitAccent || 0xf97316,
+          roughness: 0.38,
+          metalness: 0.03
+        });
+        const vermilionLanternMat = new THREE.MeshStandardMaterial({
+          color: 0xea580c,
+          roughness: 0.4,
+          metalness: 0.03
+        });
+        const amberLanternMat = new THREE.MeshStandardMaterial({
+          color: 0xf59e0b,
+          roughness: 0.42,
+          metalness: 0.03
+        });
+        const greenLanternMat = new THREE.MeshStandardMaterial({
+          color: 0x6ba336,
+          roughness: 0.68
+        });
+
+        const mainStem = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.0055, 0.008, 0.25, 7),
+          stemMat
+        );
+        mainStem.position.set(0, 0.125, 0);
+        mainStem.castShadow = true;
+        g.add(mainStem);
+
+        function createPhysalisLeaf(mat, sc = 1.0) {
+          const lfGroup = new THREE.Group();
+          const petiole = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.0018, 0.0022, 0.026 * sc, 5),
+            stemMat
+          );
+          petiole.position.set(0.012 * sc, 0, 0);
+          petiole.rotation.z = Math.PI / 2;
+          lfGroup.add(petiole);
+
+          const blade = new THREE.Mesh(
+            new THREE.ConeGeometry(0.028 * sc, 0.068 * sc, 6),
+            mat
+          );
+          blade.scale.set(1.05, 1.0, 0.26);
+          blade.position.set(0.046 * sc, 0.004 * sc, 0);
+          blade.rotation.z = -Math.PI / 2 + 0.14;
+          blade.castShadow = true;
+          lfGroup.add(blade);
+          return lfGroup;
+        }
+
+        function createLanternCalyx(mat, sc = 1.0) {
+          const lGroup = new THREE.Group();
+          const pedicel = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.0016, 0.002, 0.024 * sc, 5),
+            stemMat
+          );
+          pedicel.position.y = 0.012 * sc;
+          lGroup.add(pedicel);
+
+          const lantern = new THREE.Mesh(
+            new THREE.ConeGeometry(0.024 * sc, 0.044 * sc, 8),
+            mat
+          );
+          lantern.scale.set(1.0, 1.0, 0.92);
+          lantern.rotation.x = Math.PI;
+          lantern.position.y = -0.016 * sc;
+          lantern.castShadow = true;
+          lGroup.add(lantern);
+
+          return lGroup;
+        }
+
+        // Feuilles alternées le long de la tige dans l'emprise de 30x30 cm
+        const leafPlacements = [
+          { y: 0.065, ang: 0.3, sc: 0.95, tiltX: 0.25, mat: leafMat },
+          { y: 0.095, ang: 3.4, sc: 1.0, tiltX: 0.2, mat: lightLeafMat },
+          { y: 0.135, ang: 1.8, sc: 0.95, tiltX: 0.28, mat: leafMat },
+          { y: 0.175, ang: 4.9, sc: 0.9, tiltX: 0.22, mat: lightLeafMat },
+          { y: 0.215, ang: 2.5, sc: 0.85, tiltX: 0.3, mat: leafMat },
+          { y: 0.242, ang: 5.6, sc: 0.78, tiltX: 0.35, mat: lightLeafMat }
+        ];
+        leafPlacements.forEach((lp) => {
+          const lf = createPhysalisLeaf(lp.mat, lp.sc);
+          lf.position.set(0, lp.y, 0);
+          lf.rotation.y = lp.ang;
+          lf.rotation.x = lp.tiltX;
+          g.add(lf);
+        });
+
+        // Calices-lanternes pendantes : orange vif, vermillon, ambre et vert tendre
+        const lanternPlacements = [
+          { x: 0.028, y: 0.185, z: 0.022, sc: 1.05, rz: -0.22, rx: 0.12, mat: orangeLanternMat },
+          { x: -0.03, y: 0.148, z: 0.026, sc: 1.02, rz: 0.25, rx: 0.14, mat: vermilionLanternMat },
+          { x: 0.024, y: 0.122, z: -0.028, sc: 0.96, rz: -0.2, rx: -0.15, mat: orangeLanternMat },
+          { x: -0.022, y: 0.092, z: -0.026, sc: 0.92, rz: 0.22, rx: -0.12, mat: amberLanternMat },
+          { x: 0.022, y: 0.212, z: -0.018, sc: 0.88, rz: -0.18, rx: -0.1, mat: greenLanternMat },
+          { x: -0.032, y: 0.176, z: -0.016, sc: 0.85, rz: 0.2, rx: -0.08, mat: greenLanternMat }
+        ];
+        lanternPlacements.forEach((ln) => {
+          const lnt = createLanternCalyx(ln.mat, ln.sc);
+          lnt.position.set(ln.x, ln.y, ln.z);
+          lnt.rotation.set(ln.rx, 0, ln.rz);
+          g.add(lnt);
         });
       } else if (spec.name === 'Melon') {
         // Melon (3x3 = 9 cases de 30x30 cm = 90x90 cm) :
