@@ -324,6 +324,62 @@
     .modal p { margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.45; }
     textarea { min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
     .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+    .sim-hud {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: calc(env(safe-area-inset-bottom, 10px) + 10px);
+      z-index: 22;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(14px);
+      border-radius: 15px;
+      padding: 8px 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .sim-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sim-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #dcfce7;
+    }
+    .sim-presets {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .sim-chip {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 8px;
+      background: rgba(8, 22, 14, 0.85);
+      border: 1px solid rgba(134, 239, 172, 0.22);
+      color: var(--muted);
+    }
+    .sim-chip.active {
+      background: rgba(34, 197, 94, 0.25);
+      border-color: #4ade80;
+      color: #ffffff;
+    }
+    input[type="range"]#sim-sun-slider {
+      width: 100%;
+      accent-color: #f59e0b;
+      cursor: pointer;
+      height: 6px;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -337,12 +393,28 @@
     <div class="actions">
       <button id="btn-undo" title="Précédent (Ctrl+Z)" disabled>↶</button>
       <button id="btn-redo" title="Suivant (Ctrl+Y)" disabled>↷</button>
+      <button id="btn-zoom-in" title="Zoomer (+)">＋</button>
+      <button id="btn-zoom-out" title="Dézoomer (-)">－</button>
+      <button id="btn-reset-view" title="Recentrer la vue">⌖</button>
       <button id="btn-add" class="primary">+ Carré</button>
       <button id="btn-sync">⇅ Sync</button>
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
+
+  <div id="sim-hud" class="sim-hud" aria-label="Simulation d'ensoleillement et de saison">
+    <div class="sim-row">
+      <span id="sim-time-label" class="sim-label">☀️ Soleil : 12:30 • Été</span>
+      <div class="sim-presets">
+        <button type="button" class="sim-chip active" data-sim-preset="ete">Été</button>
+        <button type="button" class="sim-chip" data-sim-preset="printemps">Printemps</button>
+        <button type="button" class="sim-chip" data-sim-preset="automne">Automne</button>
+        <button type="button" class="sim-chip" data-sim-preset="crepuscule">Soir</button>
+      </div>
+    </div>
+    <input id="sim-sun-slider" type="range" min="6" max="20.5" step="0.25" value="12.5" aria-label="Heure du soleil" />
+  </div>
 
   <aside id="drawer" class="drawer" aria-label="Éditeur de carré potager">
     <div id="drawer-handle-zone" class="drawer-handle-zone">
@@ -1488,6 +1560,7 @@
 
       let isDraggingBed = false;
       let isOrbiting = false;
+      let isPanning = false;
       let draggedBedId = null;
       let dragStartRecorded = false;
       let dragOffset = new THREE.Vector3();
@@ -1499,9 +1572,76 @@
       let orbitDist = 36;
       const orbitTarget = new THREE.Vector3(0, 0, 0);
 
+      const activePointers = new Map();
+      let lastPinchDist = null;
+      let lastPinchCenter = null;
+
+      function panCameraInSpace(deltaX, deltaY) {
+        const panSpeed = orbitDist * 0.0018;
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        forward.y = 0;
+        if (forward.lengthSq() < 1e-6) {
+          forward.set(0, 0, -1);
+        } else {
+          forward.normalize();
+        }
+        const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+        orbitTarget.addScaledVector(right, -deltaX * panSpeed);
+        orbitTarget.addScaledVector(forward, deltaY * panSpeed);
+        orbitTarget.x = Math.max(-36, Math.min(36, orbitTarget.x));
+        orbitTarget.z = Math.max(-36, Math.min(36, orbitTarget.z));
+        updateCameraFromOrbit();
+      }
+
+      function zoomCameraBy(deltaDist) {
+        orbitDist += deltaDist;
+        updateCameraFromOrbit();
+      }
+
+      function resetCameraView() {
+        orbitYaw = 0;
+        orbitPitch = 0.88;
+        orbitDist = 36;
+        orbitTarget.set(0, 0, 0);
+        updateCameraFromOrbit();
+        showToast("Vue 3D recentrée");
+      }
+
+      document.getElementById("btn-zoom-in").addEventListener("click", () => {
+        zoomCameraBy(-4.5);
+      });
+      document.getElementById("btn-zoom-out").addEventListener("click", () => {
+        zoomCameraBy(4.5);
+      });
+      document.getElementById("btn-reset-view").addEventListener("click", resetCameraView);
+
+      renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
+
+      window.addEventListener("keydown", (e) => {
+        if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+        const step = 1.6;
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "q" || e.key.toLowerCase() === "a") {
+          panCameraInSpace(-step * 14, 0);
+        } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+          panCameraInSpace(step * 14, 0);
+        } else if (e.key === "ArrowUp" || e.key.toLowerCase() === "z" || e.key.toLowerCase() === "w") {
+          if (!(e.metaKey || e.ctrlKey)) panCameraInSpace(0, -step * 14);
+        } else if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") {
+          panCameraInSpace(0, step * 14);
+        } else if (e.key === "+" || e.key === "=") {
+          zoomCameraBy(-3.5);
+        } else if (e.key === "-" || e.key === "_") {
+          zoomCameraBy(3.5);
+        } else if (e.key.toLowerCase() === "r") {
+          resetCameraView();
+        }
+      });
+
       function updateCameraFromOrbit() {
-        const clampedPitch = Math.max(0.28, Math.min(1.38, orbitPitch));
-        const clampedDist = Math.max(12, Math.min(75, orbitDist));
+        const clampedPitch = Math.max(0.22, Math.min(1.42, orbitPitch));
+        const clampedDist = Math.max(8, Math.min(85, orbitDist));
         orbitPitch = clampedPitch;
         orbitDist = clampedDist;
 
@@ -1533,8 +1673,29 @@
       }
 
       renderer.domElement.addEventListener("pointerdown", (e) => {
-        if (e.button !== 0 && e.pointerType === "mouse") return;
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         renderer.domElement.setPointerCapture(e.pointerId);
+
+        if (activePointers.size >= 2) {
+          isDraggingBed = false;
+          isOrbiting = false;
+          isPanning = true;
+          draggedBedId = null;
+          const pts = Array.from(activePointers.values());
+          lastPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+          lastPinchCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+          return;
+        }
+
+        if (e.button === 2 || e.button === 1 || e.shiftKey) {
+          isPanning = true;
+          isOrbiting = false;
+          isDraggingBed = false;
+          lastOrbitPos = { x: e.clientX, y: e.clientY };
+          return;
+        }
+
+        if (e.button !== 0 && e.pointerType === "mouse") return;
         pointerDownPos = { x: e.clientX, y: e.clientY };
         lastOrbitPos = { x: e.clientX, y: e.clientY };
 
@@ -1554,12 +1715,34 @@
           if (drawerOpen) syncDrawerFromSelected();
         } else {
           isOrbiting = true;
+          isPanning = false;
           isDraggingBed = false;
           draggedBedId = null;
         }
       });
 
       renderer.domElement.addEventListener("pointermove", (e) => {
+        if (activePointers.has(e.pointerId)) {
+          activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        }
+
+        if (activePointers.size >= 2) {
+          const pts = Array.from(activePointers.values());
+          const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+          const center = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+          if (lastPinchDist && dist > 0) {
+            const zoomFactor = lastPinchDist / dist;
+            orbitDist *= zoomFactor;
+            updateCameraFromOrbit();
+          }
+          if (lastPinchCenter) {
+            panCameraInSpace(center.x - lastPinchCenter.x, center.y - lastPinchCenter.y);
+          }
+          lastPinchDist = dist;
+          lastPinchCenter = center;
+          return;
+        }
+
         if (isDraggingBed && draggedBedId) {
           const bed = beds.find(b => b.id === draggedBedId);
           if (!bed) return;
@@ -1584,6 +1767,14 @@
           return;
         }
 
+        if (isPanning) {
+          const dx = e.clientX - lastOrbitPos.x;
+          const dy = e.clientY - lastOrbitPos.y;
+          lastOrbitPos = { x: e.clientX, y: e.clientY };
+          panCameraInSpace(dx, dy);
+          return;
+        }
+
         if (isOrbiting) {
           const dx = e.clientX - lastOrbitPos.x;
           const dy = e.clientY - lastOrbitPos.y;
@@ -1595,6 +1786,12 @@
       });
 
       renderer.domElement.addEventListener("pointerup", (e) => {
+        activePointers.delete(e.pointerId);
+        if (activePointers.size < 2) {
+          lastPinchDist = null;
+          lastPinchCenter = null;
+        }
+
         const travel = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
         if (isDraggingBed && draggedBedId && travel < 6) {
           const now = performance.now();
@@ -1616,14 +1813,32 @@
 
         isDraggingBed = false;
         isOrbiting = false;
+        isPanning = false;
+        draggedBedId = null;
+        dragStartRecorded = false;
+      });
+
+      renderer.domElement.addEventListener("pointercancel", (e) => {
+        activePointers.delete(e.pointerId);
+        if (activePointers.size < 2) {
+          lastPinchDist = null;
+          lastPinchCenter = null;
+        }
+        isDraggingBed = false;
+        isOrbiting = false;
+        isPanning = false;
         draggedBedId = null;
         dragStartRecorded = false;
       });
 
       renderer.domElement.addEventListener("wheel", (e) => {
         e.preventDefault();
-        orbitDist += e.deltaY * 0.018;
-        updateCameraFromOrbit();
+        if (e.shiftKey) {
+          panCameraInSpace(-e.deltaY, e.deltaX);
+        } else {
+          orbitDist += e.deltaY * 0.018;
+          updateCameraFromOrbit();
+        }
       }, { passive: false });
 
       function csvEscape(val) {
@@ -1816,6 +2031,62 @@
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
+
+      const simSlider = document.getElementById("sim-sun-slider");
+      const simTimeLabel = document.getElementById("sim-time-label");
+      const simChips = Array.from(document.querySelectorAll("[data-sim-preset]"));
+
+      const SEASON_PRESETS = {
+        ete: { label: "Été", hour: 12.5, elevationScale: 1.0, groundHex: "#142b1c", skyHex: "#0c1d13", sunHex: "#fffbeb", intensity: 1.35 },
+        printemps: { label: "Printemps", hour: 10.5, elevationScale: 0.78, groundHex: "#17301e", skyHex: "#0e2216", sunHex: "#fef9c3", intensity: 1.2 },
+        automne: { label: "Automne", hour: 15.5, elevationScale: 0.58, groundHex: "#1c2a19", skyHex: "#121b12", sunHex: "#fde68a", intensity: 1.05 },
+        crepuscule: { label: "Soir", hour: 18.75, elevationScale: 0.36, groundHex: "#112118", skyHex: "#09140e", sunHex: "#fb923c", intensity: 0.85 }
+      };
+
+      let activeSeason = SEASON_PRESETS.ete;
+
+      function formatHourText(h) {
+        const wholeH = Math.floor(h);
+        const mins = Math.round((h - wholeH) * 60);
+        return `${String(wholeH).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+      }
+
+      function applySunSimulation() {
+        const hour = parseFloat(simSlider.value) || 12.5;
+        const progress = Math.max(0, Math.min(1, (hour - 6) / 14.5));
+        const azimuth = (progress - 0.5) * Math.PI * 1.15;
+        const baseElev = Math.sin(progress * Math.PI) * activeSeason.elevationScale;
+        const radius = 38;
+        const sunY = Math.max(6.5, (0.25 + baseElev * 0.85) * 32);
+        const sunX = Math.sin(azimuth) * radius;
+        const sunZ = Math.cos(azimuth) * radius * 0.65;
+
+        dirLight.position.set(sunX, sunY, sunZ);
+        dirLight.color.set(activeSeason.sunHex);
+        dirLight.intensity = activeSeason.intensity * (0.65 + 0.45 * Math.sin(progress * Math.PI));
+
+        groundPlaneMesh.material.color.set(activeSeason.groundHex);
+        scene.background = new THREE.Color(activeSeason.skyHex);
+        scene.fog.color.set(activeSeason.skyHex);
+
+        simTimeLabel.textContent = `☀️ Soleil : ${formatHourText(hour)} • ${activeSeason.label}`;
+      }
+
+      simSlider.addEventListener("input", applySunSimulation);
+
+      simChips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const key = chip.getAttribute("data-sim-preset");
+          if (!SEASON_PRESETS[key]) return;
+          activeSeason = SEASON_PRESETS[key];
+          simSlider.value = String(activeSeason.hour);
+          simChips.forEach((c) => c.classList.toggle("active", c === chip));
+          applySunSimulation();
+          showToast(`Simulation ${activeSeason.label} (${formatHourText(activeSeason.hour)})`);
+        });
+      });
+
+      applySunSimulation();
 
       const clock = new THREE.Clock();
       function animate() {
