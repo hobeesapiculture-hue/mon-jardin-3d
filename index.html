@@ -2,2204 +2,1035 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mon Jardin · Pilotage 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Potager 3D — Modélisation & Planification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
   <style>
-    :root {
-      --bg-canvas: #07130d;
-      --panel-bg: rgba(10, 26, 18, 0.88);
-      --panel-border: rgba(134, 239, 172, 0.18);
-      --text-main: #f0fdf4;
-      --text-muted: #94b8a3;
-      --accent: #22c55e;
-      --accent-strong: #16a34a;
-      --accent-soft: rgba(34, 197, 94, 0.16);
-      --danger: #ef4444;
-      --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      --radius-lg: 18px;
-      --radius-md: 12px;
-      --radius-sm: 9px;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
+    * { box-sizing: border-box; }
+    body {
       margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--bg-canvas);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      user-select: none;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f2;
+      color: #1f2923;
     }
-
-    #scene-container {
-      position: fixed;
-      inset: 0;
+    .canvas-wrap {
+      position: relative;
       width: 100%;
-      height: 100%;
+      height: 440px;
+      background: #4e7c2a;
+      overflow: hidden;
+      user-select: none;
       touch-action: none;
     }
-
-    /* Barre supérieure */
-    #top-bar {
-      position: fixed;
-      top: max(10px, env(safe-area-inset-top));
-      left: 10px;
-      right: 10px;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      pointer-events: none;
-    }
-
-    .top-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--panel-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius-lg);
-      padding: 5px 7px;
-      box-shadow: var(--shadow);
-      pointer-events: auto;
-    }
-
-    .brand-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 10px 4px 6px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      white-space: nowrap;
-    }
-
-    .brand-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      flex-shrink: 0;
-    }
-
-    .bed-counter {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
-      white-space: nowrap;
-    }
-
-    @media (max-width: 640px) {
-      .bed-counter {
-        display: none;
+    @media (min-width: 768px) {
+      .canvas-wrap {
+        height: 520px;
       }
     }
-
-    .btn {
-      appearance: none;
-      border: 1px solid transparent;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 12.5px;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      padding: 7px 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .btn:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .btn:active:not(:disabled) {
-      transform: scale(0.97);
-    }
-
-    .btn:disabled {
-      opacity: 0.36;
-      cursor: not-allowed;
-    }
-
-    .btn-icon {
-      padding: 7px 9px;
-      min-width: 32px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #15803d);
-      color: #ffffff;
-      border-color: rgba(187, 247, 208, 0.35);
-      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: linear-gradient(135deg, #2bd469, #16a34a);
-    }
-
-    .btn-active {
-      background: rgba(245, 158, 11, 0.22);
-      border-color: rgba(251, 191, 36, 0.65);
-      color: #fde68a;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
-    }
-
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.14);
-      border-color: rgba(248, 113, 113, 0.35);
-      color: #fecaca;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: rgba(239, 68, 68, 0.26);
-    }
-
-    /* Toast discret */
-    #toast {
-      position: fixed;
-      top: 68px;
-      left: 50%;
-      transform: translate(-50%, -8px);
-      z-index: 40;
-      background: rgba(11, 28, 19, 0.94);
-      color: var(--text-main);
-      border: 1px solid var(--panel-border);
-      border-radius: 999px;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      max-width: calc(100vw - 24px);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    #toast.visible {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    /* Barre inférieure : carré sélectionné + variétés + soleil/éditer */
-    #bed-bottom-bar {
-      position: fixed;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      left: 10px;
-      right: 10px;
-      z-index: 20;
-      background: var(--panel-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius-lg);
-      padding: 9px 11px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 820px;
-      margin: 0 auto;
-    }
-
-    .bottom-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .bed-badge-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .bed-code {
-      background: var(--accent-soft);
-      border: 1px solid rgba(74, 222, 128, 0.45);
-      color: #86efac;
-      font-size: 11.5px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 8px;
-      letter-spacing: 0.03em;
-      flex-shrink: 0;
-    }
-
-    .bed-title-wrap {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .bed-name-label {
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .bed-meta-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .bottom-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .variety-strip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 2px;
-    }
-
-    .variety-strip::-webkit-scrollbar {
-      display: none;
-    }
-
-    .variety-chip {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.11);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 11.5px;
-      font-weight: 600;
-      border-radius: 999px;
-      padding: 5px 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      transition: background 0.14s ease, border-color 0.14s ease, transform 0.1s ease;
-    }
-
-    .variety-chip:hover {
-      background: rgba(255, 255, 255, 0.11);
-    }
-
-    .variety-chip.active {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: #dcfce7;
-      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
-    }
-
-    .variety-swatch {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-    }
-
-    /* Popover Soleil & Saison */
-    #sun-popover {
-      position: fixed;
-      bottom: 108px;
-      right: 12px;
-      z-index: 30;
-      width: min(320px, calc(100vw - 24px));
-      background: rgba(10, 27, 18, 0.96);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      display: none;
-    }
-
-    #sun-popover.open {
-      display: block;
-    }
-
-    .popover-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .popover-title {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .sun-time-readout {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fde047;
-    }
-
-    .season-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .season-btn {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      padding: 6px 4px;
-      cursor: pointer;
-    }
-
-    .season-btn.active {
-      background: rgba(234, 179, 8, 0.22);
-      border-color: #facc15;
-      color: #fef08a;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: #facc15;
-      cursor: pointer;
-      margin: 4px 0 6px;
-    }
-
-    .sun-scale-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10.5px;
-      color: var(--text-muted);
-    }
-
-    /* Tiroir d'édition d'un carré */
-    #drawer-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 35;
-      background: rgba(0, 0, 0, 0.45);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    #drawer-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    #bed-drawer {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 36;
-      max-height: 82vh;
-      overflow-y: auto;
-      background: rgba(9, 24, 16, 0.98);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--panel-border);
-      border-radius: 22px 22px 0 0;
-      padding: 14px 16px max(20px, env(safe-area-inset-bottom));
-      box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.6);
-      transform: translateY(100%);
-      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    #bed-drawer.open {
-      transform: translateY(0);
-    }
-
-    .drawer-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 14px;
-    }
-
-    .drawer-title-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .drawer-title-group h2 {
-      margin: 0;
+    .big-select {
+      min-height: 48px;
       font-size: 16px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      padding: 10px 14px;
     }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    @media (max-width: 520px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .field.full {
-      grid-column: 1 / -1;
-    }
-
-    .field label {
-      font-size: 11.5px;
+    .tab-btn.active {
+      color: #166534;
+      border-bottom: 2px solid #166534;
       font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .field input[type="text"],
-    .field select,
-    .field textarea {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: var(--radius-sm);
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 13px;
-      padding: 8px 10px;
-      outline: none;
-    }
-
-    .field select option {
-      background: #0c2216;
-      color: var(--text-main);
-    }
-
-    .field input[type="text"]:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: var(--accent);
-    }
-
-    .field textarea {
-      min-height: 64px;
-      resize: vertical;
-    }
-
-    .drawer-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .drawer-footer-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: auto;
-    }
-
-    /* Modale Sync CSV / JSON */
-    #sync-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 45;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 14px;
-    }
-
-    #sync-modal-backdrop.open {
-      display: flex;
-    }
-
-    #sync-modal {
-      width: min(680px, 100%);
-      max-height: 88vh;
-      overflow-y: auto;
-      background: #091911;
-      border: 1px solid var(--panel-border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .modal-header h3 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .sync-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .sync-tab {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    .sync-tab.active {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: #dcfce7;
-    }
-
-    #sync-textarea {
-      width: 100%;
-      min-height: 210px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: var(--radius-sm);
-      color: #e2e8f0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11.5px;
-      line-height: 1.45;
-      padding: 10px;
-      outline: none;
-      resize: vertical;
-    }
-
-    #sync-textarea:focus {
-      border-color: var(--accent);
-    }
-
-    .modal-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .modal-actions-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    #csv-file-input {
-      display: none;
+      background-color: #f0fdf4;
     }
   </style>
 </head>
 <body>
-  <div id="scene-container"></div>
+  <div class="max-w-3xl mx-auto p-3 sm:p-5 space-y-3">
+    <!-- Zone 3D -->
+    <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
+      <!-- Barre supérieure de vue et grille -->
+      <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
+          <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
+            Vue 3D
+          </button>
+          <button id="btnViewTop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition">
+            Vue Dessus (Plan)
+          </button>
+          <button id="btnResetCamera" type="button" title="Réinitialiser la caméra" class="ml-1 p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
 
-  <!-- Barre supérieure -->
-  <header id="top-bar">
-    <div class="top-group">
-      <div class="brand-pill">
-        <span class="brand-dot"></span>
-        <span>Mon Jardin · 3D</span>
+        <button id="btnToggleGrid" type="button" class="pointer-events-auto flex items-center gap-2 bg-white/95 backdrop-blur px-3.5 py-2 rounded-xl shadow text-xs sm:text-sm font-semibold text-stone-800 border border-stone-200/80 hover:bg-white transition">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>Grille (1m)</span>
+        </button>
       </div>
-      <span id="bed-counter" class="bed-counter">0 carré</span>
+
+      <!-- Badge compact de statistiques en haut à droite -->
+      <div class="absolute top-16 right-3 z-10 bg-stone-900/85 backdrop-blur text-white px-3.5 py-2 rounded-xl shadow text-xs flex items-center gap-3 pointer-events-none">
+        <div>Carrés : <strong id="statBeds" class="text-emerald-300">0</strong></div>
+        <span class="text-stone-500">|</span>
+        <div>Terreau : <strong id="statSoil" class="text-amber-300">0 L</strong></div>
+        <span class="text-stone-500">|</span>
+        <div>Plants : <strong id="statPlants" class="text-lime-300">0</strong></div>
+      </div>
     </div>
 
-    <div class="top-group">
-      <button id="btn-undo" class="btn btn-icon" type="button" title="Annuler (Ctrl+Z)" disabled>↶</button>
-      <button id="btn-redo" class="btn btn-icon" type="button" title="Rétablir (Ctrl+Y)" disabled>↷</button>
-    </div>
+    <!-- Panneau principal -->
+    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+      <!-- En-tête + Actions JSON -->
+      <div class="px-4 py-3.5 border-b border-stone-200 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
+            ✦
+          </div>
+          <div class="truncate">
+            <h1 class="text-base sm:text-lg font-bold text-stone-900 truncate">Potager 3D</h1>
+            <p class="text-xs text-stone-500 truncate">Modélisation &amp; Planification</p>
+          </div>
+        </div>
 
-    <div class="top-group">
-      <button id="btn-zoom-in" class="btn btn-icon" type="button" title="Zoom avant">+</button>
-      <button id="btn-zoom-out" class="btn btn-icon" type="button" title="Zoom arrière">−</button>
-      <button id="btn-reset-cam" class="btn btn-icon" type="button" title="Recentrer la caméra">⌖</button>
-    </div>
-
-    <div class="top-group">
-      <button id="btn-move-mode" class="btn" type="button" aria-pressed="false" title="Activer/désactiver le déplacement du carré sélectionné">
-        <span>✥</span>
-        <span id="move-mode-label">Sélection</span>
-      </button>
-      <button id="btn-add-bed" class="btn btn-primary" type="button" title="Ajouter un carré potager">
-        <span>＋</span>
-        <span>Carré</span>
-      </button>
-      <button id="btn-sync" class="btn" type="button" title="Exporter / Importer CSV ou JSON">
-        <span>⇅</span>
-        <span>Sync</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Notification discrète -->
-  <div id="toast" role="status" aria-live="polite"></div>
-
-  <!-- Barre inférieure du carré sélectionné -->
-  <section id="bed-bottom-bar" aria-label="Carré sélectionné et variétés">
-    <div class="bottom-header">
-      <div class="bed-badge-group">
-        <span id="bottom-bed-code" class="bed-code">P-01</span>
-        <div class="bed-title-wrap">
-          <div id="bottom-bed-name" class="bed-name-label">Carré Nord-Ouest</div>
-          <div id="bottom-bed-meta" class="bed-meta-label">Tomate · 2 m × 2 m · H 0,6 m</div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+          <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          </button>
+          <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
+          <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
       </div>
-      <div class="bottom-actions">
-        <button id="btn-sun-toggle" class="btn" type="button" aria-expanded="false">
-          <span>☀️</span>
-          <span>Soleil</span>
+
+      <!-- Onglets -->
+      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600">
+        <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
+          + Ajouter Bac
         </button>
-        <button id="btn-edit-bed" class="btn btn-primary" type="button">
-          <span>Éditer</span>
+        <button id="tabActive" type="button" class="tab-btn py-3 px-2 text-center transition">
+          Bac Actif
+        </button>
+        <button id="tabPlant" type="button" class="tab-btn py-3 px-2 text-center transition">
+          🌱 Planter
         </button>
       </div>
-    </div>
-    <div id="variety-strip" class="variety-strip" role="group" aria-label="Variétés de plantes"></div>
-  </section>
 
-  <!-- Popover Soleil & Saison -->
-  <div id="sun-popover" role="dialog" aria-label="Simulation soleil et saison">
-    <div class="popover-header">
-      <span class="popover-title">☀️ Soleil &amp; Saison</span>
-      <span id="sun-readout" class="sun-time-readout">12:30 · Été</span>
-    </div>
-    <div id="season-grid" class="season-grid">
-      <button class="season-btn active" data-season="summer" type="button">Été</button>
-      <button class="season-btn" data-season="spring" type="button">Printemps</button>
-      <button class="season-btn" data-season="autumn" type="button">Automne</button>
-      <button class="season-btn" data-season="evening" type="button">Soir</button>
-    </div>
-    <input id="sun-slider" type="range" min="360" max="1260" step="15" value="750" aria-label="Heure du soleil" />
-    <div class="sun-scale-labels">
-      <span>06:00</span>
-      <span>12:00</span>
-      <span>21:00</span>
+      <!-- Contenu des onglets -->
+      <div class="p-4 sm:p-5">
+        <!-- Onglet 1 : Ajouter Bac -->
+        <div id="panelAdd" class="space-y-4">
+          <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+              Dimensions personnalisées
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
+                <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+              <div>
+                <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
+                <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+              <div>
+                <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
+                <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+            </div>
+
+            <div>
+              <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
+              <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="wood">Bois brut</option>
+                <option value="burned_wood">Bois brûlé</option>
+                <option value="corten">Acier corten</option>
+                <option value="stone">Pierre naturelle</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="btnCreateBed" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-base shadow-sm transition">
+            + Créer le carré potager
+          </button>
+        </div>
+
+        <!-- Onglet 2 : Bac Actif -->
+        <div id="panelActive" class="hidden space-y-4">
+          <div id="noActiveBed" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+            Aucun carré potager sélectionné. Clique sur un bac dans la vue 3D ou crée-en un dans l'onglet <strong>+ Ajouter Bac</strong>.
+          </div>
+
+          <div id="activeBedControls" class="hidden space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <span id="activeBedBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">
+                BAC #1
+              </span>
+              <button id="btnDeleteBed" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition">
+                <span>🗑</span>
+                <span>Supprimer</span>
+              </button>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+              <div>
+                <label for="editBedName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom du carré potager</label>
+                <input id="editBedName" type="text" maxlength="40" placeholder="Ex: Carré Tomates & Basilic" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+
+              <div>
+                <label for="editBedMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
+                <select id="editBedMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                  <option value="wood">Bois brut</option>
+                  <option value="burned_wood">Bois brûlé</option>
+                  <option value="corten">Acier corten</option>
+                  <option value="stone">Pierre naturelle</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="text-xs font-semibold text-stone-700 mb-2">Rotation</div>
+                <div class="grid grid-cols-4 gap-2">
+                  <button id="btnRotMinus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
+                    ↺ -15°
+                  </button>
+                  <button id="btnRotPlus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
+                    ↻ +15°
+                  </button>
+                  <button id="btnRot90" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
+                    +90°
+                  </button>
+                  <button id="btnRotReset" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
+                    0°
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-stone-500">
+              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur un bac pour le déplacer (aimantation tous les 10 cm).
+            </p>
+          </div>
+        </div>
+
+        <!-- Onglet 3 : Planter -->
+        <div id="panelPlant" class="hidden space-y-4">
+          <div id="noBedForPlanting" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+            Ajoute d'abord un carré potager pour commencer à planter sur sa grille de 30×30 cm.
+          </div>
+
+          <div id="plantingControls" class="hidden space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1">
+                <label for="plantTargetBed" class="block text-xs font-semibold text-stone-700 mb-1">Carré potager</label>
+                <select id="plantTargetBed" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+              </div>
+              <div class="sm:pt-5">
+                <button id="btnEraserMode" type="button" class="w-full sm:w-auto px-4 py-3 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
+                  🧹 Gomme : <span id="eraserState">OFF</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="text-xs font-semibold text-stone-700 mb-2">Choisir un plant (parcelles de 30×30 cm)</div>
+              <div id="plantPalette" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 overflow-x-auto">
+              <div class="flex items-center justify-between text-xs text-stone-500 mb-2.5">
+                <span id="gridInfoLabel">Grille 30×30 cm</span>
+                <span>Clique sur une case pour planter / retirer</span>
+              </div>
+              <div id="bedCellGrid" class="inline-grid gap-1.5 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Tiroir d'édition d'un carré -->
-  <div id="drawer-backdrop"></div>
-  <aside id="bed-drawer" aria-label="Configuration du carré potager">
-    <div class="drawer-top">
-      <div class="drawer-title-group">
-        <span id="drawer-code" class="bed-code">P-01</span>
-        <h2 id="drawer-heading">Carré Nord-Ouest</h2>
-      </div>
-      <button id="btn-close-drawer" class="btn btn-icon" type="button" aria-label="Fermer">✕</button>
-    </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    <div class="form-grid">
-      <div class="field">
-        <label for="inp-name">Nom du carré</label>
-        <input id="inp-name" type="text" maxlength="60" placeholder="Ex. Carré Tomates" />
-      </div>
+    const CELL_SIZE = 0.30; // 30 cm en mètres
+    const SNAP_STEP = 0.10;  // Aimantation 10 cm en mètres
 
-      <div class="field">
-        <label for="sel-crop">Culture (motif sur terre)</label>
-        <select id="sel-crop"></select>
-      </div>
+    const MATERIALS = {
+      wood: { label: 'Bois brut', color: 0xb5835a, roughness: 0.85, metalness: 0.05 },
+      burned_wood: { label: 'Bois brûlé', color: 0x3b302b, roughness: 0.9, metalness: 0.05 },
+      corten: { label: 'Acier corten', color: 0x9c4a27, roughness: 0.6, metalness: 0.35 },
+      stone: { label: 'Pierre naturelle', color: 0x9ca39b, roughness: 0.92, metalness: 0.02 }
+    };
 
-      <div class="field">
-        <label for="sel-w">Largeur (1 m – 4 m)</label>
-        <select id="sel-w">
-          <option value="1">1 m</option>
-          <option value="1.5">1,5 m</option>
-          <option value="2">2 m</option>
-          <option value="2.5">2,5 m</option>
-          <option value="3">3 m</option>
-          <option value="4">4 m</option>
-        </select>
-      </div>
+    const PLANTS = {
+      tomato: { id: 'tomato', name: 'Tomate', icon: '🍅', color: 0xd93829, stemColor: 0x2f7d32, height: 0.42 },
+      lettuce: { id: 'lettuce', name: 'Salade', icon: '🥬', color: 0x58b947, stemColor: 0x3e8e32, height: 0.14 },
+      carrot: { id: 'carrot', name: 'Carotte', icon: '🥕', color: 0xf07b1d, stemColor: 0x3a9d42, height: 0.18 },
+      strawberry: { id: 'strawberry', name: 'Fraise', icon: '🍓', color: 0xe11d48, stemColor: 0x2d8a3e, height: 0.15 },
+      herb: { id: 'herb', name: 'Aromatique', icon: '🌿', color: 0x229954, stemColor: 0x1e8449, height: 0.20 }
+    };
 
-      <div class="field">
-        <label for="sel-d">Profondeur (1 m – 10 m)</label>
-        <select id="sel-d">
-          <option value="1">1 m</option>
-          <option value="1.5">1,5 m</option>
-          <option value="2">2 m</option>
-          <option value="2.5">2,5 m</option>
-          <option value="3">3 m</option>
-          <option value="4">4 m</option>
-          <option value="5">5 m</option>
-          <option value="6">6 m</option>
-          <option value="8">8 m</option>
-          <option value="10">10 m</option>
-        </select>
-      </div>
+    const state = {
+      beds: [],
+      activeBedId: null,
+      selectedPlant: 'tomato',
+      eraserMode: false,
+      isTopView: false,
+      showGrid: true,
+      nextId: 1
+    };
 
-      <div class="field">
-        <label for="sel-h">Hauteur (0,2 m – 1,2 m)</label>
-        <select id="sel-h">
-          <option value="0.2">0,2 m</option>
-          <option value="0.3">0,3 m</option>
-          <option value="0.4">0,4 m</option>
-          <option value="0.6">0,6 m</option>
-          <option value="0.8">0,8 m</option>
-          <option value="1">1,0 m</option>
-          <option value="1.2">1,2 m</option>
-        </select>
-      </div>
+    // Initialisation scène Three.js
+    const container = document.getElementById('canvasContainer');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x52822e);
 
-      <div class="field">
-        <label for="sel-wall">Paroi ondulée</label>
-        <select id="sel-wall">
-          <option value="corten">Acier Corten Rouille</option>
-          <option value="anthracite">Gris Anthracite</option>
-          <option value="galva">Acier Galvanisé</option>
-          <option value="cedar">Cèdre Naturel</option>
-        </select>
-      </div>
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      100
+    );
+    camera.position.set(4.5, 5.2, 5.5);
 
-      <div class="field full">
-        <label for="inp-notes">Notes de pilotage</label>
-        <textarea id="inp-notes" maxlength="240" placeholder="Arrosage goutte-à-goutte, amendement compost, variété précise..."></textarea>
-      </div>
-    </div>
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
 
-    <div class="drawer-footer">
-      <button id="btn-delete-bed" class="btn btn-danger" type="button">Supprimer le carré</button>
-      <div class="drawer-footer-right">
-        <button id="btn-rotate-bed" class="btn" type="button">↻ +90°</button>
-        <button id="btn-done-drawer" class="btn btn-primary" type="button">Terminé</button>
-      </div>
-    </div>
-  </aside>
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxPolarAngle = Math.PI / 2 - 0.03;
+    controls.minDistance = 2;
+    controls.maxDistance = 22;
+    controls.target.set(0, 0, 0);
 
-  <!-- Modale Synchronisation CSV / JSON -->
-  <div id="sync-modal-backdrop" role="dialog" aria-modal="true" aria-label="Synchronisation CSV et JSON">
-    <div id="sync-modal">
-      <div class="modal-header">
-        <h3>Synchronisation des carrés (CSV RFC-4180 &amp; JSON)</h3>
-        <button id="btn-close-sync" class="btn btn-icon" type="button" aria-label="Fermer">✕</button>
-      </div>
+    // Lumières
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x3f6212, 0.85);
+    hemiLight.position.set(0, 15, 0);
+    scene.add(hemiLight);
 
-      <div class="sync-tabs">
-        <button id="tab-csv" class="sync-tab active" type="button">CSV (RFC-4180)</button>
-        <button id="tab-json" class="sync-tab" type="button">JSON</button>
-      </div>
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
+    dirLight.position.set(6, 11, 7);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 1;
+    dirLight.shadow.camera.far = 35;
+    const d = 8;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
 
-      <textarea id="sync-textarea" spellcheck="false"></textarea>
+    // Pelouse et grille 1m
+    const groundGeo = new THREE.PlaneGeometry(40, 40);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
 
-      <div class="modal-actions">
-        <div class="modal-actions-group">
-          <button id="btn-copy-sync" class="btn" type="button">Copier</button>
-          <button id="btn-download-sync" class="btn" type="button">Télécharger</button>
-          <button id="btn-import-file" class="btn" type="button">Importer fichier</button>
-          <input id="csv-file-input" type="file" accept=".csv,.json,text/csv,application/json" />
-        </div>
-        <div class="modal-actions-group">
-          <button id="btn-reset-demo" class="btn btn-danger" type="button">Réinitialiser</button>
-          <button id="btn-apply-sync" class="btn btn-primary" type="button">Appliquer au jardin</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    const gridHelper = new THREE.GridHelper(24, 24, 0x86efac, 0x65a30d);
+    gridHelper.position.y = 0.003;
+    gridHelper.material.transparent = true;
+    gridHelper.material.opacity = 0.35;
+    scene.add(gridHelper);
 
-  <!-- Three.js r128 depuis CDN -->
-  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-  <script>
-    (function () {
-      "use strict";
+    const bedsGroup = new THREE.Group();
+    scene.add(bedsGroup);
+    const bedMeshes = new Map();
 
-      const STORAGE_KEY = "mon_jardin_3d_state_v1";
-      const GRID_STEP = 0.5;
+    // Raycasting & déplacement en vue du dessus uniquement sur clic direct d'un bac
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const dragIntersection = new THREE.Vector3();
+    let draggingBed = null;
+    let dragOffset = new THREE.Vector3();
 
-      const CROPS = [
-        { id: "tomate", label: "Tomate", color: "#ef4444", accent: "#22c55e", shape: "round" },
-        { id: "carotte", label: "Carotte", color: "#f97316", accent: "#4ade80", shape: "carrot" },
-        { id: "laitue", label: "Laitue", color: "#22c55e", accent: "#bbf7d0", shape: "leaf" },
-        { id: "fraise", label: "Fraise", color: "#f43f5e", accent: "#86efac", shape: "berry" },
-        { id: "courgette", label: "Courgette", color: "#10b981", accent: "#fde047", shape: "oval" },
-        { id: "aubergine", label: "Aubergine", color: "#8b5cf6", accent: "#a3e635", shape: "oval" },
-        { id: "oignon", label: "Oignon", color: "#eab308", accent: "#fef08a", shape: "bulb" },
-        { id: "betterave", label: "Betterave", color: "#d946ef", accent: "#84cc16", shape: "bulb" },
-        { id: "pomme_de_terre", label: "Pomme de terre", color: "#d97706", accent: "#fcd34d", shape: "tuber" },
-        { id: "haricot", label: "Haricot", color: "#16a34a", accent: "#86efac", shape: "pod" },
-        { id: "poivron", label: "Poivron", color: "#dc2626", accent: "#4ade80", shape: "bell" },
-        { id: "radis", label: "Radis", color: "#fb7185", accent: "#4ade80", shape: "bulb" },
-        { id: "chou", label: "Chou", color: "#34d399", accent: "#a7f3d0", shape: "leaf" },
-        { id: "aromatique", label: "Aromatiques", color: "#2dd4bf", accent: "#99f6e4", shape: "herb" }
-      ];
+    function updatePointer(clientX, clientY) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    }
 
-      const WALL_STYLES = {
-        corten: { label: "Acier Corten Rouille", base: 0xb85328, rib: 0x8f3916, trim: 0xd97742 },
-        anthracite: { label: "Gris Anthracite", base: 0x334155, rib: 0x1e293b, trim: 0x64748b },
-        galva: { label: "Acier Galvanisé", base: 0x94a3b8, rib: 0x64748b, trim: 0xcbd5e1 },
-        cedar: { label: "Cèdre Naturel", base: 0x9a5b32, rib: 0x744120, trim: 0xc27d4e }
-      };
-
-      const SEASONS = {
-        summer: { label: "Été", sunColor: 0xfff3c4, sunIntensity: 1.45, hemiSky: 0x8fd3ff, hemiGround: 0x24472e, hemiIntensity: 0.72, elevationDeg: 64, fogColor: 0x0b2417 },
-        spring: { label: "Printemps", sunColor: 0xfff8dc, sunIntensity: 1.25, hemiSky: 0xa7e3ff, hemiGround: 0x264b31, hemiIntensity: 0.78, elevationDeg: 48, fogColor: 0x0c2719 },
-        autumn: { label: "Automne", sunColor: 0xffd28a, sunIntensity: 1.05, hemiSky: 0x9ec5d8, hemiGround: 0x283f2b, hemiIntensity: 0.65, elevationDeg: 32, fogColor: 0x0a1e14 },
-        evening: { label: "Soir", sunColor: 0xff8c42, sunIntensity: 0.72, hemiSky: 0x4c6b8a, hemiGround: 0x13261b, hemiIntensity: 0.45, elevationDeg: 14, fogColor: 0x06130d }
-      };
-
-      function getCrop(id) {
-        return CROPS.find((c) => c.id === id) || CROPS[0];
-      }
-
-      function formatMinutes(mins) {
-        const clamped = Math.max(0, Math.min(1439, Math.round(mins)));
-        const h = Math.floor(clamped / 60);
-        const m = clamped % 60;
-        return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
-      }
-
-      function snapGrid(val) {
-        return Math.round(val / GRID_STEP) * GRID_STEP;
-      }
-
-      function normalizeBed(raw, idx) {
-        const num = idx + 1;
-        const code = typeof raw.code === "string" && raw.code.trim()
-          ? raw.code.trim()
-          : "P-" + String(num).padStart(2, "0");
-        const w = [1, 1.5, 2, 2.5, 3, 4].includes(Number(raw.w)) ? Number(raw.w) : 2;
-        const d = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].includes(Number(raw.d)) ? Number(raw.d) : 2;
-        const h = [0.2, 0.3, 0.4, 0.6, 0.8, 1, 1.2].includes(Number(raw.h)) ? Number(raw.h) : 0.6;
-        const rot = (((Number(raw.rot) || 0) % 360) + 360) % 360;
-        const wall = WALL_STYLES[raw.wall] ? raw.wall : "corten";
-        const crop = CROPS.some((c) => c.id === raw.crop) ? raw.crop : "tomate";
-        const x = Number.isFinite(Number(raw.x)) ? snapGrid(Number(raw.x)) : 0;
-        const z = Number.isFinite(Number(raw.z)) ? snapGrid(Number(raw.z)) : 0;
-        const name = typeof raw.name === "string" && raw.name.trim()
-          ? raw.name.trim()
-          : "Carré " + code;
-        const notes = typeof raw.notes === "string" ? raw.notes : "";
-        return {
-          id: typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : "bed_" + code.toLowerCase().replace(/[^a-z0-9]/g, "") + "_" + num,
-          code,
-          name,
-          x,
-          z,
-          w,
-          d,
-          h,
-          rot,
-          wall,
-          crop,
-          notes
-        };
-      }
-
-      function createDefaultBeds() {
-        return [
-          normalizeBed({ id: "bed_p01", code: "P-01", name: "Carré Nord-Ouest", x: -3.5, z: -2.5, w: 2, d: 2, h: 0.6, rot: 0, wall: "corten", crop: "tomate", notes: "Exposition plein sud" }, 0),
-          normalizeBed({ id: "bed_p02", code: "P-02", name: "Carré Nord-Est", x: 1.5, z: -2.5, w: 2, d: 2, h: 0.6, rot: 0, wall: "cedar", crop: "carotte", notes: "Sol léger et ameubli" }, 1),
-          normalizeBed({ id: "bed_p03", code: "P-03", name: "Carré FeUIlles", x: -3.5, z: 2.0, w: 2, d: 1.5, h: 0.4, rot: 0, wall: "anthracite", crop: "laitue", notes: "Récolte continue" }, 2),
-          normalizeBed({ id: "bed_p04", code: "P-04", name: "Carré Sud-Est", x: 1.5, z: 2.0, w: 2, d: 2, h: 0.6, rot: 0, wall: "corten", crop: "fraise", notes: "Paillage copeaux" }, 3)
-        ];
-      }
-
-      // Sérialisation CSV RFC-4180
-      function escapeCsvCell(val) {
-        const s = String(val == null ? "" : val);
-        if (/[",
-
-]/.test(s)) {
-          return '"' + s.replace(/"/g, '""') + '"';
+    function findBedFromObject(obj) {
+      let current = obj;
+      while (current) {
+        if (current.userData && current.userData.bedId != null) {
+          return state.beds.find((b) => b.id === current.userData.bedId) || null;
         }
-        return s;
+        current = current.parent;
       }
+      return null;
+    }
 
-      function bedsToCsv(list) {
-        const headers = ["id", "code", "name", "x", "z", "w", "d", "h", "rot", "wall", "crop", "notes"];
-        const lines = [headers.join(",")];
-        for (const b of list) {
-          lines.push(headers.map((col) => escapeCsvCell(b[col])).join(","));
-        }
-        return lines.join("
-");
-      }
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      updatePointer(e.clientX, e.clientY);
+      raycaster.setFromCamera(pointer, camera);
 
-      function parseCsvRfc4180(text) {
-        const rows = [];
-        let row = [];
-        let cur = "";
-        let inQuotes = false;
-        const src = String(text || "").replace(/
-/g, "
-").replace(/
-/g, "
-");
+      const hits = raycaster.intersectObjects(bedsGroup.children, true);
+      const clickedBed = hits.length > 0 ? findBedFromObject(hits[0].object) : null;
 
-        for (let i = 0; i < src.length; i++) {
-          const ch = src[i];
-          if (inQuotes) {
-            if (ch === '"') {
-              if (src[i + 1] === '"') {
-                cur += '"';
-                i++;
-              } else {
-                inQuotes = false;
-              }
-            } else {
-              cur += ch;
-            }
-          } else if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ",") {
-            row.push(cur);
-            cur = "";
-          } else if (ch === "
-") {
-            row.push(cur);
-            if (row.some((cell) => cell.trim() !== "")) {
-              rows.push(row);
-            }
-            row = [];
-            cur = "";
-          } else {
-            cur += ch;
-          }
-        }
-        if (cur.length > 0 || row.length > 0) {
-          row.push(cur);
-          if (row.some((cell) => cell.trim() !== "")) {
-            rows.push(row);
-          }
-        }
-        if (rows.length < 2) {
-          throw new Error("Le CSV doit contenir un en-tête et au moins une ligne de données.");
-        }
-
-        const headerMap = {};
-        rows[0].forEach((h, idx) => {
-          headerMap[h.trim().toLowerCase()] = idx;
-        });
-
-        const parsed = [];
-        for (let r = 1; r < rows.length; r++) {
-          const cells = rows[r];
-          const getCol = (name) => {
-            const idx = headerMap[name];
-            return idx !== undefined && idx < cells.length ? cells[idx] : "";
-          };
-          parsed.push(normalizeBed({
-            id: getCol("id"),
-            code: getCol("code"),
-            name: getCol("name"),
-            x: getCol("x"),
-            z: getCol("z"),
-            w: getCol("w"),
-            d: getCol("d"),
-            h: getCol("h"),
-            rot: getCol("rot"),
-            wall: getCol("wall"),
-            crop: getCol("crop"),
-            notes: getCol("notes")
-          }, r - 1));
-        }
-        return parsed;
-      }
-
-      // État principal
-      let beds = [];
-      let selectedBedId = null;
-      let moveModeActive = false;
-      let sunMinutes = 750;
-      let currentSeason = "summer";
-
-      const undoStack = [];
-      const redoStack = [];
-      const MAX_HISTORY = 40;
-
-      function cloneBeds(list) {
-        return list.map((b) => ({ ...b }));
-      }
-
-      function saveLocal() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            beds,
-            selectedBedId,
-            sunMinutes,
-            currentSeason
-          }));
-        } catch (_err) {
-          // Stockage indisponible
+      if (clickedBed) {
+        setActiveBed(clickedBed.id);
+        if (state.isTopView && raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
+          draggingBed = clickedBed;
+          dragOffset.set(
+            dragIntersection.x - clickedBed.x,
+            0,
+            dragIntersection.z - clickedBed.z
+          );
+          controls.enabled = false;
         }
       }
+    });
 
-      function loadLocal() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return false;
-          const data = JSON.parse(raw);
-          if (!Array.isArray(data.beds) || data.beds.length === 0) return false;
-          beds = data.beds.map((b, i) => normalizeBed(b, i));
-          selectedBedId = beds.some((b) => b.id === data.selectedBedId) ? data.selectedBedId : beds[0].id;
-          if (Number.isFinite(Number(data.sunMinutes))) {
-            sunMinutes = Math.max(360, Math.min(1260, Number(data.sunMinutes)));
-          }
-          if (SEASONS[data.currentSeason]) {
-            currentSeason = data.currentSeason;
-          }
-          return true;
-        } catch (_err) {
-          return false;
-        }
+    window.addEventListener('pointermove', (e) => {
+      if (!draggingBed) return;
+      if (!state.isTopView) {
+        draggingBed = null;
+        controls.enabled = true;
+        return;
       }
-
-      function pushUndoSnapshot() {
-        undoStack.push(cloneBeds(beds));
-        if (undoStack.length > MAX_HISTORY) {
-          undoStack.shift();
-        }
-        redoStack.length = 0;
-        updateHistoryButtons();
+      updatePointer(e.clientX, e.clientY);
+      raycaster.setFromCamera(pointer, camera);
+      if (raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
+        const rawX = dragIntersection.x - dragOffset.x;
+        const rawZ = dragIntersection.z - dragOffset.z;
+        draggingBed.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
+        draggingBed.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
+        updateBedTransform(draggingBed);
       }
+    });
 
-      function updateHistoryButtons() {
-        document.getElementById("btn-undo").disabled = undoStack.length === 0;
-        document.getElementById("btn-redo").disabled = redoStack.length === 0;
+    function stopDragging() {
+      if (draggingBed) {
+        draggingBed = null;
+        controls.enabled = true;
       }
+    }
 
-      function undo() {
-        if (undoStack.length === 0) return;
-        redoStack.push(cloneBeds(beds));
-        beds = undoStack.pop();
-        if (!beds.some((b) => b.id === selectedBedId)) {
-          selectedBedId = beds.length ? beds[0].id : null;
-        }
-        updateHistoryButtons();
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        showToast("Action annulée");
-      }
+    window.addEventListener('pointerup', stopDragging);
+    window.addEventListener('pointercancel', stopDragging);
 
-      function redo() {
-        if (redoStack.length === 0) return;
-        undoStack.push(cloneBeds(beds));
-        beds = redoStack.pop();
-        if (!beds.some((b) => b.id === selectedBedId)) {
-          selectedBedId = beds.length ? beds[0].id : null;
-        }
-        updateHistoryButtons();
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        showToast("Action rétablie");
-      }
+    // Construction 3D d'un plant
+    function createPlantMesh(plantType) {
+      const spec = PLANTS[plantType] || PLANTS.tomato;
+      const g = new THREE.Group();
 
-      let toastTimer = null;
-      function showToast(msg) {
-        const el = document.getElementById("toast");
-        el.textContent = msg;
-        el.classList.add("visible");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          el.classList.remove("visible");
-        }, 1900);
-      }
-
-      function getSelectedBed() {
-        return beds.find((b) => b.id === selectedBedId) || null;
-      }
-
-      function nextBedCode() {
-        let maxNum = 0;
-        for (const b of beds) {
-          const m = String(b.code || "").match(/(\d+)/);
-          if (m) {
-            const n = parseInt(m[1], 10);
-            if (n > maxNum) maxNum = n;
-          }
-        }
-        return "P-" + String(maxNum + 1).padStart(2, "0");
-      }
-
-      function addBed() {
-        pushUndoSnapshot();
-        const code = nextBedCode();
-        const offset = beds.length * 1.5;
-        const newBed = normalizeBed({
-          id: "bed_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
-          code,
-          name: "Carré " + code,
-          x: snapGrid(((beds.length % 4) - 1.5) * 2.5),
-          z: snapGrid(Math.floor(beds.length / 4) * 2.5 - 1.0 + (offset % 0.5)),
-          w: 2,
-          d: 2,
-          h: 0.6,
-          rot: 0,
-          wall: "corten",
-          crop: CROPS[beds.length % CROPS.length].id,
-          notes: ""
-        }, beds.length);
-        beds.push(newBed);
-        selectedBedId = newBed.id;
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        showToast(newBed.code + " ajouté");
-      }
-
-      function deleteSelectedBed() {
-        const bed = getSelectedBed();
-        if (!bed) return;
-        pushUndoSnapshot();
-        beds = beds.filter((b) => b.id !== bed.id);
-        selectedBedId = beds.length ? beds[0].id : null;
-        if (beds.length === 0) {
-          moveModeActive = false;
-        }
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        closeDrawer();
-        showToast(bed.code + " supprimé");
-      }
-
-      function setBedCrop(bedId, cropId) {
-        const bed = beds.find((b) => b.id === bedId);
-        if (!bed || bed.crop === cropId) return;
-        pushUndoSnapshot();
-        bed.crop = cropId;
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        const crop = getCrop(cropId);
-        showToast(bed.code + " → " + crop.label);
-      }
-
-      function rotateSelectedBed90() {
-        const bed = getSelectedBed();
-        if (!bed) return;
-        pushUndoSnapshot();
-        bed.rot = (bed.rot + 90) % 360;
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        showToast(bed.code + " orienté à " + bed.rot + "°");
-      }
-
-      // Scène Three.js
-      const container = document.getElementById("scene-container");
-      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
-      container.appendChild(renderer.domElement);
-
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x092115);
-      scene.fog = new THREE.FogExp2(0x092115, 0.016);
-
-      const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 180);
-      const camTarget = new THREE.Vector3(0, 0.2, 0.5);
-      let camRadius = 15.5;
-      let camTheta = 0.68;
-      let camPhi = 0.78;
-
-      function updateCameraPosition() {
-        const minPhi = 0.24;
-        const maxPhi = Math.PI * 0.46;
-        camPhi = Math.max(minPhi, Math.min(maxPhi, camPhi));
-        camRadius = Math.max(5.5, Math.min(38, camRadius));
-
-        const sinPhi = Math.sin(camPhi);
-        camera.position.set(
-          camTarget.x + camRadius * sinPhi * Math.sin(camTheta),
-          camTarget.y + camRadius * Math.cos(camPhi),
-          camTarget.z + camRadius * sinPhi * Math.cos(camTheta)
+      if (plantType === 'tomato') {
+        const stake = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.015, 0.015, spec.height, 8),
+          new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.9 })
         );
-        camera.lookAt(camTarget);
-      }
+        stake.position.y = spec.height / 2;
+        stake.castShadow = true;
+        g.add(stake);
 
-      updateCameraPosition();
+        const foliage = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(0.10, 0),
+          new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.75 })
+        );
+        foliage.position.y = spec.height * 0.62;
+        foliage.castShadow = true;
+        g.add(foliage);
 
-      // Lumières et sol quadrillé
-      const hemiLight = new THREE.HemisphereLight(0x8fd3ff, 0x24472e, 0.72);
-      scene.add(hemiLight);
-
-      const dirLight = new THREE.DirectionalLight(0xfff3c4, 1.45);
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      dirLight.shadow.camera.near = 1;
-      dirLight.shadow.camera.far = 65;
-      const dShadow = 16;
-      dirLight.shadow.camera.left = -dShadow;
-      dirLight.shadow.camera.right = dShadow;
-      dirLight.shadow.camera.top = dShadow;
-      dirLight.shadow.camera.bottom = -dShadow;
-      dirLight.shadow.bias = -0.0005;
-      scene.add(dirLight);
-      scene.add(dirLight.target);
-
-      function createGroundGridTexture() {
-        const c = document.createElement("canvas");
-        c.width = 256;
-        c.height = 256;
-        const ctx = c.getContext("2d");
-        ctx.fillStyle = "#195334";
-        ctx.fillRect(0, 0, 256, 256);
-
-        ctx.strokeStyle = "rgba(167, 243, 208, 0.14)";
-        ctx.lineWidth = 2;
-        const step = 64;
-        for (let p = 0; p <= 256; p += step) {
-          ctx.beginPath();
-          ctx.moveTo(p, 0);
-          ctx.lineTo(p, 256);
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(0, p);
-          ctx.lineTo(256, p);
-          ctx.stroke();
+        const fruit = new THREE.Mesh(
+          new THREE.SphereGeometry(0.032, 10, 10),
+          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.4 })
+        );
+        fruit.position.set(0.06, spec.height * 0.55, 0.04);
+        fruit.castShadow = true;
+        g.add(fruit);
+      } else if (plantType === 'carrot') {
+        for (let i = 0; i < 4; i++) {
+          const angle = (i / 4) * Math.PI * 2;
+          const leaf = new THREE.Mesh(
+            new THREE.ConeGeometry(0.035, spec.height, 6),
+            new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.8 })
+          );
+          leaf.position.set(Math.cos(angle) * 0.04, spec.height / 2, Math.sin(angle) * 0.04);
+          leaf.rotation.z = -Math.cos(angle) * 0.25;
+          leaf.rotation.x = Math.sin(angle) * 0.25;
+          leaf.castShadow = true;
+          g.add(leaf);
         }
+      } else if (plantType === 'strawberry') {
+        const mound = new THREE.Mesh(
+          new THREE.SphereGeometry(0.095, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+          new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.8 })
+        );
+        mound.castShadow = true;
+        g.add(mound);
 
-        const tex = new THREE.CanvasTexture(c);
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(40, 40);
-        tex.anisotropy = 4;
-        return tex;
+        const berry = new THREE.Mesh(
+          new THREE.ConeGeometry(0.025, 0.045, 8),
+          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.45 })
+        );
+        berry.rotation.x = Math.PI;
+        berry.position.set(0.06, 0.035, 0.05);
+        berry.castShadow = true;
+        g.add(berry);
+      } else {
+        const bush = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(plantType === 'lettuce' ? 0.095 : 0.085, 1),
+          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.78 })
+        );
+        bush.scale.y = plantType === 'lettuce' ? 0.65 : 0.95;
+        bush.position.y = 0.05;
+        bush.castShadow = true;
+        g.add(bush);
       }
 
-      const groundTex = createGroundGridTexture();
-      const groundMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(80, 80),
-        new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.92, metalness: 0.04 })
+      return g;
+    }
+
+    // Construction / reconstruction 3D d'un bac
+    function rebuildBedMesh(bed) {
+      const old = bedMeshes.get(bed.id);
+      if (old) {
+        bedsGroup.remove(old);
+        bedMeshes.delete(bed.id);
+      }
+
+      const w = bed.widthCm / 100;
+      const d = bed.depthCm / 100;
+      const h = bed.heightCm / 100;
+      const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
+      const matSpec = MATERIALS[bed.material] || MATERIALS.wood;
+
+      const group = new THREE.Group();
+      group.userData.bedId = bed.id;
+
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: matSpec.color,
+        roughness: matSpec.roughness,
+        metalness: matSpec.metalness
+      });
+
+      const northWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
+      northWall.position.set(0, h / 2, -d / 2 + wallT / 2);
+      northWall.castShadow = true;
+      northWall.receiveShadow = true;
+
+      const southWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
+      southWall.position.set(0, h / 2, d / 2 - wallT / 2);
+      southWall.castShadow = true;
+      southWall.receiveShadow = true;
+
+      const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
+      westWall.position.set(-w / 2 + wallT / 2, h / 2, 0);
+      westWall.castShadow = true;
+      westWall.receiveShadow = true;
+
+      const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
+      eastWall.position.set(w / 2 - wallT / 2, h / 2, 0);
+      eastWall.castShadow = true;
+      eastWall.receiveShadow = true;
+
+      group.add(northWall, southWall, westWall, eastWall);
+
+      // Terreau intérieur
+      const innerW = Math.max(0.05, w - wallT * 2);
+      const innerD = Math.max(0.05, d - wallT * 2);
+      const soilH = Math.max(0.04, h - 0.03);
+      const soilMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(innerW, soilH, innerD),
+        new THREE.MeshStandardMaterial({ color: 0x3e2718, roughness: 0.96, metalness: 0.0 })
       );
-      groundMesh.rotation.x = -Math.PI / 2;
-      groundMesh.receiveShadow = true;
-      scene.add(groundMesh);
+      soilMesh.position.y = soilH / 2;
+      soilMesh.receiveShadow = true;
+      group.add(soilMesh);
 
-      function applySunAndSeason() {
-        const s = SEASONS[currentSeason] || SEASONS.summer;
-        const normalizedDay = (sunMinutes - 360) / 900; // 0 à 06:00, 0.5 à 13:30, 1 à 21:00
-        const azimuth = (normalizedDay - 0.5) * Math.PI * 1.15;
-        const dayCurve = Math.max(0.08, Math.sin(normalizedDay * Math.PI));
-        const elevRad = THREE.MathUtils.degToRad(s.elevationDeg * dayCurve + 6);
-
-        const dist = 24;
-        const lx = Math.sin(azimuth) * Math.cos(elevRad) * dist;
-        const ly = Math.max(2.5, Math.sin(elevRad) * dist);
-        const lz = Math.cos(azimuth) * Math.cos(elevRad) * dist;
-
-        dirLight.position.set(lx, ly, lz);
-        dirLight.color.setHex(s.sunColor);
-        dirLight.intensity = s.sunIntensity * (0.45 + 0.55 * dayCurve);
-
-        hemiLight.color.setHex(s.hemiSky);
-        hemiLight.groundColor.setHex(s.hemiGround);
-        hemiLight.intensity = s.hemiIntensity;
-
-        scene.background = new THREE.Color(s.fogColor);
-        scene.fog.color.setHex(s.fogColor);
-
-        document.getElementById("sun-readout").textContent = formatMinutes(sunMinutes) + " · " + s.label;
+      // Contour de sélection si bac actif
+      if (state.activeBedId === bed.id) {
+        const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.01, d + 0.02));
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
+        line.position.y = (h + 0.01) / 2;
+        group.add(line);
       }
 
-      // Texture SVG sur terre pour chaque variété
-      const soilTextureCache = new Map();
+      // Plants sur la grille 30x30 cm
+      const cols = Math.max(1, Math.floor(innerW / CELL_SIZE));
+      const rows = Math.max(1, Math.floor(innerD / CELL_SIZE));
+      const startX = -((cols - 1) * CELL_SIZE) / 2;
+      const startZ = -((rows - 1) * CELL_SIZE) / 2;
 
-      function buildCropSvgDataUri(crop) {
-        const motif = (() => {
-          switch (crop.shape) {
-            case "carrot":
-              return `<path d="M50 20 L62 66 L50 82 L38 66 Z" fill="${crop.color}" stroke="#7c2d12" stroke-width="2.5"/><path d="M50 20 C44 10 36 10 34 16 M50 20 C50 8 54 8 56 15 M50 20 C56 10 64 11 66 17" fill="none" stroke="${crop.accent}" stroke-width="3.2" stroke-linecap="round"/>`;
-            case "leaf":
-              return `<path d="M50 78 C24 68 18 40 34 24 C42 16 50 18 50 18 C50 18 58 16 66 24 C82 40 76 68 50 78 Z" fill="${crop.color}" stroke="#14532d" stroke-width="2.5"/><path d="M50 22 L50 74 M34 42 L50 52 M66 42 L50 52" fill="none" stroke="${crop.accent}" stroke-width="2.4" stroke-linecap="round"/>`;
-            case "berry":
-              return `<path d="M50 78 C28 60 26 34 40 26 C46 23 50 28 50 28 C50 28 54 23 60 26 C74 34 72 60 50 78 Z" fill="${crop.color}" stroke="#881337" stroke-width="2.5"/><path d="M38 25 L50 32 L62 25 M50 20 L50 32" fill="none" stroke="${crop.accent}" stroke-width="3" stroke-linecap="round"/>`;
-            case "oval":
-              return `<ellipse cx="50" cy="52" rx="18" ry="26" fill="${crop.color}" stroke="#1f2937" stroke-width="2.5"/><path d="M50 16 L50 27 M43 24 L57 24" fill="none" stroke="${crop.accent}" stroke-width="3" stroke-linecap="round"/>`;
-            case "bulb":
-              return `<path d="M50 26 C66 36 72 54 62 68 C56 76 44 76 38 68 C28 54 34 36 50 26 Z" fill="${crop.color}" stroke="#3f2f12" stroke-width="2.5"/><path d="M50 14 L50 26 M44 18 L50 26 L56 18" fill="none" stroke="${crop.accent}" stroke-width="2.8" stroke-linecap="round"/>`;
-            case "tuber":
-              return `<ellipse cx="50" cy="52" rx="24" ry="18" transform="rotate(-14 50 52)" fill="${crop.color}" stroke="#451a03" stroke-width="2.5"/><circle cx="41" cy="48" r="2.2" fill="${crop.accent}"/><circle cx="56" cy="55" r="2.2" fill="${crop.accent}"/>`;
-            case "pod":
-              return `<path d="M28 64 C32 34 56 22 74 32 C64 52 46 68 28 64 Z" fill="${crop.color}" stroke="#14532d" stroke-width="2.5"/><circle cx="44" cy="52" r="4.5" fill="${crop.accent}"/><circle cx="56" cy="41" r="4.5" fill="${crop.accent}"/>`;
-            case "bell":
-              return `<rect x="30" y="30" width="40" height="42" rx="14" fill="${crop.color}" stroke="#450a0a" stroke-width="2.5"/><path d="M50 16 L50 30" fill="none" stroke="${crop.accent}" stroke-width="3.5" stroke-linecap="round"/>`;
-            case "herb":
-              return `<path d="M50 76 L50 26 M50 54 L32 38 M50 44 L68 30 M50 62 L66 50" fill="none" stroke="${crop.accent}" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="38" r="6" fill="${crop.color}"/><circle cx="68" cy="30" r="6" fill="${crop.color}"/><circle cx="50" cy="24" r="6.5" fill="${crop.color}"/>`;
-            default:
-              return `<circle cx="50" cy="52" r="22" fill="${crop.color}" stroke="#450a0a" stroke-width="2.5"/><path d="M50 16 L50 30 M42 25 L50 30 L58 25" fill="none" stroke="${crop.accent}" stroke-width="3" stroke-linecap="round"/>`;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const key = `${r},${c}`;
+          const plantType = bed.plants[key];
+          if (plantType) {
+            const plantObj = createPlantMesh(plantType);
+            plantObj.position.set(startX + c * CELL_SIZE, soilH, startZ + r * CELL_SIZE);
+            group.add(plantObj);
           }
-        })();
-
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-          <rect width="512" height="512" fill="#3b2618"/>
-          <rect x="14" y="14" width="234" height="234" rx="10" fill="#472e1d" stroke="#29190f" stroke-width="6"/>
-          <rect x="264" y="14" width="234" height="234" rx="10" fill="#472e1d" stroke="#29190f" stroke-width="6"/>
-          <rect x="14" y="264" width="234" height="234" rx="10" fill="#472e1d" stroke="#29190f" stroke-width="6"/>
-          <rect x="264" y="264" width="234" height="234" rx="10" fill="#472e1d" stroke="#29190f" stroke-width="6"/>
-          <g transform="translate(81, 81) scale(1.0)">${motif}</g>
-          <g transform="translate(331, 81) scale(1.0)">${motif}</g>
-          <g transform="translate(81, 331) scale(1.0)">${motif}</g>
-          <g transform="translate(331, 331) scale(1.0)">${motif}</g>
-        </svg>`;
-        return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-      }
-
-      function getSoilTexture(cropId) {
-        if (soilTextureCache.has(cropId)) {
-          return soilTextureCache.get(cropId);
         }
-        const crop = getCrop(cropId);
-        const tex = new THREE.Texture();
-        tex.anisotropy = 4;
-        const img = new Image();
-        img.onload = () => {
-          tex.image = img;
-          tex.needsUpdate = true;
-          renderer.render(scene, camera);
-        };
-        img.src = buildCropSvgDataUri(crop);
-        soilTextureCache.set(cropId, tex);
-        return tex;
       }
 
-      // Construction et élimination propre des groupes 3D
-      const bedsRootGroup = new THREE.Group();
-      scene.add(bedsRootGroup);
-      const bedGroupMap = new Map();
+      group.position.set(bed.x, 0, bed.z);
+      group.rotation.y = THREE.MathUtils.degToRad(bed.rotationDeg || 0);
 
-      function disposeGroupResources(root) {
-        const geometries = new Set();
-        const materials = new Set();
+      bedsGroup.add(group);
+      bedMeshes.set(bed.id, group);
+    }
 
-        root.traverse((obj) => {
-          if (obj.geometry) geometries.add(obj.geometry);
-          if (obj.material) {
-            if (Array.isArray(obj.material)) {
-              obj.material.forEach((m) => materials.add(m));
+    function updateBedTransform(bed) {
+      const mesh = bedMeshes.get(bed.id);
+      if (!mesh) return;
+      mesh.position.set(bed.x, 0, bed.z);
+      mesh.rotation.y = THREE.MathUtils.degToRad(bed.rotationDeg || 0);
+    }
+
+    function rebuildAllBeds() {
+      state.beds.forEach(rebuildBedMesh);
+    }
+
+    function getBedGridDimensions(bed) {
+      const w = bed.widthCm / 100;
+      const d = bed.depthCm / 100;
+      const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
+      const innerW = Math.max(0.05, w - wallT * 2);
+      const innerD = Math.max(0.05, d - wallT * 2);
+      return {
+        cols: Math.max(1, Math.floor(innerW / CELL_SIZE)),
+        rows: Math.max(1, Math.floor(innerD / CELL_SIZE))
+      };
+    }
+
+    function updateStats() {
+      document.getElementById('statBeds').textContent = String(state.beds.length);
+
+      let totalLiters = 0;
+      let totalPlants = 0;
+      for (const bed of state.beds) {
+        const volM3 = (bed.widthCm / 100) * (bed.depthCm / 100) * (bed.heightCm / 100);
+        totalLiters += Math.round(volM3 * 1000);
+        totalPlants += Object.keys(bed.plants || {}).length;
+      }
+
+      document.getElementById('statSoil').textContent = `${totalLiters} L`;
+      document.getElementById('statPlants').textContent = String(totalPlants);
+    }
+
+    function getActiveBed() {
+      return state.beds.find((b) => b.id === state.activeBedId) || null;
+    }
+
+    function setActiveBed(id) {
+      const prevId = state.activeBedId;
+      state.activeBedId = id;
+      if (prevId != null) {
+        const prevBed = state.beds.find((b) => b.id === prevId);
+        if (prevBed) rebuildBedMesh(prevBed);
+      }
+      const nextBed = getActiveBed();
+      if (nextBed) rebuildBedMesh(nextBed);
+      syncUI();
+    }
+
+    function addBed({ widthCm, depthCm, heightCm, material, name, x, z, rotationDeg, plants }) {
+      const id = state.nextId++;
+      const bed = {
+        id,
+        name: name || `Carré #${id}`,
+        widthCm: Math.max(30, Math.min(600, Number(widthCm) || 120)),
+        depthCm: Math.max(30, Math.min(600, Number(depthCm) || 120)),
+        heightCm: Math.max(10, Math.min(120, Number(heightCm) || 30)),
+        material: MATERIALS[material] ? material : 'wood',
+        x: x != null ? x : ((state.beds.length % 3) - 1) * 1.8,
+        z: z != null ? z : Math.floor(state.beds.length / 3) * 1.8,
+        rotationDeg: rotationDeg || 0,
+        plants: plants ? { ...plants } : {}
+      };
+      state.beds.push(bed);
+      state.activeBedId = bed.id;
+      rebuildBedMesh(bed);
+      syncUI();
+      return bed;
+    }
+
+    // Palette de plants
+    const plantPaletteEl = document.getElementById('plantPalette');
+    function renderPlantPalette() {
+      plantPaletteEl.innerHTML = '';
+      Object.values(PLANTS).forEach((plant) => {
+        const isSelected = !state.eraserMode && state.selectedPlant === plant.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `flex items-center justify-center gap-1.5 px-2.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition ${
+          isSelected
+            ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+            : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50'
+        }`;
+        btn.innerHTML = `<span>${plant.icon}</span><span>${plant.name}</span>`;
+        btn.addEventListener('click', () => {
+          state.eraserMode = false;
+          state.selectedPlant = plant.id;
+          syncUI();
+        });
+        plantPaletteEl.appendChild(btn);
+      });
+    }
+
+    function renderBedCellGrid() {
+      const gridEl = document.getElementById('bedCellGrid');
+      const targetSelect = document.getElementById('plantTargetBed');
+      const targetBed = state.beds.find((b) => b.id === Number(targetSelect.value)) || getActiveBed() || state.beds[0];
+
+      if (!targetBed) {
+        gridEl.innerHTML = '';
+        return;
+      }
+
+      const { cols, rows } = getBedGridDimensions(targetBed);
+      document.getElementById('gridInfoLabel').textContent = `${targetBed.name} — ${cols}×${rows} cases (30×30 cm)`;
+
+      const cellPx = Math.max(36, Math.min(54, Math.floor(420 / Math.max(cols, rows))));
+      gridEl.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
+      gridEl.innerHTML = '';
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const key = `${r},${c}`;
+          const plantId = targetBed.plants[key];
+          const plantSpec = plantId ? PLANTS[plantId] : null;
+
+          const cellBtn = document.createElement('button');
+          cellBtn.type = 'button';
+          cellBtn.style.width = `${cellPx}px`;
+          cellBtn.style.height = `${cellPx}px`;
+          cellBtn.title = plantSpec ? `${plantSpec.name} (${c + 1}, ${r + 1})` : `Case vide (${c + 1}, ${r + 1})`;
+          cellBtn.className = `rounded-lg border flex items-center justify-center text-base sm:text-lg transition ${
+            plantSpec
+              ? 'bg-amber-900/20 border-amber-800/40 hover:bg-amber-900/30'
+              : 'bg-amber-950/10 border-amber-900/20 hover:bg-emerald-600/20'
+          }`;
+          cellBtn.textContent = plantSpec ? plantSpec.icon : '';
+
+          cellBtn.addEventListener('click', () => {
+            if (state.eraserMode) {
+              delete targetBed.plants[key];
+            } else if (targetBed.plants[key] === state.selectedPlant) {
+              delete targetBed.plants[key];
             } else {
-              materials.add(obj.material);
+              targetBed.plants[key] = state.selectedPlant;
             }
-          }
-        });
-
-        geometries.forEach((g) => g.dispose());
-        materials.forEach((m) => {
-          for (const key of Object.keys(m)) {
-            const val = m[key];
-            if (val && val.isTexture && !soilTextureCache.has(val.uuid) && val !== groundTex) {
-              // Les textures en cache restent réutilisables
-            }
-          }
-          m.dispose();
-        });
-      }
-
-      function buildBed3DGroup(bed, isSelected) {
-        const group = new THREE.Group();
-        group.userData.bedId = bed.id;
-
-        const w = bed.w;
-        const d = bed.d;
-        const wallH = bed.h;
-        const wallThickness = 0.08;
-        const style = WALL_STYLES[bed.wall] || WALL_STYLES.corten;
-
-        const wallMat = new THREE.MeshStandardMaterial({
-          color: style.base,
-          roughness: 0.68,
-          metalness: bed.wall === "cedar" ? 0.05 : 0.45
-        });
-
-        const ribMat = new THREE.MeshStandardMaterial({
-          color: style.rib,
-          roughness: 0.62,
-          metalness: bed.wall === "cedar" ? 0.08 : 0.55
-        });
-
-        const trimMat = new THREE.MeshStandardMaterial({
-          color: isSelected ? 0x4ade80 : style.trim,
-          roughness: 0.45,
-          metalness: 0.35
-        });
-
-        // 4 parois du carré surélevé
-        const frontBackGeo = new THREE.BoxGeometry(w, wallH, wallThickness);
-        const frontWall = new THREE.Mesh(frontBackGeo, wallMat);
-        frontWall.position.set(0, wallH / 2, d / 2 - wallThickness / 2);
-        frontWall.castShadow = true;
-        frontWall.receiveShadow = true;
-        group.add(frontWall);
-
-        const backWall = new THREE.Mesh(frontBackGeo, wallMat);
-        backWall.position.set(0, wallH / 2, -d / 2 + wallThickness / 2);
-        backWall.castShadow = true;
-        backWall.receiveShadow = true;
-        group.add(backWall);
-
-        const leftRightGeo = new THREE.BoxGeometry(wallThickness, wallH, Math.max(0.1, d - wallThickness * 2));
-        const leftWall = new THREE.Mesh(leftRightGeo, wallMat);
-        leftWall.position.set(-w / 2 + wallThickness / 2, wallH / 2, 0);
-        leftWall.castShadow = true;
-        leftWall.receiveShadow = true;
-        group.add(leftWall);
-
-        const rightWall = new THREE.Mesh(leftRightGeo, wallMat);
-        rightWall.position.set(w / 2 - wallThickness / 2, wallH / 2, 0);
-        rightWall.castShadow = true;
-        rightWall.receiveShadow = true;
-        group.add(rightWall);
-
-        // Nervures de paroi ondulée
-        const ribSpacing = 0.25;
-        const ribDepth = 0.024;
-        const ribWidth = 0.05;
-        const ribH = Math.max(0.06, wallH - 0.03);
-        const fbRibGeo = new THREE.BoxGeometry(ribWidth, ribH, ribDepth);
-        const xRibCount = Math.max(1, Math.floor((w - 0.2) / ribSpacing));
-        for (let i = 0; i <= xRibCount; i++) {
-          const rx = -w / 2 + 0.1 + (i / xRibCount) * Math.max(0.01, w - 0.2);
-          const rFront = new THREE.Mesh(fbRibGeo, ribMat);
-          rFront.position.set(rx, wallH / 2, d / 2 + ribDepth / 2 - 0.005);
-          rFront.castShadow = true;
-          group.add(rFront);
-
-          const rBack = new THREE.Mesh(fbRibGeo, ribMat);
-          rBack.position.set(rx, wallH / 2, -d / 2 - ribDepth / 2 + 0.005);
-          rBack.castShadow = true;
-          group.add(rBack);
-        }
-
-        const lrRibGeo = new THREE.BoxGeometry(ribDepth, ribH, ribWidth);
-        const zRibCount = Math.max(1, Math.floor((d - 0.2) / ribSpacing));
-        for (let j = 0; j <= zRibCount; j++) {
-          const rz = -d / 2 + 0.1 + (j / zRibCount) * Math.max(0.01, d - 0.2);
-          const rLeft = new THREE.Mesh(lrRibGeo, ribMat);
-          rLeft.position.set(-w / 2 - ribDepth / 2 + 0.005, wallH / 2, rz);
-          rLeft.castShadow = true;
-          group.add(rLeft);
-
-          const rRight = new THREE.Mesh(lrRibGeo, ribMat);
-          rRight.position.set(w / 2 + ribDepth / 2 - 0.005, wallH / 2, rz);
-          rRight.castShadow = true;
-          group.add(rRight);
-        }
-
-        // Margelle supérieure
-        const capThick = 0.025;
-        const capWidth = wallThickness + 0.03;
-        const capFBGeo = new THREE.BoxGeometry(w + 0.03, capThick, capWidth);
-        const capFront = new THREE.Mesh(capFBGeo, trimMat);
-        capFront.position.set(0, wallH + capThick / 2, d / 2 - wallThickness / 2);
-        capFront.castShadow = true;
-        group.add(capFront);
-
-        const capBack = new THREE.Mesh(capFBGeo, trimMat);
-        capBack.position.set(0, wallH + capThick / 2, -d / 2 + wallThickness / 2);
-        capBack.castShadow = true;
-        group.add(capBack);
-
-        const capLRGeo = new THREE.BoxGeometry(capWidth, capThick, Math.max(0.1, d - wallThickness * 2));
-        const capLeft = new THREE.Mesh(capLRGeo, trimMat);
-        capLeft.position.set(-w / 2 + wallThickness / 2, wallH + capThick / 2, 0);
-        capLeft.castShadow = true;
-        group.add(capLeft);
-
-        const capRight = new THREE.Mesh(capLRGeo, trimMat);
-        capRight.position.set(w / 2 - wallThickness / 2, wallH + capThick / 2, 0);
-        capRight.castShadow = true;
-        group.add(capRight);
-
-        // Surface de terre avec motif SVG de variété
-        const innerW = Math.max(0.2, w - wallThickness * 2);
-        const innerD = Math.max(0.2, d - wallThickness * 2);
-        const soilY = Math.max(0.08, wallH - 0.04);
-        const soilGeo = new THREE.BoxGeometry(innerW, 0.04, innerD);
-        const soilTex = getSoilTexture(bed.crop);
-        const soilMat = new THREE.MeshStandardMaterial({
-          map: soilTex,
-          roughness: 0.9,
-          metalness: 0.02
-        });
-        const soilMesh = new THREE.Mesh(soilGeo, soilMat);
-        soilMesh.position.set(0, soilY, 0);
-        soilMesh.receiveShadow = true;
-        soilMesh.userData.bedId = bed.id;
-        group.add(soilMesh);
-
-        // Cadre de sélection au sol
-        if (isSelected) {
-          const ringGeo = new THREE.RingGeometry(0.01, 0.06, 4);
-          const selBorderMat = new THREE.MeshBasicMaterial({
-            color: moveModeActive ? 0xfbbf24 : 0x4ade80,
-            side: THREE.DoubleSide
+            rebuildBedMesh(targetBed);
+            updateStats();
+            renderBedCellGrid();
           });
-          const frameW = w + 0.22;
-          const frameD = d + 0.22;
-          const barThick = 0.045;
-          const b1 = new THREE.Mesh(new THREE.PlaneGeometry(frameW, barThick), selBorderMat);
-          b1.rotation.x = -Math.PI / 2;
-          b1.position.set(0, 0.012, frameD / 2);
-          group.add(b1);
 
-          const b2 = new THREE.Mesh(new THREE.PlaneGeometry(frameW, barThick), selBorderMat);
-          b2.rotation.x = -Math.PI / 2;
-          b2.position.set(0, 0.012, -frameD / 2);
-          group.add(b2);
-
-          const b3 = new THREE.Mesh(new THREE.PlaneGeometry(barThick, frameD), selBorderMat);
-          b3.rotation.x = -Math.PI / 2;
-          b3.position.set(-frameW / 2, 0.012, 0);
-          group.add(b3);
-
-          const b4 = new THREE.Mesh(new THREE.PlaneGeometry(barThick, frameD), selBorderMat);
-          b4.rotation.x = -Math.PI / 2;
-          b4.position.set(frameW / 2, 0.012, 0);
-          group.add(b4);
-
-          ringGeo.dispose();
-        }
-
-        group.position.set(bed.x, 0, bed.z);
-        group.rotation.y = THREE.MathUtils.degToRad(bed.rot);
-        return group;
-      }
-
-      function rebuildAllBeds() {
-        while (bedsRootGroup.children.length > 0) {
-          const child = bedsRootGroup.children[0];
-          bedsRootGroup.remove(child);
-          disposeGroupResources(child);
-        }
-        bedGroupMap.clear();
-
-        for (const bed of beds) {
-          const grp = buildBed3DGroup(bed, bed.id === selectedBedId);
-          bedsRootGroup.add(grp);
-          bedGroupMap.set(bed.id, grp);
+          gridEl.appendChild(cellBtn);
         }
       }
+    }
 
-      // Interaction pointeur : sélection, déplacement protégé et orbite caméra
-      const raycaster = new THREE.Raycaster();
-      const pointerNDC = new THREE.Vector2();
-      const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const dragIntersect = new THREE.Vector3();
+    function syncUI() {
+      updateStats();
 
-      let pointerDownPos = { x: 0, y: 0 };
-      let interactionMode = null; // 'orbit' | 'dragBed'
-      let draggedBed = null;
-      let dragOffset = { x: 0, z: 0 };
-      let dragMoved = false;
+      // Onglet Bac Actif
+      const activeBed = getActiveBed();
+      const noActiveEl = document.getElementById('noActiveBed');
+      const activeControlsEl = document.getElementById('activeBedControls');
 
-      function setPointerNDC(clientX, clientY) {
-        const rect = renderer.domElement.getBoundingClientRect();
-        pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-        pointerNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      if (!activeBed) {
+        noActiveEl.classList.remove('hidden');
+        activeControlsEl.classList.add('hidden');
+      } else {
+        noActiveEl.classList.add('hidden');
+        activeControlsEl.classList.remove('hidden');
+        document.getElementById('activeBedBadge').textContent = `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} CM)`;
+        const nameInput = document.getElementById('editBedName');
+        if (document.activeElement !== nameInput) {
+          nameInput.value = activeBed.name;
+        }
+        document.getElementById('editBedMaterial').value = activeBed.material;
       }
 
-      function hitTestBed(clientX, clientY) {
-        setPointerNDC(clientX, clientY);
-        raycaster.setFromCamera(pointerNDC, camera);
-        const hits = raycaster.intersectObjects(bedsRootGroup.children, true);
-        for (const h of hits) {
-          let obj = h.object;
-          while (obj) {
-            if (obj.userData && obj.userData.bedId) {
-              return obj.userData.bedId;
-            }
-            obj = obj.parent;
-          }
-        }
-        return null;
-      }
+      // Onglet Planter
+      const noPlantBedEl = document.getElementById('noBedForPlanting');
+      const plantControlsEl = document.getElementById('plantingControls');
+      const targetSelect = document.getElementById('plantTargetBed');
 
-      renderer.domElement.addEventListener("pointerdown", (e) => {
-        if (e.button !== undefined && e.button !== 0 && e.pointerType === "mouse") return;
-        closeSunPopover();
+      if (state.beds.length === 0) {
+        noPlantBedEl.classList.remove('hidden');
+        plantControlsEl.classList.add('hidden');
+      } else {
+        noPlantBedEl.classList.add('hidden');
+        plantControlsEl.classList.remove('hidden');
 
-        pointerDownPos = { x: e.clientX, y: e.clientY };
-        dragMoved = false;
-
-        const hitId = hitTestBed(e.clientX, e.clientY);
-        const selBed = getSelectedBed();
-
-        // Déplacement autorisé uniquement si le mode Déplacer est actif ET que l'on touche le carré déjà sélectionné
-        if (moveModeActive && selBed && hitId === selBed.id) {
-          setPointerNDC(e.clientX, e.clientY);
-          raycaster.setFromCamera(pointerNDC, camera);
-          if (raycaster.ray.intersectPlane(dragPlane, dragIntersect)) {
-            interactionMode = "dragBed";
-            draggedBed = selBed;
-            dragOffset.x = selBed.x - dragIntersect.x;
-            dragOffset.z = selBed.z - dragIntersect.z;
-            pushUndoSnapshot();
-            return;
-          }
-        }
-
-        interactionMode = "orbit";
-      });
-
-      window.addEventListener("pointermove", (e) => {
-        if (!interactionMode) return;
-        const dx = e.clientX - pointerDownPos.x;
-        const dy = e.clientY - pointerDownPos.y;
-        if (Math.hypot(dx, dy) > 4) {
-          dragMoved = true;
-        }
-
-        if (interactionMode === "dragBed" && draggedBed) {
-          setPointerNDC(e.clientX, e.clientY);
-          raycaster.setFromCamera(pointerNDC, camera);
-          if (raycaster.ray.intersectPlane(dragPlane, dragIntersect)) {
-            const rawX = dragIntersect.x + dragOffset.x;
-            const rawZ = dragIntersect.z + dragOffset.z;
-            const snappedX = Math.max(-18, Math.min(18, snapGrid(rawX)));
-            const snappedZ = Math.max(-18, Math.min(18, snapGrid(rawZ)));
-            if (snappedX !== draggedBed.x || snappedZ !== draggedBed.z) {
-              draggedBed.x = snappedX;
-              draggedBed.z = snappedZ;
-              const grp = bedGroupMap.get(draggedBed.id);
-              if (grp) {
-                grp.position.x = draggedBed.x;
-                grp.position.z = draggedBed.z;
-              }
-            }
-          }
-          return;
-        }
-
-        if (interactionMode === "orbit" && dragMoved) {
-          const rotSpeed = 0.0065;
-          camTheta -= dx * rotSpeed;
-          camPhi -= dy * rotSpeed;
-          pointerDownPos = { x: e.clientX, y: e.clientY };
-          updateCameraPosition();
-        }
-      });
-
-      window.addEventListener("pointerup", (e) => {
-        if (!interactionMode) return;
-
-        if (interactionMode === "dragBed") {
-          if (dragMoved) {
-            saveLocal();
-            syncUi();
-            showToast(draggedBed.code + " déplacé");
-          } else if (undoStack.length > 0) {
-            // Aucun déplacement réel : retire le snapshot inutile
-            undoStack.pop();
-            updateHistoryButtons();
-          }
-        } else if (interactionMode === "orbit" && !dragMoved) {
-          const hitId = hitTestBed(e.clientX, e.clientY);
-          if (hitId && hitId !== selectedBedId) {
-            selectedBedId = hitId;
-            saveLocal();
-            rebuildAllBeds();
-            syncUi();
-            const b = getSelectedBed();
-            if (b) showToast(b.code + " sélectionné");
-          }
-        }
-
-        interactionMode = null;
-        draggedBed = null;
-        dragMoved = false;
-      });
-
-      renderer.domElement.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        camRadius += e.deltaY * 0.012;
-        updateCameraPosition();
-      }, { passive: false });
-
-      // Synchronisation interface
-      function setMoveMode(active) {
-        if (active && !getSelectedBed()) {
-          showToast("Sélectionnez d'abord un carré");
-          return;
-        }
-        moveModeActive = Boolean(active);
-        const btn = document.getElementById("btn-move-mode");
-        const lbl = document.getElementById("move-mode-label");
-        btn.classList.toggle("btn-active", moveModeActive);
-        btn.setAttribute("aria-pressed", String(moveModeActive));
-        lbl.textContent = moveModeActive ? "Déplacer : ON" : "Sélection";
-        rebuildAllBeds();
-        showToast(moveModeActive ? "Mode Déplacer activé sur le carré sélectionné" : "Mode Sélection actif");
-      }
-
-      function populateStaticSelects() {
-        const cropSel = document.getElementById("sel-crop");
-        cropSel.innerHTML = "";
-        for (const c of CROPS) {
-          const opt = document.createElement("option");
-          opt.value = c.id;
-          opt.textContent = c.label;
-          cropSel.appendChild(opt);
-        }
-
-        const strip = document.getElementById("variety-strip");
-        strip.innerHTML = "";
-        for (const c of CROPS) {
-          const chip = document.createElement("button");
-          chip.type = "button";
-          chip.className = "variety-chip";
-          chip.dataset.cropId = c.id;
-          chip.innerHTML = `<span class="variety-swatch" style="background:${c.color}"></span><span>${c.label}</span>`;
-          chip.addEventListener("click", () => {
-            const bed = getSelectedBed();
-            if (!bed) {
-              showToast("Aucun carré sélectionné");
-              return;
-            }
-            setBedCrop(bed.id, c.id);
-          });
-          strip.appendChild(chip);
-        }
-      }
-
-      function syncUi() {
-        const countEl = document.getElementById("bed-counter");
-        countEl.textContent = beds.length + (beds.length > 1 ? " carrés" : " carré");
-
-        const bed = getSelectedBed();
-        const codeEl = document.getElementById("bottom-bed-code");
-        const nameEl = document.getElementById("bottom-bed-name");
-        const metaEl = document.getElementById("bottom-bed-meta");
-        const editBtn = document.getElementById("btn-edit-bed");
-
-        if (!bed) {
-          moveModeActive = false;
-          const btnMove = document.getElementById("btn-move-mode");
-          btnMove.classList.remove("btn-active");
-          btnMove.setAttribute("aria-pressed", "false");
-          document.getElementById("move-mode-label").textContent = "Sélection";
-
-          codeEl.textContent = "—";
-          nameEl.textContent = "Aucun carré";
-          metaEl.textContent = "Ajoutez un carré avec ＋ Carré";
-          editBtn.disabled = true;
-        } else {
-          const crop = getCrop(bed.crop);
-          codeEl.textContent = bed.code;
-          nameEl.textContent = bed.name;
-          metaEl.textContent = `${crop.label} · ${bed.w} m × ${bed.d} m · H ${bed.h} m`;
-          editBtn.disabled = false;
-        }
-
-        const chips = document.querySelectorAll(".variety-chip");
-        chips.forEach((chip) => {
-          chip.classList.toggle("active", Boolean(bed && chip.dataset.cropId === bed.crop));
+        const currentSelectedId = activeBed ? activeBed.id : Number(targetSelect.value) || state.beds[0].id;
+        targetSelect.innerHTML = '';
+        state.beds.forEach((b) => {
+          const opt = document.createElement('option');
+          opt.value = String(b.id);
+          opt.textContent = `${b.name} (${b.widthCm}×${b.depthCm} cm)`;
+          if (b.id === currentSelectedId) opt.selected = true;
+          targetSelect.appendChild(opt);
         });
 
-        // Synchronisation tiroir si ouvert
-        if (document.getElementById("bed-drawer").classList.contains("open") && bed) {
-          document.getElementById("drawer-code").textContent = bed.code;
-          document.getElementById("drawer-heading").textContent = bed.name;
-          document.getElementById("inp-name").value = bed.name;
-          document.getElementById("sel-crop").value = bed.crop;
-          document.getElementById("sel-w").value = String(bed.w);
-          document.getElementById("sel-d").value = String(bed.d);
-          document.getElementById("sel-h").value = String(bed.h);
-          document.getElementById("sel-wall").value = bed.wall;
-          document.getElementById("inp-notes").value = bed.notes || "";
-        }
+        const eraserBtn = document.getElementById('btnEraserMode');
+        document.getElementById('eraserState').textContent = state.eraserMode ? 'ON' : 'OFF';
+        eraserBtn.className = state.eraserMode
+          ? 'w-full sm:w-auto px-4 py-3 rounded-xl border border-amber-600 bg-amber-100 text-amber-900 text-sm font-semibold transition'
+          : 'w-full sm:w-auto px-4 py-3 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition';
+
+        renderPlantPalette();
+        renderBedCellGrid();
       }
+    }
 
-      // Tiroir d'édition
-      const drawerEl = document.getElementById("bed-drawer");
-      const drawerBackdropEl = document.getElementById("drawer-backdrop");
+    // Navigation onglets
+    const tabs = [
+      { btn: document.getElementById('tabAdd'), panel: document.getElementById('panelAdd') },
+      { btn: document.getElementById('tabActive'), panel: document.getElementById('panelActive') },
+      { btn: document.getElementById('tabPlant'), panel: document.getElementById('panelPlant') }
+    ];
 
-      function openDrawer() {
-        const bed = getSelectedBed();
-        if (!bed) return;
-        closeSunPopover();
-        syncUi();
-        drawerBackdropEl.classList.add("open");
-        drawerEl.classList.add("open");
-      }
-
-      function closeDrawer() {
-        drawerBackdropEl.classList.remove("open");
-        drawerEl.classList.remove("open");
-      }
-
-      function commitDrawerField(mutator, toastMsg) {
-        const bed = getSelectedBed();
-        if (!bed) return;
-        pushUndoSnapshot();
-        mutator(bed);
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        if (toastMsg) showToast(toastMsg);
-      }
-
-      document.getElementById("inp-name").addEventListener("change", (e) => {
-        const val = e.target.value.trim();
-        commitDrawerField((b) => {
-          b.name = val || b.code;
-        }, "Nom mis à jour");
-      });
-
-      document.getElementById("sel-crop").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.crop = e.target.value;
-        }, "Culture mise à jour");
-      });
-
-      document.getElementById("sel-w").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.w = Number(e.target.value);
-        }, "Largeur mise à jour");
-      });
-
-      document.getElementById("sel-d").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.d = Number(e.target.value);
-        }, "Profondeur mise à jour");
-      });
-
-      document.getElementById("sel-h").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.h = Number(e.target.value);
-        }, "Hauteur mise à jour");
-      });
-
-      document.getElementById("sel-wall").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.wall = e.target.value;
-        }, "Paroi mise à jour");
-      });
-
-      document.getElementById("inp-notes").addEventListener("change", (e) => {
-        commitDrawerField((b) => {
-          b.notes = e.target.value;
-        }, "Notes enregistrées");
-      });
-
-      document.getElementById("btn-edit-bed").addEventListener("click", openDrawer);
-      document.getElementById("btn-close-drawer").addEventListener("click", closeDrawer);
-      document.getElementById("btn-done-drawer").addEventListener("click", closeDrawer);
-      drawerBackdropEl.addEventListener("click", closeDrawer);
-      document.getElementById("btn-rotate-bed").addEventListener("click", rotateSelectedBed90);
-      document.getElementById("btn-delete-bed").addEventListener("click", deleteSelectedBed);
-
-      // Popover Soleil
-      const sunPopover = document.getElementById("sun-popover");
-      const sunBtn = document.getElementById("btn-sun-toggle");
-
-      function closeSunPopover() {
-        sunPopover.classList.remove("open");
-        sunBtn.setAttribute("aria-expanded", "false");
-      }
-
-      sunBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const willOpen = !sunPopover.classList.contains("open");
-        sunPopover.classList.toggle("open", willOpen);
-        sunBtn.setAttribute("aria-expanded", String(willOpen));
-      });
-
-      document.querySelectorAll(".season-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          currentSeason = btn.dataset.season;
-          document.querySelectorAll(".season-btn").forEach((b) => {
-            b.classList.toggle("active", b.dataset.season === currentSeason);
-          });
-          applySunAndSeason();
-          saveLocal();
+    tabs.forEach(({ btn, panel }) => {
+      btn.addEventListener('click', () => {
+        tabs.forEach((t) => {
+          t.btn.classList.remove('active');
+          t.panel.classList.add('hidden');
         });
-      });
-
-      const sunSlider = document.getElementById("sun-slider");
-      sunSlider.value = String(sunMinutes);
-      sunSlider.addEventListener("input", (e) => {
-        sunMinutes = Number(e.target.value);
-        applySunAndSeason();
-        saveLocal();
-      });
-
-      // Modale Synchronisation CSV / JSON
-      const syncBackdrop = document.getElementById("sync-modal-backdrop");
-      const syncTextarea = document.getElementById("sync-textarea");
-      let activeSyncFormat = "csv";
-
-      function refreshSyncTextarea() {
-        if (activeSyncFormat === "csv") {
-          syncTextarea.value = bedsToCsv(beds);
-        } else {
-          syncTextarea.value = JSON.stringify(beds, null, 2);
+        btn.classList.add('active');
+        panel.classList.remove('hidden');
+        if (panel === document.getElementById('panelPlant')) {
+          syncUI();
         }
+      });
+    });
+
+    // Création bac
+    document.getElementById('btnCreateBed').addEventListener('click', () => {
+      const widthCm = Number(document.getElementById('newWidth').value);
+      const depthCm = Number(document.getElementById('newDepth').value);
+      const heightCm = Number(document.getElementById('newHeight').value);
+      const material = document.getElementById('newMaterial').value;
+      addBed({ widthCm, depthCm, heightCm, material });
+    });
+
+    // Édition bac actif
+    document.getElementById('editBedName').addEventListener('input', (e) => {
+      const bed = getActiveBed();
+      if (!bed) return;
+      const trimmed = e.target.value;
+      bed.name = trimmed.trim().length > 0 ? trimmed : `Carré #${bed.id}`;
+      syncUI();
+    });
+
+    document.getElementById('editBedMaterial').addEventListener('change', (e) => {
+      const bed = getActiveBed();
+      if (!bed) return;
+      bed.material = e.target.value;
+      rebuildBedMesh(bed);
+    });
+
+    function rotateActiveBed(deltaDeg, absolute = null) {
+      const bed = getActiveBed();
+      if (!bed) return;
+      if (absolute !== null) {
+        bed.rotationDeg = absolute;
+      } else {
+        bed.rotationDeg = ((bed.rotationDeg || 0) + deltaDeg) % 360;
       }
+      updateBedTransform(bed);
+    }
 
-      function openSyncModal() {
-        closeSunPopover();
-        closeDrawer();
-        refreshSyncTextarea();
-        syncBackdrop.classList.add("open");
+    document.getElementById('btnRotMinus15').addEventListener('click', () => rotateActiveBed(-15));
+    document.getElementById('btnRotPlus15').addEventListener('click', () => rotateActiveBed(15));
+    document.getElementById('btnRot90').addEventListener('click', () => rotateActiveBed(90));
+    document.getElementById('btnRotReset').addEventListener('click', () => rotateActiveBed(0, 0));
+
+    document.getElementById('btnDeleteBed').addEventListener('click', () => {
+      const bed = getActiveBed();
+      if (!bed) return;
+      const mesh = bedMeshes.get(bed.id);
+      if (mesh) {
+        bedsGroup.remove(mesh);
+        bedMeshes.delete(bed.id);
       }
-
-      function closeSyncModal() {
-        syncBackdrop.classList.remove("open");
-      }
-
-      document.getElementById("btn-sync").addEventListener("click", openSyncModal);
-      document.getElementById("btn-close-sync").addEventListener("click", closeSyncModal);
-      syncBackdrop.addEventListener("click", (e) => {
-        if (e.target === syncBackdrop) closeSyncModal();
-      });
-
-      document.getElementById("tab-csv").addEventListener("click", () => {
-        activeSyncFormat = "csv";
-        document.getElementById("tab-csv").classList.add("active");
-        document.getElementById("tab-json").classList.remove("active");
-        refreshSyncTextarea();
-      });
-
-      document.getElementById("tab-json").addEventListener("click", () => {
-        activeSyncFormat = "json";
-        document.getElementById("tab-json").classList.add("active");
-        document.getElementById("tab-csv").classList.remove("active");
-        refreshSyncTextarea();
-      });
-
-      document.getElementById("btn-copy-sync").addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(syncTextarea.value);
-          showToast("Copié dans le presse-papiers");
-        } catch (_err) {
-          syncTextarea.select();
-          document.execCommand("copy");
-          showToast("Sélection copiée");
-        }
-      });
-
-      document.getElementById("btn-download-sync").addEventListener("click", () => {
-        const ext = activeSyncFormat === "csv" ? "csv" : "json";
-        const mime = activeSyncFormat === "csv" ? "text/csv;charset=utf-8;" : "application/json;charset=utf-8;";
-        const blob = new Blob([syncTextarea.value], { type: mime });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "mon-jardin-3d." + ext;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast("Fichier ." + ext + " téléchargé");
-      });
-
-      const fileInput = document.getElementById("csv-file-input");
-      document.getElementById("btn-import-file").addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const text = String(reader.result || "");
-          syncTextarea.value = text;
-          if (file.name.toLowerCase().endsWith(".json")) {
-            activeSyncFormat = "json";
-            document.getElementById("tab-json").classList.add("active");
-            document.getElementById("tab-csv").classList.remove("active");
-          } else {
-            activeSyncFormat = "csv";
-            document.getElementById("tab-csv").classList.add("active");
-            document.getElementById("tab-json").classList.remove("active");
-          }
-          showToast("Fichier chargé");
-        };
-        reader.readAsText(file);
-        fileInput.value = "";
-      });
-
-      document.getElementById("btn-apply-sync").addEventListener("click", () => {
-        try {
-          const rawText = syncTextarea.value.trim();
-          let imported;
-          if (activeSyncFormat === "json" || rawText.startsWith("[")) {
-            const arr = JSON.parse(rawText);
-            if (!Array.isArray(arr) || arr.length === 0) {
-              throw new Error("Le JSON doit contenir un tableau d'au moins un carré.");
-            }
-            imported = arr.map((item, idx) => normalizeBed(item, idx));
-          } else {
-            imported = parseCsvRfc4180(rawText);
-          }
-
-          pushUndoSnapshot();
-          beds = imported;
-          selectedBedId = beds[0].id;
-          moveModeActive = false;
-          saveLocal();
-          rebuildAllBeds();
-          syncUi();
-          closeSyncModal();
-          showToast(beds.length + " carré(s) importé(s)");
-        } catch (err) {
-          showToast("Erreur : " + err.message);
-        }
-      });
-
-      document.getElementById("btn-reset-demo").addEventListener("click", () => {
-        pushUndoSnapshot();
-        beds = createDefaultBeds();
-        selectedBedId = beds[0].id;
-        moveModeActive = false;
-        saveLocal();
-        rebuildAllBeds();
-        syncUi();
-        refreshSyncTextarea();
-        showToast("Jardin par défaut restauré");
-      });
-
-      // Actions barre supérieure
-      document.getElementById("btn-undo").addEventListener("click", undo);
-      document.getElementById("btn-redo").addEventListener("click", redo);
-      document.getElementById("btn-zoom-in").addEventListener("click", () => {
-        camRadius -= 1.8;
-        updateCameraPosition();
-      });
-      document.getElementById("btn-zoom-out").addEventListener("click", () => {
-        camRadius += 1.8;
-        updateCameraPosition();
-      });
-      document.getElementById("btn-reset-cam").addEventListener("click", () => {
-        camTarget.set(0, 0.2, 0.5);
-        camRadius = 15.5;
-        camTheta = 0.68;
-        camPhi = 0.78;
-        updateCameraPosition();
-        showToast("Caméra recentrée");
-      });
-      document.getElementById("btn-move-mode").addEventListener("click", () => {
-        setMoveMode(!moveModeActive);
-      });
-      document.getElementById("btn-add-bed").addEventListener("click", addBed);
-
-      // Raccourcis clavier
-      window.addEventListener("keydown", (e) => {
-        const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : "";
-        if (tag === "input" || tag === "textarea" || tag === "select") {
-          if (e.key === "Escape") {
-            closeDrawer();
-            closeSyncModal();
-          }
-          return;
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
-          e.preventDefault();
-          if (e.shiftKey) redo();
-          else undo();
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
-          e.preventDefault();
-          redo();
-        } else if (e.key === "Escape") {
-          closeDrawer();
-          closeSyncModal();
-          closeSunPopover();
-        }
-      });
-
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      // Initialisation
-      populateStaticSelects();
-      if (!loadLocal()) {
-        beds = createDefaultBeds();
-        selectedBedId = beds[0].id;
-      }
-      document.querySelectorAll(".season-btn").forEach((b) => {
-        b.classList.toggle("active", b.dataset.season === currentSeason);
-      });
-      applySunAndSeason();
+      state.beds = state.beds.filter((b) => b.id !== bed.id);
+      state.activeBedId = state.beds.length > 0 ? state.beds[state.beds.length - 1].id : null;
       rebuildAllBeds();
-      syncUi();
-      updateHistoryButtons();
+      syncUI();
+    });
 
-      function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
+    // Plantation
+    document.getElementById('plantTargetBed').addEventListener('change', (e) => {
+      const id = Number(e.target.value);
+      if (id) setActiveBed(id);
+    });
+
+    document.getElementById('btnEraserMode').addEventListener('click', () => {
+      state.eraserMode = !state.eraserMode;
+      syncUI();
+    });
+
+    // Vues 3D / Dessus
+    const btnView3D = document.getElementById('btnView3D');
+    const btnViewTop = document.getElementById('btnViewTop');
+
+    function setViewMode(top) {
+      state.isTopView = top;
+      stopDragging();
+      if (top) {
+        btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
+        btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
+        camera.position.set(0, 9.5, 0.001);
+        controls.target.set(0, 0, 0);
+      } else {
+        btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
+        btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
+        camera.position.set(4.5, 5.2, 5.5);
+        controls.target.set(0, 0, 0);
       }
-      animate();
-    })();
+      controls.update();
+    }
+
+    btnView3D.addEventListener('click', () => setViewMode(false));
+    btnViewTop.addEventListener('click', () => setViewMode(true));
+    document.getElementById('btnResetCamera').addEventListener('click', () => setViewMode(state.isTopView));
+
+    // Grille 1m
+    document.getElementById('btnToggleGrid').addEventListener('click', () => {
+      state.showGrid = !state.showGrid;
+      gridHelper.visible = state.showGrid;
+      const dot = document.querySelector('#btnToggleGrid span:first-child');
+      dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
+    });
+
+    // Export / Import / Reset JSON
+    document.getElementById('btnExportJson').addEventListener('click', () => {
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        beds: state.beds
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'potager-3d.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    const fileInputJson = document.getElementById('fileInputJson');
+    document.getElementById('btnImportJson').addEventListener('click', () => fileInputJson.click());
+
+    fileInputJson.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(String(ev.target.result));
+          const list = Array.isArray(data) ? data : Array.isArray(data.beds) ? data.beds : [];
+          bedsGroup.clear();
+          bedMeshes.clear();
+          state.beds = [];
+          state.nextId = 1;
+          list.forEach((item) => {
+            const created = addBed(item);
+            if (item.id && item.id >= state.nextId) {
+              state.nextId = item.id + 1;
+            }
+            created.id = item.id || created.id;
+          });
+          if (state.beds.length > 0) {
+            state.activeBedId = state.beds[0].id;
+            rebuildAllBeds();
+          } else {
+            state.activeBedId = null;
+          }
+          syncUI();
+        } catch (err) {
+          alert('Fichier JSON invalide.');
+        }
+      };
+      reader.readAsText(file);
+      fileInputJson.value = '';
+    });
+
+    document.getElementById('btnClearAll').addEventListener('click', () => {
+      bedsGroup.clear();
+      bedMeshes.clear();
+      state.beds = [];
+      state.activeBedId = null;
+      state.nextId = 1;
+      syncUI();
+    });
+
+    // Redimensionnement fluide
+    const resizeObserver = new ResizeObserver(() => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w > 0 && h > 0) {
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+    });
+    resizeObserver.observe(container);
+
+    // Scène de départ
+    addBed({
+      name: 'Carré #1',
+      widthCm: 120,
+      depthCm: 120,
+      heightCm: 30,
+      material: 'wood',
+      x: -1.1,
+      z: 0,
+      rotationDeg: 0,
+      plants: { '0,0': 'tomato', '1,2': 'lettuce', '2,1': 'carrot' }
+    });
+    addBed({
+      name: 'Carré #2',
+      widthCm: 150,
+      depthCm: 90,
+      heightCm: 30,
+      material: 'corten',
+      x: 1.3,
+      z: 0.2,
+      rotationDeg: 0,
+      plants: { '0,1': 'strawberry', '1,3': 'herb' }
+    });
+    setActiveBed(1);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
   </script>
 </body>
 
