@@ -1,13 +1,10 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Potager 3D — Modélisation, Verger &amp; Planification</title>
-  <!-- Tailwind CSS pour une interface réactive et épurée -->
+  <title>Potager 3D — Modélisation, Verger & Planification</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Import Map pour Three.js et OrbitControls -->
   <script type="importmap">
     {
       "imports": {
@@ -31,7 +28,6 @@
       background: #4e7c2a;
       overflow: hidden;
       user-select: none;
-      -webkit-user-select: none;
       touch-action: none;
     }
     @media (min-width: 768px) {
@@ -50,12 +46,18 @@
       font-weight: 600;
       background-color: #f0fdf4;
     }
+    .subtab-btn.active {
+      background-color: #15803d;
+      color: #ffffff;
+      border-color: #15803d;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
   </style>
 </head>
 <body>
   <div class="max-w-3xl mx-auto p-3 sm:p-5 space-y-3">
-    <!-- 1. En-tête compact en haut au-dessus de la scène 3D + Actions JSON -->
-    <header class="bg-white/95 backdrop-blur px-4 py-3 rounded-2xl shadow-sm border border-stone-200 flex items-center justify-between gap-3">
+    <!-- Bandeau d'en-tête supérieur avec actions JSON -->
+    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
           ✦
@@ -78,17 +80,16 @@
           </svg>
         </button>
         <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
-        <button id="btnClearAll" type="button" title="Réinitialiser la scène" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
+        <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
       </div>
-    </header>
+    </div>
 
-    <!-- 2. Scène 3D interactive -->
+    <!-- Zone 3D (sans bandeau statistique superposé) -->
     <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
-      <!-- Contrôles de vue et grille 1m -->
       <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
           <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
@@ -109,14 +110,11 @@
           <span>Grille (1m)</span>
         </button>
       </div>
-
-      <!-- Notifications non bloquantes -->
-      <div id="toastContainer" class="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-3 z-20 flex flex-col gap-2 pointer-events-none"></div>
     </div>
 
-    <!-- 3. Panneau principal avec 3 onglets en haut -->
+    <!-- Panneau principal avec onglets en haut -->
     <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600 bg-stone-50/70">
+      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600">
         <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
           + Ajouter
         </button>
@@ -129,123 +127,147 @@
       </div>
 
       <div class="p-4 sm:p-5">
-        <!-- 4. Onglet + Ajouter : Bac potager, Sol labouré ou Arbres (verger) -->
+        <!-- Onglet 1 : Ajouter Bac / Sol labouré / Arbre de verger -->
         <div id="panelAdd" class="space-y-4">
-          <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
-            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+          <div>
+            <label for="addKind" class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1.5">
               Type d'aménagement à ajouter
+            </label>
+            <select id="addKind" class="big-select w-full rounded-xl border border-stone-300 bg-white font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+              <option value="bed">🪵 Bac potager (carré surélevé)</option>
+              <option value="tilled_soil">🌾 Sol labouré (parcelle pleine terre)</option>
+              <option value="orchard_tree">🌳 Arbre de verger</option>
+            </select>
+          </div>
+
+          <!-- Options Bac potager -->
+          <div id="sectionBedOptions" class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+              Dimensions du bac potager
             </div>
-
-            <div class="grid grid-cols-3 gap-2">
-              <button id="typeAddBed" type="button" class="py-2.5 px-2 rounded-xl border-2 border-emerald-700 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-semibold transition">
-                🪵 Bac potager
-              </button>
-              <button id="typeAddPlot" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition">
-                🌾 Sol labouré
-              </button>
-              <button id="typeAddTree" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition">
-                🌳 Arbre verger
-              </button>
-            </div>
-
-            <!-- Options Bac potager -->
-            <div id="formAddBed" class="space-y-4 pt-1">
-              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-                Dimensions personnalisées
-              </div>
-              <div class="grid grid-cols-3 gap-3">
-                <div>
-                  <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
-                  <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                </div>
-                <div>
-                  <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
-                  <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                </div>
-                <div>
-                  <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
-                  <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                </div>
-              </div>
-
+            <div class="grid grid-cols-3 gap-3">
               <div>
-                <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
-                <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                  <option value="wood">Bois brut</option>
-                  <option value="burned_wood">Bois brûlé</option>
-                  <option value="corten">Acier corten</option>
-                  <option value="stone">Pierre naturelle</option>
-                </select>
+                <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
+                <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+              <div>
+                <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
+                <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+              <div>
+                <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
+                <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
               </div>
             </div>
 
-            <!-- Options Sol labouré -->
-            <div id="formAddPlot" class="hidden space-y-4 pt-1">
-              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-                Dimensions du sol labouré
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label for="plotWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
-                  <input id="plotWidth" type="number" min="60" max="800" step="20" value="200" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                </div>
-                <div>
-                  <label for="plotDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
-                  <input id="plotDepth" type="number" min="60" max="800" step="20" value="150" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                </div>
-              </div>
-              <p class="text-xs text-stone-500">
-                Ajoute une bande de terre labourée avec sillons au sol, compatible avec la grille de plantation de 30×30 cm.
-              </p>
-            </div>
-
-            <!-- Options Arbres (verger) -->
-            <div id="formAddTree" class="hidden space-y-4 pt-1">
-              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-                Espèce et taille de l'arbre (verger)
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label for="newTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Essence d'arbre</label>
-                  <select id="newTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="apple">🍎 Pommier</option>
-                    <option value="pear">🍐 Poirier</option>
-                    <option value="cherry">🍒 Cerisier</option>
-                    <option value="olive">🫒 Olivier</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="newTreeScale" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille / Hauteur</label>
-                  <select id="newTreeScale" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="0.8">Jeune arbre (petit)</option>
-                    <option value="1" selected>Adulte standard (moyen)</option>
-                    <option value="1.3">Grand sujet (haut)</option>
-                  </select>
-                </div>
-              </div>
-              <p class="text-xs text-stone-500">
-                Ajoute un arbre fruitier en 3D pour composer un verger. Déplaçable en <strong>Vue Dessus (Plan)</strong> par clic direct.
-              </p>
+            <div>
+              <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
+              <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="wood">Bois brut</option>
+                <option value="burned_wood">Bois brûlé</option>
+                <option value="corten">Acier corten</option>
+                <option value="stone">Pierre naturelle</option>
+              </select>
             </div>
           </div>
 
-          <button id="btnCreateBed" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-base shadow-sm transition">
-            + Créer le carré potager
+          <!-- Options Sol labouré -->
+          <div id="sectionTilledOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+              Dimensions du sol labouré
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="tilledWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
+                <input id="tilledWidth" type="number" min="60" max="1000" step="10" value="180" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+              <div>
+                <label for="tilledDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
+                <input id="tilledDepth" type="number" min="60" max="1000" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              </div>
+            </div>
+            <p class="text-xs text-stone-500">
+              Planche de culture en pleine terre avec sillons labourés et grille de plantation de 30×30 cm.
+            </p>
+          </div>
+
+          <!-- Options Arbre de verger + Création d'un nouvel arbre fruitier -->
+          <div id="sectionTreeOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+              Essence &amp; gabarit d'arbre fruitier
+            </div>
+            <div>
+              <label for="newTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Arbre fruitier du verger</label>
+              <select id="newTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+            </div>
+            <div>
+              <label for="newTreeSize" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille de l'arbre</label>
+              <select id="newTreeSize" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="dwarf">Compact / Scion (1,8 m)</option>
+                <option value="medium" selected>Demi-tige (2,6 m)</option>
+                <option value="tall">Haute-tige (3,5 m)</option>
+              </select>
+            </div>
+
+            <!-- Formulaire création d'un nouvel arbre fruitier -->
+            <div class="border-t border-stone-200 pt-3">
+              <button id="btnToggleCustomTree" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-emerald-800 hover:text-emerald-950 py-1">
+                <span>+ Créer un nouvel arbre fruitier personnalisé</span>
+                <span id="customTreeCaret">▼</span>
+              </button>
+
+              <div id="customTreeForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
+                <div>
+                  <label for="customTreeName" class="block text-xs font-semibold text-stone-700 mb-1">Nom du fruitier</label>
+                  <input id="customTreeName" type="text" maxlength="40" placeholder="Ex: Néflier, Grenadier, Argousier..." class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="customTreeEmoji" class="block text-xs font-semibold text-stone-700 mb-1">Logo (emoji)</label>
+                    <input id="customTreeEmoji" type="text" maxlength="8" value="🌳" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                  </div>
+                  <div>
+                    <label for="customTreeFile" class="block text-xs font-semibold text-stone-700 mb-1">Ou importer un logo (image)</label>
+                    <input id="customTreeFile" type="file" accept="image/*" class="block w-full text-xs text-stone-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 items-center">
+                  <div>
+                    <label for="customTreeFruitColor" class="block text-xs font-semibold text-stone-700 mb-1">Couleur des fruits 3D</label>
+                    <input id="customTreeFruitColor" type="color" value="#dc2626" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
+                  </div>
+                  <div class="flex items-center gap-2 pt-4">
+                    <span class="text-xs text-stone-500">Aperçu :</span>
+                    <div id="customTreeLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌳</div>
+                  </div>
+                </div>
+
+                <button id="btnSaveCustomTree" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+                  Enregistrer ce fruitier dans la liste
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button id="btnCreateItem" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-base shadow-sm transition">
+            + Ajouter au jardin
           </button>
         </div>
 
-        <!-- 5. Onglet Élément Actif -->
+        <!-- Onglet 2 : Élément Actif -->
         <div id="panelActive" class="hidden space-y-4">
-          <div id="noActiveBed" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Aucun élément sélectionné. Clique directement sur un bac, un sol labouré ou un arbre dans la scène 3D ou crée-en un dans l'onglet <strong>+ Ajouter</strong>.
+          <div id="noActiveItem" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+            Aucun élément sélectionné. Clique sur un bac, un sol labouré ou un arbre dans la vue 3D, ou ajoute-en un dans l'onglet <strong>+ Ajouter</strong>.
           </div>
 
-          <div id="activeBedControls" class="hidden space-y-4">
+          <div id="activeItemControls" class="hidden space-y-4">
             <div class="flex items-center justify-between gap-2">
-              <span id="activeBedBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">
-                BAC #1
+              <span id="activeItemBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">
+                ÉLÉMENT #1
               </span>
-              <button id="btnDeleteBed" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition">
+              <button id="btnDeleteItem" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition">
                 <span>🗑</span>
                 <span>Supprimer</span>
               </button>
@@ -253,11 +275,11 @@
 
             <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
               <div>
-                <label for="editBedName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom de l'élément</label>
-                <input id="editBedName" type="text" maxlength="40" placeholder="Ex: Carré Tomates ou Pommier #1" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                <label for="editItemName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom de l'élément</label>
+                <input id="editItemName" type="text" maxlength="40" placeholder="Ex: Carré Tomates ou Pommier" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
               </div>
 
-              <div id="editMaterialWrapper">
+              <div id="editBedMaterialWrap">
                 <label for="editBedMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
                 <select id="editBedMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                   <option value="wood">Bois brut</option>
@@ -265,26 +287,6 @@
                   <option value="corten">Acier corten</option>
                   <option value="stone">Pierre naturelle</option>
                 </select>
-              </div>
-
-              <div id="editSpeciesWrapper" class="hidden space-y-4">
-                <div>
-                  <label for="editTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Essence d'arbre</label>
-                  <select id="editTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="apple">🍎 Pommier</option>
-                    <option value="pear">🍐 Poirier</option>
-                    <option value="cherry">🍒 Cerisier</option>
-                    <option value="olive">🫒 Olivier</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="editTreeScale" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille / Hauteur</label>
-                  <select id="editTreeScale" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="0.8">Jeune arbre (petit)</option>
-                    <option value="1">Adulte standard (moyen)</option>
-                    <option value="1.3">Grand sujet (haut)</option>
-                  </select>
-                </div>
               </div>
 
               <div>
@@ -307,41 +309,113 @@
             </div>
 
             <p class="text-xs text-stone-500">
-              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur l'élément pour le déplacer (aimantation tous les 10 cm).
+              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur un élément pour le déplacer (aimantation tous les 10 cm).
             </p>
           </div>
         </div>
 
-        <!-- 6. Onglet Planter : Bac ou sol labouré cible + Gomme + Palette + Grille 30×30 cm -->
+        <!-- Onglet 3 : Planter (70 légumes + 9 petits fruits + création personnalisée) -->
         <div id="panelPlant" class="hidden space-y-4">
-          <div id="noBedForPlanting" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Ajoute d'abord un carré potager ou un sol labouré pour commencer à planter sur sa grille de 30×30 cm.
+          <div id="noPlotForPlanting" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+            Ajoute d'abord un <strong>bac potager</strong> ou un <strong>sol labouré</strong> pour planter sur la grille de 30×30 cm.
           </div>
 
           <div id="plantingControls" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex-1">
-                <label for="plantTargetBed" class="block text-xs font-semibold text-stone-700 mb-1">Bac ou sol labouré cible</label>
-                <select id="plantTargetBed" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+            <div>
+              <label for="plantTargetItem" class="block text-xs font-semibold text-stone-700 mb-1.5">Bac ou sol labouré cible</label>
+              <select id="plantTargetItem" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+            </div>
+
+            <!-- Sous-menu Légumes / Fruits -->
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-semibold text-stone-700">Catégorie à planter</span>
+                <span id="categoryCountBadge" class="text-xs font-semibold text-emerald-700">70 légumes</span>
               </div>
-              <div class="sm:pt-5">
-                <button id="btnEraserMode" type="button" class="w-full sm:w-auto px-4 py-3 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
-                  🧹 Gomme : <span id="eraserState">OFF</span>
+              <div class="grid grid-cols-2 gap-2.5">
+                <button id="subtabVegetables" type="button" class="subtab-btn active py-2.5 px-3 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 transition">
+                  🥕 Légumes (70)
+                </button>
+                <button id="subtabFruits" type="button" class="subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition">
+                  🍓 Petits fruits (9)
                 </button>
               </div>
             </div>
 
-            <div>
-              <div class="text-xs font-semibold text-stone-700 mb-2">Choisir un plant (parcelles de 30×30 cm)</div>
-              <div id="plantPalette" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
+            <!-- Création personnalisée d'un légume ou petit fruit -->
+            <div class="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-3">
+              <button id="btnToggleCustomPlant" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-emerald-800 hover:text-emerald-950">
+                <span id="customPlantToggleLabel">+ Ajouter un légume ou fruit personnalisé</span>
+                <span id="customPlantCaret">▼</span>
+              </button>
+
+              <div id="customPlantForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="customPlantName" class="block text-xs font-semibold text-stone-700 mb-1">Nom</label>
+                    <input id="customPlantName" type="text" maxlength="40" placeholder="Ex: Chou romanesco ou Framboise jaune" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                  </div>
+                  <div>
+                    <label for="customPlantCategory" class="block text-xs font-semibold text-stone-700 mb-1">Type</label>
+                    <select id="customPlantCategory" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                      <option value="vegetables">Légume</option>
+                      <option value="fruits">Petit fruit</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="customPlantEmoji" class="block text-xs font-semibold text-stone-700 mb-1">Logo (emoji)</label>
+                    <input id="customPlantEmoji" type="text" maxlength="8" value="🌱" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                  </div>
+                  <div>
+                    <label for="customPlantFile" class="block text-xs font-semibold text-stone-700 mb-1">Ou importer un logo (image)</label>
+                    <input id="customPlantFile" type="file" accept="image/*" class="block w-full text-xs text-stone-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 items-center">
+                  <div>
+                    <label for="customPlantColor" class="block text-xs font-semibold text-stone-700 mb-1">Couleur 3D</label>
+                    <input id="customPlantColor" type="color" value="#3b82f6" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
+                  </div>
+                  <div class="flex items-center gap-2 pt-4">
+                    <span class="text-xs text-stone-500">Aperçu :</span>
+                    <div id="customPlantLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌱</div>
+                  </div>
+                </div>
+
+                <button id="btnSaveCustomPlant" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition">
+                  Ajouter à la palette et sélectionner
+                </button>
+              </div>
             </div>
 
-            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 overflow-x-auto">
-              <div class="flex items-center justify-between text-xs text-stone-500 mb-2.5">
-                <span id="gridInfoLabel">Grille 30×30 cm</span>
-                <span>Clique sur une case pour planter / retirer</span>
+            <!-- Filtre & palette -->
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <label id="paletteTitleLabel" for="plantSearchInput" class="text-xs font-semibold text-stone-700">
+                  Choisir un légume (parcelles de 30×30 cm)
+                </label>
+                <span id="selectedPlantSummary" class="text-xs font-semibold text-stone-600"></span>
               </div>
-              <div id="bedCellGrid" class="inline-grid gap-1.5 mx-auto"></div>
+              <input
+                id="plantSearchInput"
+                type="search"
+                placeholder="Filtrer par nom..."
+                class="w-full mb-2.5 rounded-xl border border-stone-300 bg-stone-50 px-3.5 py-2 text-sm text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              />
+              <div id="plantPalette" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Grille de plantation 30x30 cm -->
+            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 overflow-x-auto">
+              <div class="flex flex-wrap items-center justify-between gap-1 text-xs text-stone-500 mb-2.5">
+                <span id="gridInfoLabel">Grille 30×30 cm</span>
+                <span>Clic sur plant identique = retrait</span>
+              </div>
+              <div id="itemCellGrid" class="inline-grid gap-1.5 mx-auto"></div>
             </div>
           </div>
         </div>
@@ -354,7 +428,7 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     const CELL_SIZE = 0.30; // 30 cm en mètres
-    const SNAP_STEP = 0.10;  // Aimantation tous les 10 cm en mètres
+    const SNAP_STEP = 0.10;  // Aimantation 10 cm en mètres
 
     const MATERIALS = {
       wood: { label: 'Bois brut', color: 0xb5835a, roughness: 0.85, metalness: 0.05 },
@@ -363,92 +437,242 @@
       stone: { label: 'Pierre naturelle', color: 0x9ca39b, roughness: 0.92, metalness: 0.02 }
     };
 
-    const PLANTS = {
-      tomato: { id: 'tomato', name: 'Tomate', icon: '🍅', color: 0xd93829, stemColor: 0x2f7d32, height: 0.42 },
-      lettuce: { id: 'lettuce', name: 'Salade', icon: '🥬', color: 0x58b947, stemColor: 0x3e8e32, height: 0.14 },
-      carrot: { id: 'carrot', name: 'Carotte', icon: '🥕', color: 0xf07b1d, stemColor: 0x3a9d42, height: 0.18 },
-      strawberry: { id: 'strawberry', name: 'Fraise', icon: '🍓', color: 0xe11d48, stemColor: 0x2d8a3e, height: 0.15 },
-      herb: { id: 'herb', name: 'Aromatique', icon: '🌿', color: 0x229954, stemColor: 0x1e8449, height: 0.20 }
+    const ORCHARD_FRUIT_TREES_FR = [
+      'Abricotier', 'Amandier', 'Cerisier', 'Châtaignier', 'Citronnier',
+      'Clémentinier', 'Cognassier', 'Figuier', 'Kiwaï / Kiwi grimpant', 'Mirabellier',
+      'Nectarinier', 'Noisetier', 'Noyer', 'Oranger', 'Pêcher',
+      'Poirier', 'Pommier', 'Prunier', 'Reine-Claude (prunier)', 'Vigne fruitière'
+    ];
+
+    const TREE_SPECIES = {};
+    const TREE_ICONS_BY_NAME = {
+      "Abricotier": "🍑",
+      "Amandier": "🌰",
+      "Cerisier": "🍒",
+      "Châtaignier": "🌰",
+      "Citronnier": "🍋",
+      "Clémentinier": "🍊",
+      "Cognassier": "🍐",
+      "Figuier": "🟣",
+      "Kiwaï / Kiwi grimpant": "🥝",
+      "Mirabellier": "🟡",
+      "Nectarinier": "🍑",
+      "Noisetier": "🌰",
+      "Noyer": "🥜",
+      "Oranger": "🍊",
+      "Pêcher": "🍑",
+      "Poirier": "🍐",
+      "Pommier": "🍎",
+      "Prunier": "🟣",
+      "Reine-Claude (prunier)": "🟢",
+      "Vigne fruitière": "🍇"
     };
 
-    const TREE_SPECIES = {
-      apple: { label: 'Pommier', icon: '🍎', foliageColor: 0x3b873e, fruitColor: 0xdc2626, trunkHeight: 1.05, canopyRadius: 0.72 },
-      pear: { label: 'Poirier', icon: '🍐', foliageColor: 0x4c9a38, fruitColor: 0xa3be36, trunkHeight: 1.15, canopyRadius: 0.65 },
-      cherry: { label: 'Cerisier', icon: '🍒', foliageColor: 0x478c39, fruitColor: 0xb91c1c, trunkHeight: 1.0, canopyRadius: 0.70 },
-      olive: { label: 'Olivier', icon: '🫒', foliageColor: 0x6b8e67, fruitColor: 0x3f4d28, trunkHeight: 0.9, canopyRadius: 0.68 }
+    const TREE_PALETTES = [
+      { fruitColor: 0xdc2626, foliageColor: 0x3b7a2a, trunkColor: 0x6b442a },
+      { fruitColor: 0xa3b136, foliageColor: 0x45852e, trunkColor: 0x644128 },
+      { fruitColor: 0xb91c1c, foliageColor: 0x356e28, trunkColor: 0x5c3726 },
+      { fruitColor: 0xf97316, foliageColor: 0x4a8c31, trunkColor: 0x6b452b },
+      { fruitColor: 0x6d28d9, foliageColor: 0x3f7d2d, trunkColor: 0x634029 },
+      { fruitColor: 0x581c87, foliageColor: 0x2f6b29, trunkColor: 0x73685a }
+    ];
+
+    function initDefaultTreeSpecies() {
+      Object.keys(TREE_SPECIES).forEach((k) => delete TREE_SPECIES[k]);
+      ORCHARD_FRUIT_TREES_FR.forEach((label, idx) => {
+        const key = `tree_${idx + 1}`;
+        const pal = TREE_PALETTES[idx % TREE_PALETTES.length];
+        TREE_SPECIES[key] = {
+          key,
+          label,
+          icon: TREE_ICONS_BY_NAME[label] || '🌳',
+          customImage: null,
+          fruitColor: pal.fruitColor,
+          foliageColor: pal.foliageColor,
+          trunkColor: pal.trunkColor
+        };
+      });
+    }
+    initDefaultTreeSpecies();
+
+    const DEFAULT_TREE_KEY = Object.keys(TREE_SPECIES).find((k) => /pommier/i.test(TREE_SPECIES[k].label)) || Object.keys(TREE_SPECIES)[0];
+
+    const TREE_SIZES = {
+      dwarf: { label: 'Compact', height: 1.8, crownRadius: 0.52 },
+      medium: { label: 'Demi-tige', height: 2.6, crownRadius: 0.78 },
+      tall: { label: 'Haute-tige', height: 3.5, crownRadius: 1.05 }
     };
+
+    const VEGETABLE_NAMES_FR = [
+      'Ail', 'Aneth', 'Artichaut', 'Asperge', 'Aubergine',
+      'Basilic', 'Batavia', 'Betterave rouge', 'Blette (carde)', 'Brocoli',
+      'Carotte', 'Céleri branche', 'Céleri-rave', 'Cerfeuil', 'Chicorée frisée',
+      'Chou chinois', 'Chou de Bruxelles', 'Chou kale', 'Chou pointu', 'Chou pommé',
+      'Chou rouge', 'Chou-fleur', 'Chou-rave', 'Ciboulette', 'Concombre',
+      'Coriandre', 'Cornichon', 'Courge butternut', 'Courgette', 'Cresson',
+      'Échalote', 'Endive', 'Épinard', 'Estragon', 'Fenouil bulbe',
+      'Fève', 'Haricot à rames', 'Haricot vert', 'Laitue iceberg', 'Laitue romaine',
+      'Mâche', 'Menthe', 'Mizuna', 'Navet', 'Oignon',
+      'Origan', 'Oseille', 'Pak choï', 'Panais', 'Patate douce',
+      'Persil', 'Petit pois', 'Piment doux', 'Piment fort', 'Poireau',
+      'Poivron', 'Pomme de terre', 'Potiron', 'Pourpier', 'Radis noir',
+      'Radis rose', 'Rave longue', 'Romarin', 'Roquette', 'Salade laitue',
+      'Sauge', 'Scarole', 'Thym', 'Tomate', 'Topinambour'
+    ];
+
+    const FRUIT_NAMES_FR = [
+      'Cassis', 'Fraise', 'Framboise', 'Groseille rouge',
+      'Melon', 'Mûre', 'Myrtille', 'Physalis', 'Raisin de table'
+    ];
+
+    const VEG_ICONS_BY_NAME = {
+      "Ail": "🧄", "Aneth": "🌿", "Artichaut": "🌵", "Asperge": "🎍", "Aubergine": "🍆",
+      "Basilic": "🌿", "Batavia": "🥬", "Betterave rouge": "🫜", "Blette (carde)": "🥬", "Brocoli": "🥦",
+      "Carotte": "🥕", "Céleri branche": "🥬", "Céleri-rave": "🫜", "Cerfeuil": "🌿", "Chicorée frisée": "🥬",
+      "Chou chinois": "🥬", "Chou de Bruxelles": "🥦", "Chou kale": "🥬", "Chou pointu": "🥬", "Chou pommé": "🥬",
+      "Chou rouge": "🟣", "Chou-fleur": "🥦", "Chou-rave": "🫜", "Ciboulette": "🌱", "Concombre": "🥒",
+      "Coriandre": "🌿", "Cornichon": "🥒", "Courge butternut": "🎃", "Courgette": "🥒", "Cresson": "🌱",
+      "Échalote": "🧅", "Endive": "🥬", "Épinard": "🍃", "Estragon": "🌿", "Fenouil bulbe": "🫜",
+      "Fève": "🫘", "Haricot à rames": "🫛", "Haricot vert": "🫛", "Laitue iceberg": "🥬", "Laitue romaine": "🥬",
+      "Mâche": "🌱", "Menthe": "🍃", "Mizuna": "🥬", "Navet": "🫜", "Oignon": "🧅",
+      "Origan": "🌿", "Oseille": "🍃", "Pak choï": "🥬", "Panais": "🥕", "Patate douce": "🍠",
+      "Persil": "🌿", "Petit pois": "🫛", "Piment doux": "🫑", "Piment fort": "🌶️", "Poireau": "🧅",
+      "Poivron": "🫑", "Pomme de terre": "🥔", "Potiron": "🎃", "Pourpier": "🌱", "Radis noir": "🫜",
+      "Radis rose": "🔴", "Rave longue": "🫜", "Romarin": "🌿", "Roquette": "🥬", "Salade laitue": "🥗",
+      "Sauge": "🌿", "Scarole": "🥬", "Thym": "🌿", "Tomate": "🍅", "Topinambour": "🥔"
+    };
+
+    const FRUIT_ICONS_BY_NAME = {
+      "Cassis": "⚫",
+      "Fraise": "🍓",
+      "Framboise": "🍒",
+      "Groseille rouge": "🍎",
+      "Melon": "🍈",
+      "Mûre": "🍇",
+      "Myrtille": "🫐",
+      "Physalis": "🏮",
+      "Raisin de table": "🍇"
+    };
+
+    const FRUIT_SVG_BY_NAME = {
+      "Mûre": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18 9C14 5 9 5 7 7C10 8 13 10 15 11C11 11 8 13 7 15C11 14 15 13 18 11C21 13 25 14 29 15C28 13 25 11 21 11C23 10 26 8 29 7C27 5 22 5 18 9Z\" fill=\"#4da135\" stroke=\"#1f3b14\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18 11V6\" stroke=\"#4da135\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M18 11C12.5 11 9 15.5 9.5 21.5C10 27 14 31.5 18 31.5C22 31.5 26 27 26.5 21.5C27 15.5 23.5 11 18 11Z\" fill=\"#3b3675\" stroke=\"#1d1b38\" stroke-width=\"1.6\"/><circle cx=\"14.5\" cy=\"15\" r=\"2.6\" fill=\"#5b54a8\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"21.5\" cy=\"15\" r=\"2.6\" fill=\"#5b54a8\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"12\" cy=\"19.5\" r=\"2.7\" fill=\"#4a4491\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18\" cy=\"19\" r=\"2.9\" fill=\"#635bb5\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"24\" cy=\"19.5\" r=\"2.7\" fill=\"#4a4491\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"13.5\" cy=\"24.5\" r=\"2.6\" fill=\"#433d85\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18.5\" cy=\"24.5\" r=\"2.7\" fill=\"#554ea6\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"23\" cy=\"24.2\" r=\"2.5\" fill=\"#433d85\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18\" cy=\"28.8\" r=\"2.3\" fill=\"#393473\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/></svg>",
+      "Myrtille": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M16 11C12 6 7 7 6 10C10 10 13 12 15 14Z\" fill=\"#69a338\" stroke=\"#223612\" stroke-width=\"1.3\"/><path d=\"M21 10C25 5 30 6 31 9C27 10 24 12 22 14Z\" fill=\"#7ab843\" stroke=\"#223612\" stroke-width=\"1.3\"/><path d=\"M25 18C29 15 32 18 31 22C28 21 26 20 24 19Z\" fill=\"#5e9430\" stroke=\"#223612\" stroke-width=\"1.3\"/><circle cx=\"24\" cy=\"14\" r=\"4.3\" fill=\"#4c69a8\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"14\" cy=\"15\" r=\"4.5\" fill=\"#5575ba\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"11.5\" cy=\"21.5\" r=\"4.3\" fill=\"#45619c\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"21.5\" cy=\"21\" r=\"4.6\" fill=\"#5d7ec4\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"16.5\" cy=\"18.5\" r=\"4.8\" fill=\"#6587cf\" stroke=\"#1e2942\" stroke-width=\"1.5\"/><circle cx=\"14\" cy=\"26.8\" r=\"4.1\" fill=\"#4a66a3\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><path d=\"M15 15.5L16.5 14.5L18 15.5L17.3 17L15.7 17Z\" fill=\"#29385c\"/><path d=\"M20 18.5L21.5 17.5L23 18.5L22.3 20L20.7 20Z\" fill=\"#29385c\"/></svg>",
+      "Framboise": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 9L24 5\" stroke=\"#5ca329\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M18 11C14 7 9 7 7 9C11 10 14 12 16 13C12 13 9 15 8 17C12 16 15 15 18 13C21 15 24 16 28 17C27 15 24 13 20 13C22 12 25 10 28 9C26 7 22 7 18 11Z\" fill=\"#76c435\" stroke=\"#1b2e0c\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18 12.5C12.5 12.5 8.5 16.5 9 22.5C9.5 28 13.8 31.5 18 31.5C22.2 31.5 26.5 28 27 22.5C27.5 16.5 23.5 12.5 18 12.5Z\" fill=\"#df1e38\" stroke=\"#1a1114\" stroke-width=\"1.7\"/><circle cx=\"14.2\" cy=\"16.2\" r=\"2.7\" fill=\"#f22b46\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"21.8\" cy=\"16.2\" r=\"2.7\" fill=\"#f22b46\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"11.5\" cy=\"20.8\" r=\"2.8\" fill=\"#d61831\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18\" cy=\"20.2\" r=\"3\" fill=\"#fa3751\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"24.5\" cy=\"20.8\" r=\"2.8\" fill=\"#d61831\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"13\" cy=\"25.5\" r=\"2.6\" fill=\"#c9142c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18.2\" cy=\"25.8\" r=\"2.8\" fill=\"#e6223c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"23.2\" cy=\"25.3\" r=\"2.6\" fill=\"#c9142c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18\" cy=\"29.4\" r=\"2.2\" fill=\"#ba1127\" stroke=\"#1a1114\" stroke-width=\"1.2\"/></svg>",
+      "Groseille rouge": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z\" fill=\"#68a832\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z\" fill=\"#78bd3c\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M19 10L11 27\" stroke=\"#6d9c2b\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M17 15L14 16.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M15.5 19L21 20.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M14 22.5L18.5 25.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><circle cx=\"17.5\" cy=\"14.5\" r=\"2.9\" fill=\"#e62222\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"13.5\" cy=\"18\" r=\"3\" fill=\"#f02929\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"21.5\" cy=\"20.5\" r=\"3.1\" fill=\"#e01d1d\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"11.5\" cy=\"23.5\" r=\"3\" fill=\"#db1a1a\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"16.5\" cy=\"24.5\" r=\"3.2\" fill=\"#f22c2c\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"19.5\" cy=\"27.5\" r=\"2.9\" fill=\"#d41717\" stroke=\"#8f1111\" stroke-width=\"1\"/></svg>",
+      "Cassis": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z\" fill=\"#68a832\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z\" fill=\"#78bd3c\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M19 10L11 27\" stroke=\"#6d9c2b\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M17 15L14 16.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M15.5 19L21 20.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M14 22.5L18.5 25.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><circle cx=\"17.5\" cy=\"14.5\" r=\"2.9\" fill=\"#262629\" stroke=\"#0e0e10\" stroke-width=\"1\"/><circle cx=\"13.5\" cy=\"18\" r=\"3\" fill=\"#323236\" stroke=\"#0e0e10\" stroke-width=\"1\"/><circle cx=\"21.5\" cy=\"20.5\" r=\"3.1\" fill=\"#202024\" stroke=\"#0e0e10\" stroke-width=\"1\"/><circle cx=\"11.5\" cy=\"23.5\" r=\"3\" fill=\"#1d1d21\" stroke=\"#0e0e10\" stroke-width=\"1\"/><circle cx=\"16.5\" cy=\"24.5\" r=\"3.2\" fill=\"#36363b\" stroke=\"#0e0e10\" stroke-width=\"1\"/><circle cx=\"19.5\" cy=\"27.5\" r=\"2.9\" fill=\"#19191c\" stroke=\"#0e0e10\" stroke-width=\"1\"/></svg>",
+      "Raisin de table": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18 11V6.5\" stroke=\"#658f24\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M17.5 8.5C14 5 9.5 5 8 7.5C10.5 9.5 14.5 9.5 17.5 8.5Z\" fill=\"#82ba2d\" stroke=\"#3f6312\" stroke-width=\"1\"/><path d=\"M18.5 8.5C22 5 26.5 5 28 7.5C25.5 9.5 21.5 9.5 18.5 8.5Z\" fill=\"#92cc35\" stroke=\"#3f6312\" stroke-width=\"1\"/><circle cx=\"13.2\" cy=\"13.2\" r=\"3.1\" fill=\"#7e2288\"/><circle cx=\"18\" cy=\"13.2\" r=\"3.2\" fill=\"#8e2799\"/><circle cx=\"22.8\" cy=\"13.2\" r=\"3.1\" fill=\"#7e2288\"/><circle cx=\"11.6\" cy=\"17.4\" r=\"3\" fill=\"#731d7d\"/><circle cx=\"16.1\" cy=\"17.2\" r=\"3.2\" fill=\"#9629a3\"/><circle cx=\"20.5\" cy=\"17.2\" r=\"3.2\" fill=\"#852391\"/><circle cx=\"24.6\" cy=\"17.5\" r=\"2.9\" fill=\"#731d7d\"/><circle cx=\"13.5\" cy=\"21.5\" r=\"3\" fill=\"#7b2085\"/><circle cx=\"18\" cy=\"21.4\" r=\"3.1\" fill=\"#9629a3\"/><circle cx=\"22.3\" cy=\"21.5\" r=\"3\" fill=\"#7b2085\"/><circle cx=\"15.2\" cy=\"25.5\" r=\"2.8\" fill=\"#731d7d\"/><circle cx=\"19.8\" cy=\"25.5\" r=\"2.9\" fill=\"#852391\"/><circle cx=\"17.8\" cy=\"29.3\" r=\"2.7\" fill=\"#7b2085\"/></svg>"
+    };
+
+    const PLANTS = {};
+    const VEGETABLE_IDS = [];
+    const FRUIT_IDS = [];
+
+    function initDefaultPlants() {
+      Object.keys(PLANTS).forEach((k) => delete PLANTS[k]);
+      VEGETABLE_IDS.length = 0;
+      FRUIT_IDS.length = 0;
+
+      VEGETABLE_NAMES_FR.forEach((name, idx) => {
+        const id = `veg_${idx + 1}`;
+        VEGETABLE_IDS.push(id);
+        const isRoot = /carotte|betterave|navet|radis|panais|pomme de terre|topinambour|patate douce|rave|céleri-rave/i.test(name);
+        const isTall = /tomate|haricot à rames|poireau|asperge|maïs|céleri branche|fenouil/i.test(name);
+        const hueColor = isRoot ? 0xe06d1b : isTall ? 0x388e3c : 0x4caf50;
+        const fruitAccent = /tomate/i.test(name) ? 0xd93829 : /poivron|piment/i.test(name) ? 0xeab308 : /aubergine/i.test(name) ? 0x6b21a8 : null;
+        PLANTS[id] = {
+          id,
+          category: 'vegetables',
+          name,
+          icon: VEG_ICONS_BY_NAME[name] || '🌱',
+          customImage: null,
+          shape: isRoot ? 'root' : isTall ? 'tall' : 'leafy',
+          color: hueColor,
+          fruitAccent,
+          height: isTall ? 0.36 : isRoot ? 0.16 : 0.13
+        };
+      });
+
+      FRUIT_NAMES_FR.forEach((name, idx) => {
+        const id = `fruit_${idx + 1}`;
+        FRUIT_IDS.push(id);
+        const isVine = /raisin|melon|pastèque|kiwi/i.test(name);
+        const isBushOrBerry = /fraise|framboise|mûre|groseille|cassis|myrtille|physalis/i.test(name);
+        const berryColor = /fraise|framboise|cerise|groseille rouge/i.test(name)
+          ? 0xe11d48
+          : /myrtille|cassis|mûre|prune|mirabelle|raisin/i.test(name)
+            ? 0x4f46e5
+            : /abricot|pêche|nectarine|orange|clémentine|melon|mangue/i.test(name)
+              ? 0xf97316
+              : /citron|poire|kiwi|pomme/i.test(name)
+                ? 0x84cc16
+                : 0xa16207;
+        PLANTS[id] = {
+          id,
+          category: 'fruits',
+          name,
+          icon: FRUIT_ICONS_BY_NAME[name] || '🍓',
+          customImage: null,
+          shape: isVine ? 'vine' : isBushOrBerry ? 'berry' : 'orchard_plant',
+          color: isBushOrBerry ? 0x2e7d32 : 0x3f8f29,
+          fruitAccent: berryColor,
+          height: isVine ? 0.24 : isBushOrBerry ? 0.16 : 0.28
+        };
+      });
+    }
+    initDefaultPlants();
 
     const state = {
-      beds: [],
-      activeBedId: null,
-      addKind: 'bed', // 'bed' | 'plot' | 'tree'
-      selectedPlant: 'tomato',
-      eraserMode: false,
+      items: [], // 'bed' | 'tilled_soil' | 'orchard_tree'
+      activeItemId: null,
+      activePlantCategory: 'vegetables', // 'vegetables' | 'fruits'
+      selectedPlant: VEGETABLE_IDS[0],
+      plantSearch: '',
       isTopView: false,
       showGrid: true,
       nextId: 1
     };
 
-    // Notification discrète sans alert()
-    function showToast(msg, isError = false) {
-      const box = document.getElementById('toastContainer');
-      if (!box) return;
-      const item = document.createElement('div');
-      item.className = `px-3.5 py-2 rounded-xl text-xs font-semibold shadow-lg border transition-opacity duration-300 ${
-        isError
-          ? 'bg-red-600 text-white border-red-700'
-          : 'bg-stone-900/95 text-white border-white/15'
-      }`;
-      item.textContent = msg;
-      box.appendChild(item);
-      setTimeout(() => {
-        item.style.opacity = '0';
-        setTimeout(() => item.remove(), 300);
-      }, 2400);
+    function hexToThreeColor(hexStr, fallback = 0x4caf50) {
+      if (!hexStr || typeof hexStr !== 'string') return fallback;
+      const clean = hexStr.trim().replace(/^#/, '');
+      if (!/^[0-9a-fA-F]{6}$/.test(clean)) return fallback;
+      return parseInt(clean, 16);
     }
 
-    // Texture de pelouse douce
-    function createGrassTexture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#568c34';
-      ctx.fillRect(0, 0, 512, 512);
-      for (let i = 0; i < 6000; i++) {
-        const x = Math.random() * 512;
-        const y = Math.random() * 512;
-        const r = Math.random();
-        ctx.fillStyle = r < 0.33
-          ? 'rgba(67, 114, 39, 0.35)'
-          : r < 0.66
-            ? 'rgba(112, 162, 66, 0.25)'
-            : 'rgba(48, 88, 28, 0.30)';
-        ctx.fillRect(x, y, 2, 5);
+    function renderLogoHTML(entry, sizeClass = 'w-5 h-5', textClass = 'text-base') {
+      if (!entry) return `<span class="${textClass} shrink-0">🌱</span>`;
+      if (entry.customImage) {
+        return `<img src="${entry.customImage}" alt="${entry.name || entry.label || ''}" class="${sizeClass} rounded object-cover shrink-0" />`;
       }
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(24, 24);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
+      if (entry.category === 'fruits' && entry.name && FRUIT_SVG_BY_NAME[entry.name]) {
+        return FRUIT_SVG_BY_NAME[entry.name];
+      }
+      return `<span class="${textClass} shrink-0 leading-none">${entry.icon || '🌱'}</span>`;
     }
 
-    // Initialisation de la scène Three.js
+    function readImageAsDataURL(file, callback) {
+      if (!file) return callback(null);
+      const reader = new FileReader();
+      reader.onload = (ev) => callback(String(ev.target.result || ''));
+      reader.onerror = () => callback(null);
+      reader.readAsDataURL(file);
+    }
+
+    // Initialisation scène Three.js
     const container = document.getElementById('canvasContainer');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x52822e);
 
     const camera = new THREE.PerspectiveCamera(
       45,
-      Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
+      container.clientWidth / container.clientHeight,
       0.1,
       100
     );
-    camera.position.set(4.5, 5.2, 5.5);
+    camera.position.set(4.8, 5.4, 5.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(Math.max(1, container.clientWidth), Math.max(1, container.clientHeight));
+    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -462,7 +686,7 @@
     controls.maxDistance = 24;
     controls.target.set(0, 0, 0);
 
-    // Lumières et ombres douces
+    // Lumières
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x3f6212, 0.85);
     hemiLight.position.set(0, 15, 0);
     scene.add(hemiLight);
@@ -474,22 +698,19 @@
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 35;
-    const shadowBound = 9;
-    dirLight.shadow.camera.left = -shadowBound;
-    dirLight.shadow.camera.right = shadowBound;
-    dirLight.shadow.camera.top = shadowBound;
-    dirLight.shadow.camera.bottom = -shadowBound;
+    const dShadow = 9;
+    dirLight.shadow.camera.left = -dShadow;
+    dirLight.shadow.camera.right = dShadow;
+    dirLight.shadow.camera.top = dShadow;
+    dirLight.shadow.camera.bottom = -dShadow;
     dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
-    // Pelouse texturée + Grille de 1 mètre
-    const groundGeo = new THREE.PlaneGeometry(40, 40);
-    const groundMat = new THREE.MeshStandardMaterial({
-      map: createGrassTexture(),
-      roughness: 0.95,
-      metalness: 0.0
-    });
-    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    // Pelouse et grille 1m
+    const groundMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(40, 40),
+      new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 })
+    );
     groundMesh.rotation.x = -Math.PI / 2;
     groundMesh.receiveShadow = true;
     scene.add(groundMesh);
@@ -500,16 +721,16 @@
     gridHelper.material.opacity = 0.35;
     scene.add(gridHelper);
 
-    const bedsGroup = new THREE.Group();
-    scene.add(bedsGroup);
-    const bedMeshes = new Map();
+    const itemsGroup = new THREE.Group();
+    scene.add(itemsGroup);
+    const itemMeshes = new Map();
 
-    // Déplacement uniquement en Vue Dessus (Plan) après clic direct sur l'élément
+    // Raycasting & déplacement en vue du dessus uniquement sur clic direct d'un élément
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const dragIntersection = new THREE.Vector3();
-    let draggingBed = null;
+    let draggingItem = null;
     let dragOffset = new THREE.Vector3();
 
     function updatePointer(clientX, clientY) {
@@ -518,11 +739,11 @@
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     }
 
-    function findBedFromObject(obj) {
+    function findItemFromObject(obj) {
       let current = obj;
       while (current) {
-        if (current.userData && current.userData.bedId != null) {
-          return state.beds.find((b) => b.id === current.userData.bedId) || null;
+        if (current.userData && current.userData.itemId != null) {
+          return state.items.find((it) => it.id === current.userData.itemId) || null;
         }
         current = current.parent;
       }
@@ -534,17 +755,17 @@
       updatePointer(e.clientX, e.clientY);
       raycaster.setFromCamera(pointer, camera);
 
-      const hits = raycaster.intersectObjects(bedsGroup.children, true);
-      const clickedBed = hits.length > 0 ? findBedFromObject(hits[0].object) : null;
+      const hits = raycaster.intersectObjects(itemsGroup.children, true);
+      const clickedItem = hits.length > 0 ? findItemFromObject(hits[0].object) : null;
 
-      if (clickedBed) {
-        setActiveBed(clickedBed.id);
+      if (clickedItem) {
+        setActiveItem(clickedItem.id);
         if (state.isTopView && raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
-          draggingBed = clickedBed;
+          draggingItem = clickedItem;
           dragOffset.set(
-            dragIntersection.x - clickedBed.x,
+            dragIntersection.x - clickedItem.x,
             0,
-            dragIntersection.z - clickedBed.z
+            dragIntersection.z - clickedItem.z
           );
           controls.enabled = false;
         }
@@ -552,9 +773,9 @@
     });
 
     window.addEventListener('pointermove', (e) => {
-      if (!draggingBed) return;
+      if (!draggingItem) return;
       if (!state.isTopView) {
-        draggingBed = null;
+        draggingItem = null;
         controls.enabled = true;
         return;
       }
@@ -563,15 +784,15 @@
       if (raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
         const rawX = dragIntersection.x - dragOffset.x;
         const rawZ = dragIntersection.z - dragOffset.z;
-        draggingBed.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
-        draggingBed.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
-        updateBedTransform(draggingBed);
+        draggingItem.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
+        draggingItem.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
+        updateItemTransform(draggingItem);
       }
     });
 
     function stopDragging() {
-      if (draggingBed) {
-        draggingBed = null;
+      if (draggingItem) {
+        draggingItem = null;
         controls.enabled = true;
       }
     }
@@ -579,215 +800,135 @@
     window.addEventListener('pointerup', stopDragging);
     window.addEventListener('pointercancel', stopDragging);
 
-    // Construction 3D d'un plant
+    // Maillage 3D d'un plant (différenciation visuelle légumes vs fruits)
     function createPlantMesh(plantType) {
-      const spec = PLANTS[plantType] || PLANTS.tomato;
+      const spec = PLANTS[plantType] || PLANTS[VEGETABLE_IDS[0]];
       const g = new THREE.Group();
 
-      if (plantType === 'tomato') {
-        const stake = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.015, 0.015, spec.height, 8),
-          new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.9 })
-        );
-        stake.position.y = spec.height / 2;
-        stake.castShadow = true;
-        g.add(stake);
-
-        const foliage = new THREE.Mesh(
-          new THREE.DodecahedronGeometry(0.10, 0),
-          new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.75 })
-        );
-        foliage.position.y = spec.height * 0.62;
-        foliage.castShadow = true;
-        g.add(foliage);
-
-        const fruit = new THREE.Mesh(
-          new THREE.SphereGeometry(0.032, 10, 10),
-          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.4 })
-        );
-        fruit.position.set(0.06, spec.height * 0.55, 0.04);
-        fruit.castShadow = true;
-        g.add(fruit);
-      } else if (plantType === 'carrot') {
-        for (let i = 0; i < 4; i++) {
-          const angle = (i / 4) * Math.PI * 2;
-          const leaf = new THREE.Mesh(
-            new THREE.ConeGeometry(0.035, spec.height, 6),
-            new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.8 })
+      if (spec.category === 'vegetables') {
+        if (spec.shape === 'tall') {
+          const stem = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.014, 0.018, spec.height * 0.75, 8),
+            new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.8 })
           );
-          leaf.position.set(Math.cos(angle) * 0.04, spec.height / 2, Math.sin(angle) * 0.04);
-          leaf.rotation.z = -Math.cos(angle) * 0.25;
-          leaf.rotation.x = Math.sin(angle) * 0.25;
-          leaf.castShadow = true;
-          g.add(leaf);
-        }
-      } else if (plantType === 'strawberry') {
-        const mound = new THREE.Mesh(
-          new THREE.SphereGeometry(0.095, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-          new THREE.MeshStandardMaterial({ color: spec.stemColor, roughness: 0.8 })
-        );
-        mound.castShadow = true;
-        g.add(mound);
+          stem.position.y = (spec.height * 0.75) / 2;
+          stem.castShadow = true;
+          g.add(stem);
 
-        const berry = new THREE.Mesh(
-          new THREE.ConeGeometry(0.025, 0.045, 8),
-          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.45 })
-        );
-        berry.rotation.x = Math.PI;
-        berry.position.set(0.06, 0.035, 0.05);
-        berry.castShadow = true;
-        g.add(berry);
+          const top = new THREE.Mesh(
+            new THREE.ConeGeometry(0.065, spec.height * 0.45, 7),
+            new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.75 })
+          );
+          top.position.y = spec.height * 0.78;
+          top.castShadow = true;
+          g.add(top);
+        } else if (spec.shape === 'root') {
+          for (let i = 0; i < 3; i++) {
+            const a = (i / 3) * Math.PI * 2;
+            const frond = new THREE.Mesh(
+              new THREE.ConeGeometry(0.026, spec.height, 6),
+              new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.82 })
+            );
+            frond.position.set(Math.cos(a) * 0.03, spec.height / 2, Math.sin(a) * 0.03);
+            frond.rotation.z = -Math.cos(a) * 0.22;
+            frond.rotation.x = Math.sin(a) * 0.22;
+            frond.castShadow = true;
+            g.add(frond);
+          }
+        } else {
+          const rosette = new THREE.Mesh(
+            new THREE.DodecahedronGeometry(0.085, 0),
+            new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.78 })
+          );
+          rosette.scale.y = 0.65;
+          rosette.position.y = 0.045;
+          rosette.castShadow = true;
+          g.add(rosette);
+        }
+
+        if (spec.fruitAccent) {
+          const pod = new THREE.Mesh(
+            new THREE.SphereGeometry(0.028, 8, 8),
+            new THREE.MeshStandardMaterial({ color: spec.fruitAccent, roughness: 0.45 })
+          );
+          pod.position.set(0.045, spec.height * 0.45, 0.035);
+          pod.castShadow = true;
+          g.add(pod);
+        }
       } else {
         const bush = new THREE.Mesh(
-          new THREE.DodecahedronGeometry(plantType === 'lettuce' ? 0.095 : 0.085, 1),
-          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.78 })
+          new THREE.DodecahedronGeometry(0.088, 1),
+          new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.75 })
         );
-        bush.scale.y = plantType === 'lettuce' ? 0.65 : 0.95;
-        bush.position.y = 0.05;
+        bush.scale.y = spec.shape === 'vine' ? 0.7 : 0.9;
+        bush.position.y = spec.height * 0.42;
         bush.castShadow = true;
         g.add(bush);
+
+        const berryOffsets = [
+          [0.055, spec.height * 0.35, 0.04],
+          [-0.045, spec.height * 0.55, 0.045]
+        ];
+        berryOffsets.forEach(([bx, by, bz]) => {
+          const fruitMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(0.026, 8, 8),
+            new THREE.MeshStandardMaterial({ color: spec.fruitAccent || 0xe11d48, roughness: 0.35 })
+          );
+          fruitMesh.position.set(bx, by, bz);
+          fruitMesh.castShadow = true;
+          g.add(fruitMesh);
+        });
       }
 
       return g;
     }
 
-    // Construction 3D d'un arbre fruitier de verger
-    function createOrchardTreeMesh(speciesKey, scaleMultiplier = 1) {
-      const spec = TREE_SPECIES[speciesKey] || TREE_SPECIES.apple;
-      const scale = Number(scaleMultiplier) || 1;
-      const g = new THREE.Group();
-
-      const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.065, 0.11, spec.trunkHeight, 10),
-        new THREE.MeshStandardMaterial({ color: 0x6d4c3d, roughness: 0.92, metalness: 0.02 })
-      );
-      trunk.position.y = spec.trunkHeight / 2;
-      trunk.castShadow = true;
-      trunk.receiveShadow = true;
-      g.add(trunk);
-
-      const foliageMat = new THREE.MeshStandardMaterial({
-        color: spec.foliageColor,
-        roughness: 0.8,
-        metalness: 0.02
-      });
-
-      const crownMain = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(spec.canopyRadius, 1),
-        foliageMat
-      );
-      crownMain.position.set(0, spec.trunkHeight + spec.canopyRadius * 0.55, 0);
-      crownMain.castShadow = true;
-      crownMain.receiveShadow = true;
-      g.add(crownMain);
-
-      const crownSub = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(spec.canopyRadius * 0.68, 1),
-        foliageMat
-      );
-      crownSub.position.set(spec.canopyRadius * 0.45, spec.trunkHeight + spec.canopyRadius * 0.35, spec.canopyRadius * 0.25);
-      crownSub.castShadow = true;
-      crownSub.receiveShadow = true;
-      g.add(crownSub);
-
-      const fruitMat = new THREE.MeshStandardMaterial({
-        color: spec.fruitColor,
-        roughness: 0.4,
-        metalness: 0.05
-      });
-
-      const fruitOffsets = [
-        [0.34, spec.trunkHeight + 0.25, 0.28],
-        [-0.32, spec.trunkHeight + 0.42, 0.26],
-        [0.12, spec.trunkHeight + 0.58, -0.36],
-        [-0.22, spec.trunkHeight + 0.18, -0.32]
-      ];
-      fruitOffsets.forEach(([fx, fy, fz]) => {
-        const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.052, 8, 8), fruitMat);
-        fruit.position.set(fx, fy, fz);
-        fruit.castShadow = true;
-        g.add(fruit);
-      });
-
-      g.scale.setScalar(scale);
-      return g;
+    function getPlotGridDimensions(item) {
+      if (item.type === 'bed') {
+        const w = item.widthCm / 100;
+        const d = item.depthCm / 100;
+        const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
+        const innerW = Math.max(0.05, w - wallT * 2);
+        const innerD = Math.max(0.05, d - wallT * 2);
+        return {
+          cols: Math.max(1, Math.floor(innerW / CELL_SIZE)),
+          rows: Math.max(1, Math.floor(innerD / CELL_SIZE)),
+          surfaceY: Math.max(0.04, (item.heightCm / 100) - 0.03),
+          innerW,
+          innerD
+        };
+      }
+      if (item.type === 'tilled_soil') {
+        const w = item.widthCm / 100;
+        const d = item.depthCm / 100;
+        return {
+          cols: Math.max(1, Math.floor(w / CELL_SIZE)),
+          rows: Math.max(1, Math.floor(d / CELL_SIZE)),
+          surfaceY: 0.03,
+          innerW: w,
+          innerD: d
+        };
+      }
+      return { cols: 0, rows: 0, surfaceY: 0, innerW: 0, innerD: 0 };
     }
 
-    // Construction / reconstruction 3D d'un élément
-    function rebuildBedMesh(bed) {
-      const old = bedMeshes.get(bed.id);
+    function rebuildItemMesh(item) {
+      const old = itemMeshes.get(item.id);
       if (old) {
-        bedsGroup.remove(old);
-        bedMeshes.delete(bed.id);
+        itemsGroup.remove(old);
+        itemMeshes.delete(item.id);
       }
-
-      const kind = bed.kind || 'bed';
-      const w = bed.widthCm / 100;
-      const d = bed.depthCm / 100;
-      const h = bed.heightCm / 100;
 
       const group = new THREE.Group();
-      group.userData.bedId = bed.id;
+      group.userData.itemId = item.id;
+      const isSelected = state.activeItemId === item.id;
 
-      if (kind === 'tree') {
-        const treeObj = createOrchardTreeMesh(bed.species || 'apple', bed.scale || 1);
-        group.add(treeObj);
-
-        if (state.activeBedId === bed.id) {
-          const ring = new THREE.Mesh(
-            new THREE.RingGeometry(0.45 * (bed.scale || 1), 0.54 * (bed.scale || 1), 28),
-            new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide })
-          );
-          ring.rotation.x = -Math.PI / 2;
-          ring.position.y = 0.01;
-          group.add(ring);
-        }
-      } else if (kind === 'plot') {
-        const soilBase = new THREE.Mesh(
-          new THREE.BoxGeometry(w, 0.05, d),
-          new THREE.MeshStandardMaterial({ color: 0x3b2516, roughness: 0.96, metalness: 0.0 })
-        );
-        soilBase.position.y = 0.025;
-        soilBase.receiveShadow = true;
-        group.add(soilBase);
-
-        const furrowMat = new THREE.MeshStandardMaterial({ color: 0x4d311d, roughness: 0.95, metalness: 0.0 });
-        const furrowSpacing = 0.24;
-        const furrowCount = Math.max(2, Math.floor(d / furrowSpacing));
-        for (let i = 0; i < furrowCount; i++) {
-          const zPos = -((furrowCount - 1) * furrowSpacing) / 2 + i * furrowSpacing;
-          const ridge = new THREE.Mesh(new THREE.BoxGeometry(w * 0.96, 0.035, 0.09), furrowMat);
-          ridge.position.set(0, 0.055, zPos);
-          ridge.castShadow = true;
-          ridge.receiveShadow = true;
-          group.add(ridge);
-        }
-
-        if (state.activeBedId === bed.id) {
-          const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.03, 0.08, d + 0.03));
-          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
-          line.position.y = 0.04;
-          group.add(line);
-        }
-
-        const cols = Math.max(1, Math.floor(w / CELL_SIZE));
-        const rows = Math.max(1, Math.floor(d / CELL_SIZE));
-        const startX = -((cols - 1) * CELL_SIZE) / 2;
-        const startZ = -((rows - 1) * CELL_SIZE) / 2;
-
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const plantType = bed.plants[`${r},${c}`];
-            if (plantType) {
-              const plantObj = createPlantMesh(plantType);
-              plantObj.position.set(startX + c * CELL_SIZE, 0.06, startZ + r * CELL_SIZE);
-              group.add(plantObj);
-            }
-          }
-        }
-      } else {
+      if (item.type === 'bed') {
+        const w = item.widthCm / 100;
+        const d = item.depthCm / 100;
+        const h = item.heightCm / 100;
         const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
-        const matSpec = MATERIALS[bed.material] || MATERIALS.wood;
+        const matSpec = MATERIALS[item.material] || MATERIALS.wood;
 
         const wallMat = new THREE.MeshStandardMaterial({
           color: matSpec.color,
@@ -817,143 +958,402 @@
 
         group.add(northWall, southWall, westWall, eastWall);
 
-        const innerW = Math.max(0.05, w - wallT * 2);
-        const innerD = Math.max(0.05, d - wallT * 2);
-        const soilH = Math.max(0.04, h - 0.03);
+        const { cols, rows, surfaceY, innerW, innerD } = getPlotGridDimensions(item);
         const soilMesh = new THREE.Mesh(
-          new THREE.BoxGeometry(innerW, soilH, innerD),
+          new THREE.BoxGeometry(innerW, surfaceY, innerD),
           new THREE.MeshStandardMaterial({ color: 0x3e2718, roughness: 0.96, metalness: 0.0 })
         );
-        soilMesh.position.y = soilH / 2;
+        soilMesh.position.y = surfaceY / 2;
         soilMesh.receiveShadow = true;
         group.add(soilMesh);
 
-        if (state.activeBedId === bed.id) {
+        if (isSelected) {
           const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.01, d + 0.02));
           const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
           line.position.y = (h + 0.01) / 2;
           group.add(line);
         }
 
-        const cols = Math.max(1, Math.floor(innerW / CELL_SIZE));
-        const rows = Math.max(1, Math.floor(innerD / CELL_SIZE));
         const startX = -((cols - 1) * CELL_SIZE) / 2;
         const startZ = -((rows - 1) * CELL_SIZE) / 2;
-
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const key = `${r},${c}`;
-            const plantType = bed.plants[key];
+            const plantType = item.plants && item.plants[`${r},${c}`];
             if (plantType) {
-              const plantObj = createPlantMesh(plantType);
-              plantObj.position.set(startX + c * CELL_SIZE, soilH, startZ + r * CELL_SIZE);
-              group.add(plantObj);
+              const pObj = createPlantMesh(plantType);
+              pObj.position.set(startX + c * CELL_SIZE, surfaceY, startZ + r * CELL_SIZE);
+              group.add(pObj);
             }
           }
         }
+      } else if (item.type === 'tilled_soil') {
+        const w = item.widthCm / 100;
+        const d = item.depthCm / 100;
+        const { cols, rows, surfaceY } = getPlotGridDimensions(item);
+
+        const baseSoil = new THREE.Mesh(
+          new THREE.BoxGeometry(w, surfaceY, d),
+          new THREE.MeshStandardMaterial({ color: 0x4b2e19, roughness: 0.98, metalness: 0.0 })
+        );
+        baseSoil.position.y = surfaceY / 2;
+        baseSoil.receiveShadow = true;
+        group.add(baseSoil);
+
+        const ridgeCount = Math.max(3, Math.floor(d / 0.22));
+        const ridgeMat = new THREE.MeshStandardMaterial({ color: 0x5b381e, roughness: 0.95 });
+        for (let i = 0; i < ridgeCount; i++) {
+          const zPos = -d / 2 + ((i + 0.5) / ridgeCount) * d;
+          const ridge = new THREE.Mesh(
+            new THREE.BoxGeometry(w * 0.96, 0.025, Math.min(0.09, (d / ridgeCount) * 0.55)),
+            ridgeMat
+          );
+          ridge.position.set(0, surfaceY + 0.008, zPos);
+          ridge.receiveShadow = true;
+          group.add(ridge);
+        }
+
+        if (isSelected) {
+          const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, surfaceY + 0.03, d + 0.02));
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
+          line.position.y = (surfaceY + 0.03) / 2;
+          group.add(line);
+        }
+
+        const startX = -((cols - 1) * CELL_SIZE) / 2;
+        const startZ = -((rows - 1) * CELL_SIZE) / 2;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const plantType = item.plants && item.plants[`${r},${c}`];
+            if (plantType) {
+              const pObj = createPlantMesh(plantType);
+              pObj.position.set(startX + c * CELL_SIZE, surfaceY + 0.015, startZ + r * CELL_SIZE);
+              group.add(pObj);
+            }
+          }
+        }
+      } else if (item.type === 'orchard_tree') {
+        const sp = TREE_SPECIES[item.species] || TREE_SPECIES[DEFAULT_TREE_KEY];
+        const sz = TREE_SIZES[item.size] || TREE_SIZES.medium;
+
+        const trunkH = sz.height * 0.45;
+        const trunk = new THREE.Mesh(
+          new THREE.CylinderGeometry(sz.crownRadius * 0.11, sz.crownRadius * 0.16, trunkH, 10),
+          new THREE.MeshStandardMaterial({ color: sp.trunkColor, roughness: 0.92 })
+        );
+        trunk.position.y = trunkH / 2;
+        trunk.castShadow = true;
+        trunk.receiveShadow = true;
+        group.add(trunk);
+
+        const crown = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(sz.crownRadius, 1),
+          new THREE.MeshStandardMaterial({ color: sp.foliageColor, roughness: 0.8 })
+        );
+        crown.position.y = trunkH + sz.crownRadius * 0.65;
+        crown.castShadow = true;
+        crown.receiveShadow = true;
+        group.add(crown);
+
+        const fruitOffsets = [
+          [0.62, 0.2, 0.55],
+          [-0.58, 0.1, 0.62],
+          [0.15, 0.52, -0.68]
+        ];
+        fruitOffsets.forEach(([fx, fy, fz]) => {
+          const fMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(sz.crownRadius * 0.11, 8, 8),
+            new THREE.MeshStandardMaterial({ color: sp.fruitColor, roughness: 0.4 })
+          );
+          fMesh.position.set(
+            fx * sz.crownRadius,
+            crown.position.y + fy * sz.crownRadius,
+            fz * sz.crownRadius
+          );
+          fMesh.castShadow = true;
+          group.add(fMesh);
+        });
+
+        if (isSelected) {
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(sz.crownRadius * 0.85, sz.crownRadius * 0.93, 28),
+            new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide })
+          );
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.y = 0.015;
+          group.add(ring);
+        }
       }
 
-      group.position.set(bed.x, 0, bed.z);
-      group.rotation.y = THREE.MathUtils.degToRad(bed.rotationDeg || 0);
+      group.position.set(item.x, 0, item.z);
+      group.rotation.y = THREE.MathUtils.degToRad(item.rotationDeg || 0);
 
-      bedsGroup.add(group);
-      bedMeshes.set(bed.id, group);
+      itemsGroup.add(group);
+      itemMeshes.set(item.id, group);
     }
 
-    function updateBedTransform(bed) {
-      const mesh = bedMeshes.get(bed.id);
+    function updateItemTransform(item) {
+      const mesh = itemMeshes.get(item.id);
       if (!mesh) return;
-      mesh.position.set(bed.x, 0, bed.z);
-      mesh.rotation.y = THREE.MathUtils.degToRad(bed.rotationDeg || 0);
+      mesh.position.set(item.x, 0, item.z);
+      mesh.rotation.y = THREE.MathUtils.degToRad(item.rotationDeg || 0);
     }
 
-    function rebuildAllBeds() {
-      state.beds.forEach(rebuildBedMesh);
+    function rebuildAllItems() {
+      state.items.forEach(rebuildItemMesh);
     }
 
-    function getBedGridDimensions(bed) {
-      const kind = bed.kind || 'bed';
-      if (kind === 'plot') {
-        return {
-          cols: Math.max(1, Math.floor((bed.widthCm / 100) / CELL_SIZE)),
-          rows: Math.max(1, Math.floor((bed.depthCm / 100) / CELL_SIZE))
-        };
-      }
-      const w = bed.widthCm / 100;
-      const d = bed.depthCm / 100;
-      const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
-      const innerW = Math.max(0.05, w - wallT * 2);
-      const innerD = Math.max(0.05, d - wallT * 2);
-      return {
-        cols: Math.max(1, Math.floor(innerW / CELL_SIZE)),
-        rows: Math.max(1, Math.floor(innerD / CELL_SIZE))
-      };
+    function getActiveItem() {
+      return state.items.find((it) => it.id === state.activeItemId) || null;
     }
 
-    function getActiveBed() {
-      return state.beds.find((b) => b.id === state.activeBedId) || null;
-    }
-
-    function setActiveBed(id) {
-      const prevId = state.activeBedId;
-      state.activeBedId = id;
+    function setActiveItem(id) {
+      const prevId = state.activeItemId;
+      state.activeItemId = id;
       if (prevId != null) {
-        const prevBed = state.beds.find((b) => b.id === prevId);
-        if (prevBed) rebuildBedMesh(prevBed);
+        const prev = state.items.find((it) => it.id === prevId);
+        if (prev) rebuildItemMesh(prev);
       }
-      const nextBed = getActiveBed();
-      if (nextBed) rebuildBedMesh(nextBed);
+      const next = getActiveItem();
+      if (next) rebuildItemMesh(next);
       syncUI();
     }
 
-    function addBed({ kind, species, scale, widthCm, depthCm, heightCm, material, name, x, z, rotationDeg, plants }) {
+    function addItem(cfg) {
       const id = state.nextId++;
-      const resolvedKind = kind === 'plot' || kind === 'tree' ? kind : 'bed';
-      const defaultName =
-        resolvedKind === 'tree'
-          ? `${(TREE_SPECIES[species] || TREE_SPECIES.apple).label} #${id}`
-          : resolvedKind === 'plot'
-            ? `Parcelle #${id}`
-            : `Carré #${id}`;
+      const type = cfg.type || 'bed';
+      const defaultIdx = state.items.length;
 
-      const bed = {
+      let name = cfg.name;
+      if (!name) {
+        if (type === 'bed') name = `Carré #${id}`;
+        else if (type === 'tilled_soil') name = `Parcelle labourée #${id}`;
+        else name = `${(TREE_SPECIES[cfg.species] || TREE_SPECIES[DEFAULT_TREE_KEY]).label} #${id}`;
+      }
+
+      const item = {
         id,
-        kind: resolvedKind,
-        species: resolvedKind === 'tree' ? (TREE_SPECIES[species] ? species : 'apple') : null,
-        scale: resolvedKind === 'tree' ? Math.max(0.5, Math.min(2, Number(scale) || 1)) : 1,
-        name: name || defaultName,
-        widthCm: Math.max(30, Math.min(800, Number(widthCm) || (resolvedKind === 'plot' ? 200 : 120))),
-        depthCm: Math.max(30, Math.min(800, Number(depthCm) || (resolvedKind === 'plot' ? 150 : 120))),
-        heightCm: Math.max(10, Math.min(120, Number(heightCm) || 30)),
-        material: MATERIALS[material] ? material : 'wood',
-        x: x != null ? x : ((state.beds.length % 3) - 1) * 1.8,
-        z: z != null ? z : Math.floor(state.beds.length / 3) * 1.8,
-        rotationDeg: rotationDeg || 0,
-        plants: plants ? { ...plants } : {}
+        type,
+        name,
+        widthCm: Math.max(30, Math.min(1000, Number(cfg.widthCm) || (type === 'tilled_soil' ? 180 : 120))),
+        depthCm: Math.max(30, Math.min(1000, Number(cfg.depthCm) || 120)),
+        heightCm: Math.max(10, Math.min(120, Number(cfg.heightCm) || 30)),
+        material: MATERIALS[cfg.material] ? cfg.material : 'wood',
+        species: TREE_SPECIES[cfg.species] ? cfg.species : DEFAULT_TREE_KEY,
+        size: TREE_SIZES[cfg.size] ? cfg.size : 'medium',
+        x: cfg.x != null ? cfg.x : ((defaultIdx % 3) - 1) * 2.0,
+        z: cfg.z != null ? cfg.z : Math.floor(defaultIdx / 3) * 2.0,
+        rotationDeg: cfg.rotationDeg || 0,
+        plants: cfg.plants ? { ...cfg.plants } : {}
       };
-      state.beds.push(bed);
-      state.activeBedId = bed.id;
-      rebuildBedMesh(bed);
+
+      state.items.push(item);
+      state.activeItemId = item.id;
+      rebuildItemMesh(item);
       syncUI();
-      return bed;
+      return item;
     }
 
-    // Palette de plants
+    function getPlantableItems() {
+      return state.items.filter((it) => it.type === 'bed' || it.type === 'tilled_soil');
+    }
+
+    // Rafraîchit la liste déroulante des arbres fruitiers (incluant les créations personnalisées)
+    const treeSpeciesSelect = document.getElementById('newTreeSpecies');
+    function refreshTreeSpeciesSelect(selectedKey = null) {
+      const currentVal = selectedKey || treeSpeciesSelect.value || DEFAULT_TREE_KEY;
+      treeSpeciesSelect.innerHTML = '';
+      Object.values(TREE_SPECIES).forEach((sp) => {
+        const opt = document.createElement('option');
+        opt.value = sp.key;
+        opt.textContent = `${sp.customImage ? '🖼️' : (sp.icon || '🌳')} ${sp.label}`;
+        if (sp.key === currentVal) opt.selected = true;
+        treeSpeciesSelect.appendChild(opt);
+      });
+    }
+    refreshTreeSpeciesSelect(DEFAULT_TREE_KEY);
+
+    // Formulaire création d'un arbre fruitier personnalisé
+    let pendingCustomTreeImage = null;
+    document.getElementById('btnToggleCustomTree').addEventListener('click', () => {
+      const form = document.getElementById('customTreeForm');
+      const caret = document.getElementById('customTreeCaret');
+      const isHidden = form.classList.contains('hidden');
+      form.classList.toggle('hidden', !isHidden);
+      caret.textContent = isHidden ? '▲' : '▼';
+    });
+
+    function updateCustomTreePreview() {
+      const preview = document.getElementById('customTreeLogoPreview');
+      const emoji = (document.getElementById('customTreeEmoji').value || '🌳').trim();
+      if (pendingCustomTreeImage) {
+        preview.innerHTML = `<img src="${pendingCustomTreeImage}" alt="Aperçu fruitier" class="w-full h-full object-cover" />`;
+      } else {
+        preview.textContent = emoji || '🌳';
+      }
+    }
+
+    document.getElementById('customTreeEmoji').addEventListener('input', () => {
+      pendingCustomTreeImage = null;
+      document.getElementById('customTreeFile').value = '';
+      updateCustomTreePreview();
+    });
+
+    document.getElementById('customTreeFile').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      readImageAsDataURL(file, (dataUrl) => {
+        pendingCustomTreeImage = dataUrl;
+        updateCustomTreePreview();
+      });
+    });
+
+    document.getElementById('btnSaveCustomTree').addEventListener('click', () => {
+      const nameInput = document.getElementById('customTreeName');
+      const rawName = nameInput.value.trim();
+      if (!rawName) {
+        nameInput.focus();
+        return;
+      }
+      const emoji = (document.getElementById('customTreeEmoji').value || '🌳').trim();
+      const fruitColorHex = document.getElementById('customTreeFruitColor').value;
+      const customKey = `custom_tree_${Date.now()}`;
+
+      TREE_SPECIES[customKey] = {
+        key: customKey,
+        label: rawName,
+        icon: emoji || '🌳',
+        customImage: pendingCustomTreeImage || null,
+        custom: true,
+        fruitColor: hexToThreeColor(fruitColorHex, 0xdc2626),
+        foliageColor: 0x3b7a2a,
+        trunkColor: 0x6b442a
+      };
+
+      refreshTreeSpeciesSelect(customKey);
+      nameInput.value = '';
+      pendingCustomTreeImage = null;
+      document.getElementById('customTreeFile').value = '';
+      updateCustomTreePreview();
+    });
+
+    // Formulaire création d'un légume ou petit fruit personnalisé
+    let pendingCustomPlantImage = null;
+    document.getElementById('btnToggleCustomPlant').addEventListener('click', () => {
+      const form = document.getElementById('customPlantForm');
+      const caret = document.getElementById('customPlantCaret');
+      const catSelect = document.getElementById('customPlantCategory');
+      catSelect.value = state.activePlantCategory;
+      const isHidden = form.classList.contains('hidden');
+      form.classList.toggle('hidden', !isHidden);
+      caret.textContent = isHidden ? '▲' : '▼';
+    });
+
+    function updateCustomPlantPreview() {
+      const preview = document.getElementById('customPlantLogoPreview');
+      const emoji = (document.getElementById('customPlantEmoji').value || '🌱').trim();
+      if (pendingCustomPlantImage) {
+        preview.innerHTML = `<img src="${pendingCustomPlantImage}" alt="Aperçu plant" class="w-full h-full object-cover" />`;
+      } else {
+        preview.textContent = emoji || '🌱';
+      }
+    }
+
+    document.getElementById('customPlantEmoji').addEventListener('input', () => {
+      pendingCustomPlantImage = null;
+      document.getElementById('customPlantFile').value = '';
+      updateCustomPlantPreview();
+    });
+
+    document.getElementById('customPlantFile').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      readImageAsDataURL(file, (dataUrl) => {
+        pendingCustomPlantImage = dataUrl;
+        updateCustomPlantPreview();
+      });
+    });
+
+    document.getElementById('btnSaveCustomPlant').addEventListener('click', () => {
+      const nameInput = document.getElementById('customPlantName');
+      const rawName = nameInput.value.trim();
+      if (!rawName) {
+        nameInput.focus();
+        return;
+      }
+
+      const category = document.getElementById('customPlantCategory').value === 'fruits' ? 'fruits' : 'vegetables';
+      const emoji = (document.getElementById('customPlantEmoji').value || (category === 'fruits' ? '🍓' : '🌱')).trim();
+      const colorHex = document.getElementById('customPlantColor').value;
+      const customId = `custom_${category === 'fruits' ? 'fruit' : 'veg'}_${Date.now()}`;
+
+      PLANTS[customId] = {
+        id: customId,
+        category,
+        name: rawName,
+        icon: emoji || (category === 'fruits' ? '🍓' : '🌱'),
+        customImage: pendingCustomPlantImage || null,
+        custom: true,
+        shape: category === 'fruits' ? 'berry' : 'leafy',
+        color: category === 'fruits' ? 0x2e7d32 : hexToThreeColor(colorHex, 0x4caf50),
+        fruitAccent: category === 'fruits' ? hexToThreeColor(colorHex, 0xe11d48) : hexToThreeColor(colorHex, 0x4caf50),
+        height: category === 'fruits' ? 0.18 : 0.15
+      };
+
+      if (category === 'fruits') {
+        FRUIT_IDS.push(customId);
+      } else {
+        VEGETABLE_IDS.push(customId);
+      }
+
+      state.activePlantCategory = category;
+      state.selectedPlant = customId;
+
+      nameInput.value = '';
+      pendingCustomPlantImage = null;
+      document.getElementById('customPlantFile').value = '';
+      updateCustomPlantPreview();
+      syncUI();
+    });
+
+    // Palette Légumes / Fruits
     const plantPaletteEl = document.getElementById('plantPalette');
     function renderPlantPalette() {
+      const ids = state.activePlantCategory === 'vegetables' ? VEGETABLE_IDS : FRUIT_IDS;
+      const query = (state.plantSearch || '').trim().toLowerCase();
+      const filteredIds = ids.filter((id) => PLANTS[id] && PLANTS[id].name.toLowerCase().includes(query));
+
+      document.getElementById('categoryCountBadge').textContent =
+        state.activePlantCategory === 'vegetables'
+          ? `${VEGETABLE_IDS.length} légumes`
+          : `${FRUIT_IDS.length} petits fruits`;
+      document.getElementById('paletteTitleLabel').textContent =
+        state.activePlantCategory === 'vegetables'
+          ? 'Choisir un légume (parcelles de 30×30 cm)'
+          : 'Choisir un fruit (parcelles de 30×30 cm)';
+
+      const selSpec = PLANTS[state.selectedPlant];
+      document.getElementById('selectedPlantSummary').innerHTML = selSpec
+        ? `<span class="inline-flex items-center gap-1.5">Sélection : ${renderLogoHTML(selSpec, 'w-4 h-4', 'text-sm')} <span>${selSpec.name}</span></span>`
+        : '';
+
       plantPaletteEl.innerHTML = '';
-      Object.values(PLANTS).forEach((plant) => {
-        const isSelected = !state.eraserMode && state.selectedPlant === plant.id;
+      if (filteredIds.length === 0) {
+        plantPaletteEl.innerHTML = `<div class="col-span-2 sm:col-span-3 text-center py-4 text-xs text-stone-500">Aucun résultat pour ce filtre.</div>`;
+        return;
+      }
+
+      filteredIds.forEach((plantId) => {
+        const plant = PLANTS[plantId];
+        const isSelected = state.selectedPlant === plant.id;
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `flex items-center justify-center gap-1.5 px-2.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition ${
+        btn.className = `flex items-center gap-2 px-3 py-2 rounded-xl border text-left text-xs sm:text-sm font-medium transition ${
           isSelected
-            ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-            : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50'
+            ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm font-semibold'
+            : 'bg-white text-stone-800 border-stone-200 hover:bg-stone-50'
         }`;
-        btn.innerHTML = `<span>${plant.icon}</span><span>${plant.name}</span>`;
+        btn.innerHTML = `${renderLogoHTML(plant, 'w-6 h-6', 'text-base')}<span class="truncate">${plant.name}</span>`;
         btn.addEventListener('click', () => {
-          state.eraserMode = false;
           state.selectedPlant = plant.id;
           syncUI();
         });
@@ -961,20 +1361,25 @@
       });
     }
 
-    function renderBedCellGrid() {
-      const gridEl = document.getElementById('bedCellGrid');
-      const targetSelect = document.getElementById('plantTargetBed');
-      const plantableBeds = state.beds.filter((b) => (b.kind || 'bed') !== 'tree');
-      const targetBed = plantableBeds.find((b) => b.id === Number(targetSelect.value)) || plantableBeds[0];
+    function renderItemCellGrid() {
+      const gridEl = document.getElementById('itemCellGrid');
+      const plantables = getPlantableItems();
+      const targetSelect = document.getElementById('plantTargetItem');
+      const targetItem =
+        plantables.find((it) => it.id === Number(targetSelect.value)) ||
+        (getActiveItem() && (getActiveItem().type === 'bed' || getActiveItem().type === 'tilled_soil')
+          ? getActiveItem()
+          : plantables[0]);
 
-      if (!targetBed) {
+      if (!targetItem) {
         gridEl.innerHTML = '';
         return;
       }
 
-      const { cols, rows } = getBedGridDimensions(targetBed);
-      const kindLabel = (targetBed.kind || 'bed') === 'plot' ? 'Sol labouré' : 'Bac';
-      document.getElementById('gridInfoLabel').textContent = `${targetBed.name} (${kindLabel}) — ${cols}×${rows} cases (30×30 cm)`;
+      const { cols, rows } = getPlotGridDimensions(targetItem);
+      const kindLabel = targetItem.type === 'bed' ? 'Bac' : 'Sol labouré';
+      document.getElementById('gridInfoLabel').textContent =
+        `${targetItem.name} (${kindLabel}) — ${cols}×${rows} cases (30×30 cm)`;
 
       const cellPx = Math.max(36, Math.min(54, Math.floor(420 / Math.max(cols, rows))));
       gridEl.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
@@ -983,31 +1388,33 @@
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const key = `${r},${c}`;
-          const plantId = targetBed.plants[key];
+          const plantId = targetItem.plants[key];
           const plantSpec = plantId ? PLANTS[plantId] : null;
 
           const cellBtn = document.createElement('button');
           cellBtn.type = 'button';
           cellBtn.style.width = `${cellPx}px`;
           cellBtn.style.height = `${cellPx}px`;
-          cellBtn.title = plantSpec ? `${plantSpec.name} (${c + 1}, ${r + 1})` : `Case vide (${c + 1}, ${r + 1})`;
+          cellBtn.title = plantSpec
+            ? `${plantSpec.name} (${plantSpec.category === 'vegetables' ? 'Légume' : 'Fruit'}) — (${c + 1}, ${r + 1})`
+            : `Case vide (${c + 1}, ${r + 1})`;
           cellBtn.className = `rounded-lg border flex items-center justify-center text-base sm:text-lg transition ${
             plantSpec
-              ? 'bg-amber-900/20 border-amber-800/40 hover:bg-amber-900/30'
+              ? plantSpec.category === 'fruits'
+                ? 'bg-rose-500/15 border-rose-500/40 hover:bg-rose-500/25'
+                : 'bg-emerald-600/15 border-emerald-700/35 hover:bg-emerald-600/25'
               : 'bg-amber-950/10 border-amber-900/20 hover:bg-emerald-600/20'
           }`;
-          cellBtn.textContent = plantSpec ? plantSpec.icon : '';
+          cellBtn.innerHTML = plantSpec ? renderLogoHTML(plantSpec, 'w-6 h-6', 'text-lg') : '';
 
           cellBtn.addEventListener('click', () => {
-            if (state.eraserMode) {
-              delete targetBed.plants[key];
-            } else if (targetBed.plants[key] === state.selectedPlant) {
-              delete targetBed.plants[key];
+            if (targetItem.plants[key] === state.selectedPlant) {
+              delete targetItem.plants[key];
             } else {
-              targetBed.plants[key] = state.selectedPlant;
+              targetItem.plants[key] = state.selectedPlant;
             }
-            rebuildBedMesh(targetBed);
-            renderBedCellGrid();
+            rebuildItemMesh(targetItem);
+            renderItemCellGrid();
           });
 
           gridEl.appendChild(cellBtn);
@@ -1016,109 +1423,88 @@
     }
 
     function syncUI() {
-      // Onglet + Ajouter : Bac / Sol labouré / Arbre verger
-      const btnTypeBed = document.getElementById('typeAddBed');
-      const btnTypePlot = document.getElementById('typeAddPlot');
-      const btnTypeTree = document.getElementById('typeAddTree');
-      const formAddBed = document.getElementById('formAddBed');
-      const formAddPlot = document.getElementById('formAddPlot');
-      const formAddTree = document.getElementById('formAddTree');
-      const btnCreateBed = document.getElementById('btnCreateBed');
-
-      const activeTypeClass = 'py-2.5 px-2 rounded-xl border-2 border-emerald-700 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-semibold transition';
-      const idleTypeClass = 'py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition';
-
-      btnTypeBed.className = state.addKind === 'bed' ? activeTypeClass : idleTypeClass;
-      btnTypePlot.className = state.addKind === 'plot' ? activeTypeClass : idleTypeClass;
-      btnTypeTree.className = state.addKind === 'tree' ? activeTypeClass : idleTypeClass;
-
-      formAddBed.classList.toggle('hidden', state.addKind !== 'bed');
-      formAddPlot.classList.toggle('hidden', state.addKind !== 'plot');
-      formAddTree.classList.toggle('hidden', state.addKind !== 'tree');
-
-      if (state.addKind === 'plot') {
-        btnCreateBed.textContent = '+ Créer le sol labouré';
-      } else if (state.addKind === 'tree') {
-        btnCreateBed.textContent = "+ Ajouter l'arbre au verger";
-      } else {
-        btnCreateBed.textContent = '+ Créer le carré potager';
-      }
-
       // Onglet Élément Actif
-      const activeBed = getActiveBed();
-      const noActiveEl = document.getElementById('noActiveBed');
-      const activeControlsEl = document.getElementById('activeBedControls');
-      const editMatWrapper = document.getElementById('editMaterialWrapper');
-      const editSpeciesWrapper = document.getElementById('editSpeciesWrapper');
+      const activeItem = getActiveItem();
+      const noActiveEl = document.getElementById('noActiveItem');
+      const activeControlsEl = document.getElementById('activeItemControls');
 
-      if (!activeBed) {
+      if (!activeItem) {
         noActiveEl.classList.remove('hidden');
         activeControlsEl.classList.add('hidden');
       } else {
         noActiveEl.classList.add('hidden');
         activeControlsEl.classList.remove('hidden');
-        const kind = activeBed.kind || 'bed';
-        const badgeText =
-          kind === 'tree'
-            ? `${activeBed.name} (${(TREE_SPECIES[activeBed.species] || TREE_SPECIES.apple).label})`
-            : kind === 'plot'
-              ? `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} cm · Sol labouré)`
-              : `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} CM)`;
-        document.getElementById('activeBedBadge').textContent = badgeText;
-        editMatWrapper.classList.toggle('hidden', kind !== 'bed');
-        editSpeciesWrapper.classList.toggle('hidden', kind !== 'tree');
 
-        const nameInput = document.getElementById('editBedName');
+        const badgeSuffix =
+          activeItem.type === 'bed'
+            ? `${activeItem.widthCm}×${activeItem.depthCm} CM`
+            : activeItem.type === 'tilled_soil'
+              ? `SOL LABOURÉ ${activeItem.widthCm}×${activeItem.depthCm} CM`
+              : `VERGER · ${(TREE_SPECIES[activeItem.species] || TREE_SPECIES[DEFAULT_TREE_KEY]).label.toUpperCase()}`;
+
+        document.getElementById('activeItemBadge').textContent = `${activeItem.name} (${badgeSuffix})`;
+
+        const nameInput = document.getElementById('editItemName');
         if (document.activeElement !== nameInput) {
-          nameInput.value = activeBed.name;
+          nameInput.value = activeItem.name;
         }
-        document.getElementById('editBedMaterial').value = activeBed.material;
-        document.getElementById('editTreeSpecies').value = activeBed.species || 'apple';
-        document.getElementById('editTreeScale').value = String(activeBed.scale || 1);
+
+        const matWrap = document.getElementById('editBedMaterialWrap');
+        if (activeItem.type === 'bed') {
+          matWrap.classList.remove('hidden');
+          document.getElementById('editBedMaterial').value = activeItem.material;
+        } else {
+          matWrap.classList.add('hidden');
+        }
       }
 
       // Onglet Planter
-      const plantableBeds = state.beds.filter((b) => (b.kind || 'bed') !== 'tree');
-      const noPlantBedEl = document.getElementById('noBedForPlanting');
+      const plantables = getPlantableItems();
+      const noPlotEl = document.getElementById('noPlotForPlanting');
       const plantControlsEl = document.getElementById('plantingControls');
-      const targetSelect = document.getElementById('plantTargetBed');
+      const targetSelect = document.getElementById('plantTargetItem');
 
-      if (plantableBeds.length === 0) {
-        noPlantBedEl.classList.remove('hidden');
+      if (plantables.length === 0) {
+        noPlotEl.classList.remove('hidden');
         plantControlsEl.classList.add('hidden');
       } else {
-        noPlantBedEl.classList.add('hidden');
+        noPlotEl.classList.add('hidden');
         plantControlsEl.classList.remove('hidden');
 
-        const activeIsPlantable = activeBed && (activeBed.kind || 'bed') !== 'tree';
-        const currentSelectedId = activeIsPlantable
-          ? activeBed.id
-          : plantableBeds.some((b) => b.id === Number(targetSelect.value))
-            ? Number(targetSelect.value)
-            : plantableBeds[0].id;
+        const preferredId =
+          activeItem && (activeItem.type === 'bed' || activeItem.type === 'tilled_soil')
+            ? activeItem.id
+            : Number(targetSelect.value) || plantables[0].id;
 
         targetSelect.innerHTML = '';
-        plantableBeds.forEach((b) => {
+        plantables.forEach((it) => {
           const opt = document.createElement('option');
-          opt.value = String(b.id);
-          const suffix = (b.kind || 'bed') === 'plot' ? ' · Sol labouré' : '';
-          opt.textContent = `${b.name} (${b.widthCm}×${b.depthCm} cm${suffix})`;
-          if (b.id === currentSelectedId) opt.selected = true;
+          opt.value = String(it.id);
+          const tag = it.type === 'bed' ? 'Bac potager' : 'Sol labouré';
+          opt.textContent = `${it.name} (${it.widthCm}×${it.depthCm} cm · ${tag})`;
+          if (it.id === preferredId) opt.selected = true;
           targetSelect.appendChild(opt);
         });
 
-        const eraserBtn = document.getElementById('btnEraserMode');
-        document.getElementById('eraserState').textContent = state.eraserMode ? 'ON' : 'OFF';
-        eraserBtn.className = state.eraserMode
-          ? 'w-full sm:w-auto px-4 py-3 rounded-xl border border-amber-600 bg-amber-100 text-amber-900 text-sm font-semibold transition'
-          : 'w-full sm:w-auto px-4 py-3 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition';
+        document.getElementById('subtabVegetables').textContent = `🥕 Légumes (${VEGETABLE_IDS.length})`;
+        document.getElementById('subtabFruits').textContent = `🍓 Petits fruits (${FRUIT_IDS.length})`;
+
+        document.getElementById('subtabVegetables').className =
+          state.activePlantCategory === 'vegetables'
+            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold transition'
+            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition';
+
+        document.getElementById('subtabFruits').className =
+          state.activePlantCategory === 'fruits'
+            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold transition'
+            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition';
 
         renderPlantPalette();
-        renderBedCellGrid();
+        renderItemCellGrid();
       }
     }
 
-    // Navigation entre les 3 onglets
+    // Navigation onglets principaux
     const tabs = [
       { btn: document.getElementById('tabAdd'), panel: document.getElementById('panelAdd') },
       { btn: document.getElementById('tabActive'), panel: document.getElementById('panelActive') },
@@ -1139,116 +1525,115 @@
       });
     });
 
-    // Choix du type d'élément dans + Ajouter
-    document.getElementById('typeAddBed').addEventListener('click', () => {
-      state.addKind = 'bed';
-      syncUI();
-    });
-    document.getElementById('typeAddPlot').addEventListener('click', () => {
-      state.addKind = 'plot';
-      syncUI();
-    });
-    document.getElementById('typeAddTree').addEventListener('click', () => {
-      state.addKind = 'tree';
-      syncUI();
-    });
+    const addKindSelect = document.getElementById('addKind');
+    function updateAddSections() {
+      const kind = addKindSelect.value;
+      document.getElementById('sectionBedOptions').classList.toggle('hidden', kind !== 'bed');
+      document.getElementById('sectionTilledOptions').classList.toggle('hidden', kind !== 'tilled_soil');
+      document.getElementById('sectionTreeOptions').classList.toggle('hidden', kind !== 'orchard_tree');
+    }
+    addKindSelect.addEventListener('change', updateAddSections);
+    updateAddSections();
 
-    // Création bac / sol labouré / arbre verger
-    document.getElementById('btnCreateBed').addEventListener('click', () => {
-      if (state.addKind === 'plot') {
-        const widthCm = Number(document.getElementById('plotWidth').value);
-        const depthCm = Number(document.getElementById('plotDepth').value);
-        const created = addBed({ kind: 'plot', widthCm, depthCm, heightCm: 15 });
-        showToast(`${created.name} ajouté.`);
-      } else if (state.addKind === 'tree') {
-        const species = document.getElementById('newTreeSpecies').value;
-        const scale = Number(document.getElementById('newTreeScale').value) || 1;
-        const created = addBed({ kind: 'tree', species, scale, widthCm: 120, depthCm: 120, heightCm: 180 });
-        showToast(`${created.name} ajouté au verger.`);
+    document.getElementById('btnCreateItem').addEventListener('click', () => {
+      const kind = addKindSelect.value;
+      if (kind === 'bed') {
+        addItem({
+          type: 'bed',
+          widthCm: Number(document.getElementById('newWidth').value),
+          depthCm: Number(document.getElementById('newDepth').value),
+          heightCm: Number(document.getElementById('newHeight').value),
+          material: document.getElementById('newMaterial').value
+        });
+      } else if (kind === 'tilled_soil') {
+        addItem({
+          type: 'tilled_soil',
+          widthCm: Number(document.getElementById('tilledWidth').value),
+          depthCm: Number(document.getElementById('tilledDepth').value)
+        });
       } else {
-        const widthCm = Number(document.getElementById('newWidth').value);
-        const depthCm = Number(document.getElementById('newDepth').value);
-        const heightCm = Number(document.getElementById('newHeight').value);
-        const material = document.getElementById('newMaterial').value;
-        const created = addBed({ kind: 'bed', widthCm, depthCm, heightCm, material });
-        showToast(`${created.name} créé.`);
+        addItem({
+          type: 'orchard_tree',
+          species: document.getElementById('newTreeSpecies').value,
+          size: document.getElementById('newTreeSize').value
+        });
       }
     });
 
     // Édition élément actif
-    document.getElementById('editBedName').addEventListener('input', (e) => {
-      const bed = getActiveBed();
-      if (!bed) return;
-      const trimmed = e.target.value;
-      bed.name = trimmed.trim().length > 0 ? trimmed : `Élément #${bed.id}`;
+    document.getElementById('editItemName').addEventListener('input', (e) => {
+      const item = getActiveItem();
+      if (!item) return;
+      const val = e.target.value;
+      item.name = val.trim().length > 0 ? val : `Élément #${item.id}`;
       syncUI();
     });
 
     document.getElementById('editBedMaterial').addEventListener('change', (e) => {
-      const bed = getActiveBed();
-      if (!bed) return;
-      bed.material = e.target.value;
-      rebuildBedMesh(bed);
+      const item = getActiveItem();
+      if (!item || item.type !== 'bed') return;
+      item.material = e.target.value;
+      rebuildItemMesh(item);
     });
 
-    document.getElementById('editTreeSpecies').addEventListener('change', (e) => {
-      const bed = getActiveBed();
-      if (!bed || (bed.kind || 'bed') !== 'tree') return;
-      bed.species = e.target.value;
-      rebuildBedMesh(bed);
-      syncUI();
-    });
-
-    document.getElementById('editTreeScale').addEventListener('change', (e) => {
-      const bed = getActiveBed();
-      if (!bed || (bed.kind || 'bed') !== 'tree') return;
-      bed.scale = Number(e.target.value) || 1;
-      rebuildBedMesh(bed);
-    });
-
-    function rotateActiveBed(deltaDeg, absolute = null) {
-      const bed = getActiveBed();
-      if (!bed) return;
+    function rotateActiveItem(deltaDeg, absolute = null) {
+      const item = getActiveItem();
+      if (!item) return;
       if (absolute !== null) {
-        bed.rotationDeg = absolute;
+        item.rotationDeg = absolute;
       } else {
-        bed.rotationDeg = ((bed.rotationDeg || 0) + deltaDeg) % 360;
+        item.rotationDeg = ((item.rotationDeg || 0) + deltaDeg) % 360;
       }
-      updateBedTransform(bed);
+      updateItemTransform(item);
     }
 
-    document.getElementById('btnRotMinus15').addEventListener('click', () => rotateActiveBed(-15));
-    document.getElementById('btnRotPlus15').addEventListener('click', () => rotateActiveBed(15));
-    document.getElementById('btnRot90').addEventListener('click', () => rotateActiveBed(90));
-    document.getElementById('btnRotReset').addEventListener('click', () => rotateActiveBed(0, 0));
+    document.getElementById('btnRotMinus15').addEventListener('click', () => rotateActiveItem(-15));
+    document.getElementById('btnRotPlus15').addEventListener('click', () => rotateActiveItem(15));
+    document.getElementById('btnRot90').addEventListener('click', () => rotateActiveItem(90));
+    document.getElementById('btnRotReset').addEventListener('click', () => rotateActiveItem(0, 0));
 
-    document.getElementById('btnDeleteBed').addEventListener('click', () => {
-      const bed = getActiveBed();
-      if (!bed) return;
-      const mesh = bedMeshes.get(bed.id);
+    document.getElementById('btnDeleteItem').addEventListener('click', () => {
+      const item = getActiveItem();
+      if (!item) return;
+      const mesh = itemMeshes.get(item.id);
       if (mesh) {
-        bedsGroup.remove(mesh);
-        bedMeshes.delete(bed.id);
+        itemsGroup.remove(mesh);
+        itemMeshes.delete(item.id);
       }
-      state.beds = state.beds.filter((b) => b.id !== bed.id);
-      state.activeBedId = state.beds.length > 0 ? state.beds[state.beds.length - 1].id : null;
-      rebuildAllBeds();
+      state.items = state.items.filter((it) => it.id !== item.id);
+      state.activeItemId = state.items.length > 0 ? state.items[state.items.length - 1].id : null;
+      rebuildAllItems();
       syncUI();
-      showToast('Élément supprimé.');
     });
 
-    // Plantation
-    document.getElementById('plantTargetBed').addEventListener('change', (e) => {
+    // Sous-menu Légumes / Fruits
+    document.getElementById('subtabVegetables').addEventListener('click', () => {
+      state.activePlantCategory = 'vegetables';
+      if (!PLANTS[state.selectedPlant] || PLANTS[state.selectedPlant].category !== 'vegetables') {
+        state.selectedPlant = VEGETABLE_IDS[0];
+      }
+      syncUI();
+    });
+
+    document.getElementById('subtabFruits').addEventListener('click', () => {
+      state.activePlantCategory = 'fruits';
+      if (!PLANTS[state.selectedPlant] || PLANTS[state.selectedPlant].category !== 'fruits') {
+        state.selectedPlant = FRUIT_IDS[0];
+      }
+      syncUI();
+    });
+
+    document.getElementById('plantSearchInput').addEventListener('input', (e) => {
+      state.plantSearch = e.target.value;
+      renderPlantPalette();
+    });
+
+    document.getElementById('plantTargetItem').addEventListener('change', (e) => {
       const id = Number(e.target.value);
-      if (id) setActiveBed(id);
+      if (id) setActiveItem(id);
     });
 
-    document.getElementById('btnEraserMode').addEventListener('click', () => {
-      state.eraserMode = !state.eraserMode;
-      syncUI();
-    });
-
-    // Vues 3D / Dessus (Plan)
+    // Vues 3D / Dessus
     const btnView3D = document.getElementById('btnView3D');
     const btnViewTop = document.getElementById('btnViewTop');
 
@@ -1258,12 +1643,12 @@
       if (top) {
         btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
         btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
-        camera.position.set(0, 9.5, 0.001);
+        camera.position.set(0, 10.5, 0.001);
         controls.target.set(0, 0, 0);
       } else {
         btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
         btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
-        camera.position.set(4.5, 5.2, 5.5);
+        camera.position.set(4.8, 5.4, 5.8);
         controls.target.set(0, 0, 0);
       }
       controls.update();
@@ -1281,25 +1666,24 @@
       dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
     });
 
-    // Export / Import / Réinitialisation JSON
+    // Export / Import / Reset JSON (inclut les créations personnalisées)
     document.getElementById('btnExportJson').addEventListener('click', () => {
-      try {
-        const payload = {
-          version: 2,
-          exportedAt: new Date().toISOString(),
-          beds: state.beds
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'potager-3d.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Plan exporté vers potager-3d.json.');
-      } catch (err) {
-        showToast("Erreur lors de l'export JSON.", true);
-      }
+      const customPlants = Object.values(PLANTS).filter((p) => p.custom);
+      const customTrees = Object.values(TREE_SPECIES).filter((t) => t.custom);
+      const payload = {
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        items: state.items,
+        customPlants,
+        customTrees
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'potager-3d.json';
+      a.click();
+      URL.revokeObjectURL(url);
     });
 
     const fileInputJson = document.getElementById('fileInputJson');
@@ -1312,28 +1696,66 @@
       reader.onload = (ev) => {
         try {
           const data = JSON.parse(String(ev.target.result));
-          const list = Array.isArray(data) ? data : Array.isArray(data.beds) ? data.beds : [];
-          bedsGroup.clear();
-          bedMeshes.clear();
-          state.beds = [];
+
+          initDefaultPlants();
+          initDefaultTreeSpecies();
+
+          if (Array.isArray(data.customPlants)) {
+            data.customPlants.forEach((cp) => {
+              if (!cp || !cp.id || !cp.name) return;
+              const cat = cp.category === 'fruits' ? 'fruits' : 'vegetables';
+              PLANTS[cp.id] = {
+                ...cp,
+                category: cat,
+                custom: true
+              };
+              if (cat === 'fruits' && !FRUIT_IDS.includes(cp.id)) FRUIT_IDS.push(cp.id);
+              if (cat === 'vegetables' && !VEGETABLE_IDS.includes(cp.id)) VEGETABLE_IDS.push(cp.id);
+            });
+          }
+
+          if (Array.isArray(data.customTrees)) {
+            data.customTrees.forEach((ct) => {
+              if (!ct || !ct.key || !ct.label) return;
+              TREE_SPECIES[ct.key] = {
+                ...ct,
+                custom: true
+              };
+            });
+          }
+          refreshTreeSpeciesSelect(DEFAULT_TREE_KEY);
+
+          const list = Array.isArray(data)
+            ? data
+            : Array.isArray(data.items)
+              ? data.items
+              : Array.isArray(data.beds)
+                ? data.beds.map((b) => ({ ...b, type: b.type || 'bed' }))
+                : [];
+          itemsGroup.clear();
+          itemMeshes.clear();
+          state.items = [];
           state.nextId = 1;
-          list.forEach((item) => {
-            const created = addBed(item);
-            if (item.id && Number(item.id) >= state.nextId) {
-              state.nextId = Number(item.id) + 1;
+          list.forEach((raw) => {
+            const created = addItem(raw);
+            if (raw.id && raw.id >= state.nextId) {
+              state.nextId = raw.id + 1;
             }
-            created.id = item.id || created.id;
+            created.id = raw.id || created.id;
           });
-          if (state.beds.length > 0) {
-            state.activeBedId = state.beds[0].id;
-            rebuildAllBeds();
+          if (state.items.length > 0) {
+            state.activeItemId = state.items[0].id;
+            rebuildAllItems();
           } else {
-            state.activeBedId = null;
+            state.activeItemId = null;
           }
           syncUI();
-          showToast('Plan JSON importé.');
         } catch (err) {
-          showToast('Fichier JSON invalide.', true);
+          const errBox = document.createElement('div');
+          errBox.className = 'fixed bottom-4 right-4 z-50 bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg';
+          errBox.textContent = 'Fichier JSON invalide.';
+          document.body.appendChild(errBox);
+          setTimeout(() => errBox.remove(), 3000);
         }
       };
       reader.readAsText(file);
@@ -1341,16 +1763,15 @@
     });
 
     document.getElementById('btnClearAll').addEventListener('click', () => {
-      bedsGroup.clear();
-      bedMeshes.clear();
-      state.beds = [];
-      state.activeBedId = null;
+      itemsGroup.clear();
+      itemMeshes.clear();
+      state.items = [];
+      state.activeItemId = null;
       state.nextId = 1;
       syncUI();
-      showToast('Scène réinitialisée.');
     });
 
-    // Redimensionnement fluide via ResizeObserver
+    // Redimensionnement fluide
     const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -1362,43 +1783,39 @@
     });
     resizeObserver.observe(container);
 
-    // Scène initiale avec bac potager, sol labouré et arbre de verger
-    addBed({
-      kind: 'bed',
+    // Scène initiale avec bac potager, sol labouré et arbre fruitier
+    addItem({
+      type: 'bed',
       name: 'Carré #1',
       widthCm: 120,
       depthCm: 120,
       heightCm: 30,
       material: 'wood',
-      x: -1.4,
-      z: -0.4,
+      x: -1.8,
+      z: -0.6,
       rotationDeg: 0,
-      plants: { '0,0': 'tomato', '1,2': 'lettuce', '2,1': 'carrot' }
+      plants: { '0,0': 'veg_1', '1,2': 'veg_4', '2,1': 'veg_3' }
     });
-    addBed({
-      kind: 'plot',
-      name: 'Parcelle #2',
+    addItem({
+      type: 'tilled_soil',
+      name: 'Parcelle labourée #2',
       widthCm: 180,
       depthCm: 120,
-      heightCm: 15,
-      x: 1.2,
+      x: 1.4,
       z: -0.5,
       rotationDeg: 0,
-      plants: { '0,1': 'strawberry', '1,3': 'herb' }
+      plants: { '0,1': 'fruit_1', '1,3': 'fruit_2' }
     });
-    addBed({
-      kind: 'tree',
-      species: 'apple',
-      scale: 1,
+    addItem({
+      type: 'orchard_tree',
       name: 'Pommier #3',
-      widthCm: 120,
-      depthCm: 120,
-      heightCm: 180,
-      x: 0,
-      z: 1.7,
+      species: DEFAULT_TREE_KEY,
+      size: 'medium',
+      x: 0.4,
+      z: 1.8,
       rotationDeg: 0
     });
-    setActiveBed(1);
+    setActiveItem(1);
 
     function animate() {
       requestAnimationFrame(animate);
@@ -1408,5 +1825,4 @@
     animate();
   </script>
 </body>
-</html>
-```
+  </html>
