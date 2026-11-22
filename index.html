@@ -3,6 +3,223 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azalée — Création, Gestion &amp; Planning du Jardin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f3f6f1;
+      color: #1c2821;
+      overflow-x: hidden;
+    }
+    .menu-tab.active {
+      background-color: #166534;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(22, 101, 52, 0.24);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-5xl mx-auto p-3 sm:p-6 space-y-4">
+    <!-- En-tête Azalée -->
+    <header class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center text-xl shrink-0">
+          🌺
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-lg sm:text-xl font-bold text-stone-900 tracking-tight truncate">Azalée</h1>
+          <p class="text-xs text-stone-500 truncate">Création 3D · Gestion des zones · Planning du jardin</p>
+        </div>
+      </div>
+
+      <button id="btnQuickOpenPotager3D" type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition shrink-0">
+        <span>↗</span>
+        <span>Ouvrir Potager 3D</span>
+      </button>
+    </header>
+
+    <!-- Menu principal en 3 parties -->
+    <nav aria-label="Menu principal Azalée" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-1.5 grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+      <button id="tabPart1" type="button" class="menu-tab active flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
+        <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center shrink-0">1</span>
+        <span class="truncate">Création de mon jardin</span>
+      </button>
+      <button id="tabPart2" type="button" class="menu-tab flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
+        <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center shrink-0">2</span>
+        <span class="truncate">Gestion de mon jardin</span>
+      </button>
+      <button id="tabPart3" type="button" class="menu-tab flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
+        <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 text-xs font-bold flex items-center justify-center shrink-0">3</span>
+        <span class="truncate">Planning de mon jardin</span>
+      </button>
+    </nav>
+
+    <!-- Bannière de retour / notification (sans alert ni confirm) -->
+    <div id="azaleeNotice" role="status" aria-live="polite" class="hidden rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition">
+      <span id="azaleeNoticeText"></span>
+      <button id="btnCloseNotice" type="button" class="text-current opacity-75 hover:opacity-100 font-bold px-1.5">✕</button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PARTIE 1 : CRÉATION DE MON JARDIN (OUVERTURE NOUVELLE PAGE CODE 3D)  -->
+    <!-- ===================================================================== -->
+    <section id="part1Section" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-5">
+        <div class="space-y-1">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+            Partie 1 · Création de mon jardin
+          </span>
+          <h2 class="text-lg sm:text-xl font-bold text-stone-900">
+            Studio Potager 3D (Nouvelle page)
+          </h2>
+          <p class="text-xs sm:text-sm text-stone-600">
+            Cliquez sur le bouton ci-dessous pour ouvrir votre code <strong>Potager 3D — Modélisation, Verger &amp; Planification</strong> dans une nouvelle page.
+          </p>
+        </div>
+
+        <button id="btnOpenPotager3DPage" type="button" class="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow-sm transition shrink-0">
+          ↗ Ouvrir dans une nouvelle page
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
+          <div class="font-bold text-stone-900">🪵 Bacs &amp; Sol labouré</div>
+          <p class="text-stone-600 mt-1">Dimensions en cm, matériaux, protections serre ou filet et grille 30×30 cm.</p>
+        </div>
+        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
+          <div class="font-bold text-stone-900">🌳 Verger &amp; Fruitiers</div>
+          <p class="text-stone-600 mt-1">Essences fruitières, gabarits et création d'arbres personnalisés.</p>
+        </div>
+        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
+          <div class="font-bold text-stone-900">🌱 70 Légumes &amp; 9 Fruits</div>
+          <p class="text-stone-600 mt-1">Palette complète, recherche, emprises et export/import JSON.</p>
+        </div>
+      </div>
+
+      <!-- Accès rapide au code source intégré -->
+      <div class="rounded-2xl border border-stone-200 bg-stone-50 overflow-hidden">
+        <div class="px-4 py-2.5 bg-stone-100 border-b border-stone-200 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-600">
+            Code source Potager 3D intégré
+          </span>
+          <div class="flex items-center gap-2">
+            <button id="btnCopyPotagerCode" type="button" class="px-3 py-1 rounded-lg bg-white hover:bg-stone-50 border border-stone-300 text-xs font-semibold text-stone-800 transition">
+              Copier le code
+            </button>
+            <button id="btnToggleCodePreview" type="button" class="px-3 py-1 rounded-lg bg-stone-800 hover:bg-stone-900 text-xs font-semibold text-white transition">
+              Afficher / Masquer
+            </button>
+          </div>
+        </div>
+        <div id="potagerCodeBox" class="hidden p-3.5 max-h-72 overflow-auto">
+          <pre id="potagerCodePre" class="text-[11px] leading-relaxed font-mono text-stone-800 whitespace-pre"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PARTIE 2 : GESTION DE MON JARDIN                                      -->
+    <!-- ===================================================================== -->
+    <section id="part2Section" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 mb-1">
+              Partie 2 · Gestion de mon jardin
+            </span>
+            <h2 class="text-lg font-bold text-stone-900">Suivi des zones, arrosage &amp; entretien</h2>
+          </div>
+          <button id="btnAddZoneFormToggle" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold transition">
+            + Nouvelle zone
+          </button>
+        </div>
+
+        <!-- Ajout rapide d'une zone à gérer -->
+        <form id="newZoneForm" class="hidden grid grid-cols-1 sm:grid-cols-4 gap-3 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
+          <input id="newZoneName" type="text" maxlength="45" placeholder="Nom de la zone (ex: Carré Tomates)" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900" />
+          <select id="newZoneFreq" class="rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-900">
+            <option value="Tous les 2 jours">Tous les 2 jours</option>
+            <option value="2 fois / semaine">2 fois / semaine</option>
+            <option value="1 fois / semaine">1 fois / semaine</option>
+            <option value="Paillage / léger">Paillage / léger</option>
+          </select>
+          <button type="submit" class="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
+            Enregistrer
+          </button>
+        </form>
+
+        <div id="zonesListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PARTIE 3 : PLANNING DE MON JARDIN                                      -->
+    <!-- ===================================================================== -->
+    <section id="part3Section" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-900 mb-1">
+              Partie 3 · Planning de mon jardin
+            </span>
+            <h2 class="text-lg font-bold text-stone-900">Calendrier &amp; tâches du jardin</h2>
+          </div>
+          <span id="planningCounterBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-800">
+            0 / 0 terminées
+          </span>
+        </div>
+
+        <form id="planningTaskForm" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
+          <input id="planningTaskTitle" type="text" maxlength="80" placeholder="Nouvelle tâche (ex: Semer des carottes, tailler les framboisiers...)" class="sm:col-span-5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900" />
+          <select id="planningTaskType" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-900">
+            <option value="semis">🌱 Semis</option>
+            <option value="plantation">🪴 Plantation</option>
+            <option value="taille">✂️ Taille</option>
+            <option value="arrosage">💧 Arrosage</option>
+            <option value="recolte">🧺 Récolte</option>
+          </select>
+          <select id="planningTaskPeriod" class="sm:col-span-3 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-900">
+            <option value="Cette semaine">Cette semaine</option>
+            <option value="Printemps">Printemps</option>
+            <option value="Été">Été</option>
+            <option value="Automne">Automne</option>
+            <option value="Hiver">Hiver</option>
+          </select>
+          <button type="submit" class="sm:col-span-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
+            + Ajouter
+          </button>
+        </form>
+
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div id="planningFilterBar" class="flex flex-wrap items-center gap-1.5">
+            <button data-cat="all" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-700 text-white transition">Toutes</button>
+            <button data-cat="semis" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🌱 Semis</button>
+            <button data-cat="plantation" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🪴 Plantation</button>
+            <button data-cat="taille" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">✂️ Taille</button>
+            <button data-cat="arrosage" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">💧 Arrosage</button>
+            <button data-cat="recolte" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🧺 Récolte</button>
+          </div>
+          <button id="btnPruneDoneTasks" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-700 transition">
+            Supprimer terminées
+          </button>
+        </div>
+
+        <div id="planningTasksList" class="space-y-2"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Code exact Potager 3D fourni, conservé intégralement pour ouverture dans une nouvelle page -->
+  <script id="potager3DSourceCode" type="text/plain">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Potager 3D — Modélisation, Verger &amp; Planification</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
@@ -2941,3 +3158,454 @@
   </script>
 </body>
 </html>
+  </script>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'azalee_workspace_v1';
+
+      const TYPE_LABELS = {
+        semis: '🌱 Semis',
+        plantation: '🪴 Plantation',
+        taille: '✂️ Taille',
+        arrosage: '💧 Arrosage',
+        recolte: '🧺 Récolte'
+      };
+
+      function getPotagerExactHtml() {
+        const rawEl = document.getElementById('potager3DSourceCode');
+        return rawEl ? rawEl.textContent.trim() : '';
+      }
+
+      function createDefaultWorkspace() {
+        return {
+          activePart: 'part1',
+          taskFilter: 'all',
+          nextZoneId: 4,
+          nextTaskId: 5,
+          zones: [
+            {
+              id: 1,
+              name: 'Carré Aromatiques & Salades',
+              waterFreq: 'Tous les 2 jours',
+              lastWatered: "Aujourd'hui",
+              notes: 'Arroser de préférence le matin, maintenir un léger paillage.'
+            },
+            {
+              id: 2,
+              name: 'Parcelle Pleine Terre Sud',
+              waterFreq: '2 fois / semaine',
+              lastWatered: 'Il y a 2 jours',
+              notes: 'Biner superficiellement après arrosage et surveiller les adventices.'
+            },
+            {
+              id: 3,
+              name: 'Verger Fruitier',
+              waterFreq: '1 fois / semaine',
+              lastWatered: 'Il y a 4 jours',
+              notes: 'Vérifier le paillage au pied des jeunes arbres.'
+            }
+          ],
+          tasks: [
+            {
+              id: 1,
+              title: 'Arroser les carrés potagers',
+              category: 'arrosage',
+              period: 'Cette semaine',
+              done: false
+            },
+            {
+              id: 2,
+              title: 'Semer des radis et laitues de printemps',
+              category: 'semis',
+              period: 'Printemps',
+              done: false
+            },
+            {
+              id: 3,
+              title: 'Tailler le bois mort des fruitiers',
+              category: 'taille',
+              period: 'Hiver',
+              done: true
+            },
+            {
+              id: 4,
+              title: 'Récolter les herbes aromatiques',
+              category: 'recolte',
+              period: 'Cette semaine',
+              done: false
+            }
+          ]
+        };
+      }
+
+      let workspace = loadWorkspace();
+
+      function loadWorkspace() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return createDefaultWorkspace();
+          const parsed = JSON.parse(raw);
+          const def = createDefaultWorkspace();
+          return {
+            ...def,
+            ...parsed,
+            zones: Array.isArray(parsed.zones) ? parsed.zones : def.zones,
+            tasks: Array.isArray(parsed.tasks) ? parsed.tasks : def.tasks
+          };
+        } catch (err) {
+          return createDefaultWorkspace();
+        }
+      }
+
+      function saveWorkspace() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
+        } catch (err) {
+          showAzaleeNotice("Impossible d'enregistrer dans le stockage local.", 'warn');
+        }
+      }
+
+      let noticeTimer = null;
+      function showAzaleeNotice(message, tone = 'info') {
+        const banner = document.getElementById('azaleeNotice');
+        const text = document.getElementById('azaleeNoticeText');
+        if (!banner || !text) return;
+        if (noticeTimer) clearTimeout(noticeTimer);
+        const styles = {
+          info: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+          warn: 'bg-amber-50 border-amber-300 text-amber-950',
+          error: 'bg-red-50 border-red-200 text-red-900'
+        };
+        banner.className = `rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition ${styles[tone] || styles.info}`;
+        text.textContent = message;
+        banner.classList.remove('hidden');
+        noticeTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 3600);
+      }
+
+      document.getElementById('btnCloseNotice').addEventListener('click', () => {
+        document.getElementById('azaleeNotice').classList.add('hidden');
+      });
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // Navigation entre les 3 parties du menu Azalée
+      function switchPart(partKey) {
+        workspace.activePart = partKey;
+        const defs = [
+          { key: 'part1', btn: document.getElementById('tabPart1'), sec: document.getElementById('part1Section') },
+          { key: 'part2', btn: document.getElementById('tabPart2'), sec: document.getElementById('part2Section') },
+          { key: 'part3', btn: document.getElementById('tabPart3'), sec: document.getElementById('part3Section') }
+        ];
+        defs.forEach(({ key, btn, sec }) => {
+          const active = key === partKey;
+          btn.classList.toggle('active', active);
+          sec.classList.toggle('hidden', !active);
+        });
+        saveWorkspace();
+      }
+
+      document.getElementById('tabPart1').addEventListener('click', () => switchPart('part1'));
+      document.getElementById('tabPart2').addEventListener('click', () => switchPart('part2'));
+      document.getElementById('tabPart3').addEventListener('click', () => switchPart('part3'));
+
+      // Ouverture du code Potager 3D dans une nouvelle page via Blob URL
+      function openPotager3DInNewPage() {
+        const htmlSource = getPotagerExactHtml();
+        if (!htmlSource) {
+          showAzaleeNotice('Code Potager 3D introuvable.', 'error');
+          return;
+        }
+        try {
+          const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' });
+          const blobUrl = URL.createObjectURL(blob);
+          const openedWin = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+          if (!openedWin) {
+            showAzaleeNotice(
+              'Le navigateur a bloqué la nouvelle page : autorisez les fenêtres pop-up pour ouvrir Potager 3D.',
+              'warn'
+            );
+          } else {
+            showAzaleeNotice('Potager 3D ouvert dans une nouvelle page.', 'info');
+          }
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        } catch (err) {
+          showAzaleeNotice("Erreur lors de l'ouverture de la nouvelle page.", 'error');
+        }
+      }
+
+      document.getElementById('btnOpenPotager3DPage').addEventListener('click', openPotager3DInNewPage);
+      document.getElementById('btnQuickOpenPotager3D').addEventListener('click', openPotager3DInNewPage);
+
+      // Affichage et copie du code Potager 3D intégré
+      const codePre = document.getElementById('potagerCodePre');
+      const codeBox = document.getElementById('potagerCodeBox');
+      codePre.textContent = getPotagerExactHtml();
+
+      document.getElementById('btnToggleCodePreview').addEventListener('click', () => {
+        codeBox.classList.toggle('hidden');
+      });
+
+      document.getElementById('btnCopyPotagerCode').addEventListener('click', () => {
+        const text = getPotagerExactHtml();
+        const helper = document.createElement('textarea');
+        helper.value = text;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.left = '-9999px';
+        document.body.appendChild(helper);
+        helper.select();
+        let copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } catch (err) {
+          copied = false;
+        }
+        document.body.removeChild(helper);
+        if (copied) {
+          showAzaleeNotice('Code Potager 3D copié dans le presse-papiers.', 'info');
+        } else {
+          showAzaleeNotice('Sélectionnez le code dans l’aperçu pour le copier.', 'warn');
+        }
+      });
+
+      // Partie 2 : Gestion de mon jardin
+      const newZoneForm = document.getElementById('newZoneForm');
+      document.getElementById('btnAddZoneFormToggle').addEventListener('click', () => {
+        newZoneForm.classList.toggle('hidden');
+        if (!newZoneForm.classList.contains('hidden')) {
+          document.getElementById('newZoneName').focus();
+        }
+      });
+
+      newZoneForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nameInput = document.getElementById('newZoneName');
+        const name = nameInput.value.trim();
+        if (!name) {
+          showAzaleeNotice('Veuillez saisir un nom de zone.', 'warn');
+          nameInput.focus();
+          return;
+        }
+        workspace.zones.push({
+          id: workspace.nextZoneId++,
+          name,
+          waterFreq: document.getElementById('newZoneFreq').value,
+          lastWatered: 'Jamais',
+          notes: ''
+        });
+        nameInput.value = '';
+        newZoneForm.classList.add('hidden');
+        saveWorkspace();
+        renderZones();
+        showAzaleeNotice(`Zone "${name}" ajoutée à la gestion.`, 'info');
+      });
+
+      function renderZones() {
+        const container = document.getElementById('zonesListContainer');
+        container.innerHTML = '';
+
+        if (workspace.zones.length === 0) {
+          container.innerHTML =
+            '<div class="md:col-span-2 text-center py-8 text-sm text-stone-500 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune zone enregistrée. Cliquez sur <strong>+ Nouvelle zone</strong> pour commencer.</div>';
+          return;
+        }
+
+        workspace.zones.forEach((zone) => {
+          const card = document.createElement('div');
+          card.className = 'rounded-2xl border border-stone-200 bg-stone-50/80 p-4 space-y-3';
+
+          const topRow = document.createElement('div');
+          topRow.className = 'flex items-start justify-between gap-2';
+          topRow.innerHTML = `
+            <div class="min-w-0">
+              <h3 class="text-sm sm:text-base font-bold text-stone-900 truncate">${escapeHtml(zone.name)}</h3>
+              <p class="text-xs text-stone-500 mt-0.5">Arrosage : ${escapeHtml(zone.waterFreq)} · Dernier : ${escapeHtml(zone.lastWatered)}</p>
+            </div>
+          `;
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'Supprimer cette zone';
+          delBtn.className = 'p-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition shrink-0';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', () => {
+            workspace.zones = workspace.zones.filter((z) => z.id !== zone.id);
+            saveWorkspace();
+            renderZones();
+          });
+          topRow.appendChild(delBtn);
+
+          const notesArea = document.createElement('textarea');
+          notesArea.rows = 2;
+          notesArea.placeholder = "Notes d'entretien, paillage, engrais...";
+          notesArea.className = 'w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-600';
+          notesArea.value = zone.notes || '';
+          notesArea.addEventListener('input', () => {
+            zone.notes = notesArea.value;
+            saveWorkspace();
+          });
+
+          const actionsRow = document.createElement('div');
+          actionsRow.className = 'flex flex-wrap items-center justify-between gap-2';
+
+          const waterBtn = document.createElement('button');
+          waterBtn.type = 'button';
+          waterBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition';
+          waterBtn.textContent = "💧 Marquer arrosé aujourd'hui";
+          waterBtn.addEventListener('click', () => {
+            const hm = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            zone.lastWatered = `Aujourd'hui (${hm})`;
+            saveWorkspace();
+            renderZones();
+            showAzaleeNotice(`Arrosage noté pour "${zone.name}".`, 'info');
+          });
+
+          const planTaskBtn = document.createElement('button');
+          planTaskBtn.type = 'button';
+          planTaskBtn.className = 'px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-xs font-semibold text-stone-700 transition';
+          planTaskBtn.textContent = '+ Tâche au planning';
+          planTaskBtn.addEventListener('click', () => {
+            workspace.tasks.unshift({
+              id: workspace.nextTaskId++,
+              title: `Entretien — ${zone.name}`,
+              category: 'arrosage',
+              period: 'Cette semaine',
+              done: false
+            });
+            saveWorkspace();
+            switchPart('part3');
+            renderTasks();
+            showAzaleeNotice(`Tâche ajoutée pour "${zone.name}".`, 'info');
+          });
+
+          actionsRow.append(waterBtn, planTaskBtn);
+          card.append(topRow, notesArea, actionsRow);
+          container.appendChild(card);
+        });
+      }
+
+      // Partie 3 : Planning de mon jardin
+      document.getElementById('planningTaskForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const titleInput = document.getElementById('planningTaskTitle');
+        const title = titleInput.value.trim();
+        if (!title) {
+          showAzaleeNotice('Veuillez saisir une tâche pour le planning.', 'warn');
+          titleInput.focus();
+          return;
+        }
+        workspace.tasks.unshift({
+          id: workspace.nextTaskId++,
+          title,
+          category: document.getElementById('planningTaskType').value,
+          period: document.getElementById('planningTaskPeriod').value,
+          done: false
+        });
+        titleInput.value = '';
+        saveWorkspace();
+        renderTasks();
+        showAzaleeNotice('Tâche ajoutée au planning.', 'info');
+      });
+
+      document.querySelectorAll('.pfilter-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          workspace.taskFilter = btn.getAttribute('data-cat') || 'all';
+          document.querySelectorAll('.pfilter-btn').forEach((b) => {
+            const active = b.getAttribute('data-cat') === workspace.taskFilter;
+            b.className = active
+              ? 'pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-700 text-white transition'
+              : 'pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition';
+          });
+          saveWorkspace();
+          renderTasks();
+        });
+      });
+
+      document.getElementById('btnPruneDoneTasks').addEventListener('click', () => {
+        workspace.tasks = workspace.tasks.filter((t) => !t.done);
+        saveWorkspace();
+        renderTasks();
+        showAzaleeNotice('Tâches terminées supprimées.', 'info');
+      });
+
+      function renderTasks() {
+        const listEl = document.getElementById('planningTasksList');
+        const total = workspace.tasks.length;
+        const doneCount = workspace.tasks.filter((t) => t.done).length;
+        document.getElementById('planningCounterBadge').textContent = `${doneCount} / ${total} terminées`;
+
+        const visibleTasks =
+          workspace.taskFilter === 'all'
+            ? workspace.tasks
+            : workspace.tasks.filter((t) => t.category === workspace.taskFilter);
+
+        listEl.innerHTML = '';
+        if (visibleTasks.length === 0) {
+          listEl.innerHTML =
+            '<div class="text-center py-8 text-sm text-stone-500 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune tâche dans ce filtre.</div>';
+          return;
+        }
+
+        visibleTasks.forEach((task) => {
+          const row = document.createElement('div');
+          row.className = `flex items-center justify-between gap-3 p-3 rounded-xl border transition ${
+            task.done ? 'bg-stone-50 border-stone-200/70 opacity-75' : 'bg-white border-stone-200'
+          }`;
+
+          const left = document.createElement('label');
+          left.className = 'flex items-center gap-3 min-w-0 cursor-pointer flex-1';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = Boolean(task.done);
+          checkbox.className = 'w-4 h-4 accent-emerald-700 rounded cursor-pointer shrink-0';
+          checkbox.addEventListener('change', () => {
+            task.done = checkbox.checked;
+            saveWorkspace();
+            renderTasks();
+          });
+
+          const info = document.createElement('div');
+          info.className = 'min-w-0';
+          info.innerHTML = `
+            <div class="text-sm font-semibold text-stone-900 truncate ${task.done ? 'line-through text-stone-500' : ''}">${escapeHtml(task.title)}</div>
+            <div class="flex flex-wrap items-center gap-1.5 mt-1">
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">${TYPE_LABELS[task.category] || task.category}</span>
+              <span class="text-xs text-stone-500">· ${escapeHtml(task.period)}</span>
+            </div>
+          `;
+
+          left.append(checkbox, info);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'Supprimer la tâche';
+          delBtn.className = 'p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition shrink-0';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', () => {
+            workspace.tasks = workspace.tasks.filter((t) => t.id !== task.id);
+            saveWorkspace();
+            renderTasks();
+          });
+
+          row.append(left, delBtn);
+          listEl.appendChild(row);
+        });
+      }
+
+      renderZones();
+      renderTasks();
+      switchPart(workspace.activePart || 'part1');
+    })();
+  </script>
+</body>
+  </html>
