@@ -1,10 +1,13 @@
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Potager 3D — Modélisation & Planification</title>
+  <title>Potager 3D — Modélisation, Verger &amp; Planification</title>
+  <!-- Tailwind CSS pour une interface réactive et épurée -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Import Map pour Three.js et OrbitControls -->
   <script type="importmap">
     {
       "imports": {
@@ -24,15 +27,16 @@
     .canvas-wrap {
       position: relative;
       width: 100%;
-      height: 440px;
+      height: 430px;
       background: #4e7c2a;
       overflow: hidden;
       user-select: none;
+      -webkit-user-select: none;
       touch-action: none;
     }
     @media (min-width: 768px) {
       .canvas-wrap {
-        height: 520px;
+        height: 510px;
       }
     }
     .big-select {
@@ -50,9 +54,41 @@
 </head>
 <body>
   <div class="max-w-3xl mx-auto p-3 sm:p-5 space-y-3">
-    <!-- Zone 3D -->
+    <!-- 1. En-tête compact en haut au-dessus de la scène 3D + Actions JSON -->
+    <header class="bg-white/95 backdrop-blur px-4 py-3 rounded-2xl shadow-sm border border-stone-200 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
+          ✦
+        </div>
+        <div class="truncate">
+          <h1 class="text-base sm:text-lg font-bold text-stone-900 truncate">Potager 3D</h1>
+          <p class="text-xs text-stone-500 truncate">Modélisation, Verger &amp; Planification</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </button>
+        <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+        </button>
+        <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
+        <button id="btnClearAll" type="button" title="Réinitialiser la scène" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Scène 3D interactive -->
     <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
-      <!-- Barre supérieure de vue et grille -->
+      <!-- Contrôles de vue et grille 1m -->
       <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
           <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
@@ -74,94 +110,122 @@
         </button>
       </div>
 
-      <!-- Badge compact de statistiques en haut à droite -->
-      <div class="absolute top-16 right-3 z-10 bg-stone-900/85 backdrop-blur text-white px-3.5 py-2 rounded-xl shadow text-xs flex items-center gap-3 pointer-events-none">
-        <div>Carrés : <strong id="statBeds" class="text-emerald-300">0</strong></div>
-        <span class="text-stone-500">|</span>
-        <div>Terreau : <strong id="statSoil" class="text-amber-300">0 L</strong></div>
-        <span class="text-stone-500">|</span>
-        <div>Plants : <strong id="statPlants" class="text-lime-300">0</strong></div>
-      </div>
+      <!-- Notifications non bloquantes -->
+      <div id="toastContainer" class="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-3 z-20 flex flex-col gap-2 pointer-events-none"></div>
     </div>
 
-    <!-- Panneau principal -->
+    <!-- 3. Panneau principal avec 3 onglets en haut -->
     <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-      <!-- En-tête + Actions JSON -->
-      <div class="px-4 py-3.5 border-b border-stone-200 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
-            ✦
-          </div>
-          <div class="truncate">
-            <h1 class="text-base sm:text-lg font-bold text-stone-900 truncate">Potager 3D</h1>
-            <p class="text-xs text-stone-500 truncate">Modélisation &amp; Planification</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </button>
-          <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-          </button>
-          <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
-          <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Onglets -->
-      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600">
+      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600 bg-stone-50/70">
         <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
-          + Ajouter Bac
+          + Ajouter
         </button>
         <button id="tabActive" type="button" class="tab-btn py-3 px-2 text-center transition">
-          Bac Actif
+          Élément Actif
         </button>
         <button id="tabPlant" type="button" class="tab-btn py-3 px-2 text-center transition">
           🌱 Planter
         </button>
       </div>
 
-      <!-- Contenu des onglets -->
       <div class="p-4 sm:p-5">
-        <!-- Onglet 1 : Ajouter Bac -->
+        <!-- 4. Onglet + Ajouter : Bac potager, Sol labouré ou Arbres (verger) -->
         <div id="panelAdd" class="space-y-4">
           <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
             <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-              Dimensions personnalisées
+              Type d'aménagement à ajouter
             </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
-                <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+
+            <div class="grid grid-cols-3 gap-2">
+              <button id="typeAddBed" type="button" class="py-2.5 px-2 rounded-xl border-2 border-emerald-700 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-semibold transition">
+                🪵 Bac potager
+              </button>
+              <button id="typeAddPlot" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition">
+                🌾 Sol labouré
+              </button>
+              <button id="typeAddTree" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition">
+                🌳 Arbre verger
+              </button>
+            </div>
+
+            <!-- Options Bac potager -->
+            <div id="formAddBed" class="space-y-4 pt-1">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+                Dimensions personnalisées
               </div>
-              <div>
-                <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
-                <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
+                  <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+                <div>
+                  <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
+                  <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+                <div>
+                  <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
+                  <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
               </div>
+
               <div>
-                <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
-                <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
+                <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                  <option value="wood">Bois brut</option>
+                  <option value="burned_wood">Bois brûlé</option>
+                  <option value="corten">Acier corten</option>
+                  <option value="stone">Pierre naturelle</option>
+                </select>
               </div>
             </div>
 
-            <div>
-              <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
-              <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                <option value="wood">Bois brut</option>
-                <option value="burned_wood">Bois brûlé</option>
-                <option value="corten">Acier corten</option>
-                <option value="stone">Pierre naturelle</option>
-              </select>
+            <!-- Options Sol labouré -->
+            <div id="formAddPlot" class="hidden space-y-4 pt-1">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+                Dimensions du sol labouré
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="plotWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
+                  <input id="plotWidth" type="number" min="60" max="800" step="20" value="200" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+                <div>
+                  <label for="plotDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
+                  <input id="plotDepth" type="number" min="60" max="800" step="20" value="150" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+              </div>
+              <p class="text-xs text-stone-500">
+                Ajoute une bande de terre labourée avec sillons au sol, compatible avec la grille de plantation de 30×30 cm.
+              </p>
+            </div>
+
+            <!-- Options Arbres (verger) -->
+            <div id="formAddTree" class="hidden space-y-4 pt-1">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
+                Espèce et taille de l'arbre (verger)
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="newTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Essence d'arbre</label>
+                  <select id="newTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="apple">🍎 Pommier</option>
+                    <option value="pear">🍐 Poirier</option>
+                    <option value="cherry">🍒 Cerisier</option>
+                    <option value="olive">🫒 Olivier</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="newTreeScale" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille / Hauteur</label>
+                  <select id="newTreeScale" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="0.8">Jeune arbre (petit)</option>
+                    <option value="1" selected>Adulte standard (moyen)</option>
+                    <option value="1.3">Grand sujet (haut)</option>
+                  </select>
+                </div>
+              </div>
+              <p class="text-xs text-stone-500">
+                Ajoute un arbre fruitier en 3D pour composer un verger. Déplaçable en <strong>Vue Dessus (Plan)</strong> par clic direct.
+              </p>
             </div>
           </div>
 
@@ -170,10 +234,10 @@
           </button>
         </div>
 
-        <!-- Onglet 2 : Bac Actif -->
+        <!-- 5. Onglet Élément Actif -->
         <div id="panelActive" class="hidden space-y-4">
           <div id="noActiveBed" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Aucun carré potager sélectionné. Clique sur un bac dans la vue 3D ou crée-en un dans l'onglet <strong>+ Ajouter Bac</strong>.
+            Aucun élément sélectionné. Clique directement sur un bac, un sol labouré ou un arbre dans la scène 3D ou crée-en un dans l'onglet <strong>+ Ajouter</strong>.
           </div>
 
           <div id="activeBedControls" class="hidden space-y-4">
@@ -189,11 +253,11 @@
 
             <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
               <div>
-                <label for="editBedName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom du carré potager</label>
-                <input id="editBedName" type="text" maxlength="40" placeholder="Ex: Carré Tomates & Basilic" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                <label for="editBedName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom de l'élément</label>
+                <input id="editBedName" type="text" maxlength="40" placeholder="Ex: Carré Tomates ou Pommier #1" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
               </div>
 
-              <div>
+              <div id="editMaterialWrapper">
                 <label for="editBedMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
                 <select id="editBedMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                   <option value="wood">Bois brut</option>
@@ -201,6 +265,26 @@
                   <option value="corten">Acier corten</option>
                   <option value="stone">Pierre naturelle</option>
                 </select>
+              </div>
+
+              <div id="editSpeciesWrapper" class="hidden space-y-4">
+                <div>
+                  <label for="editTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Essence d'arbre</label>
+                  <select id="editTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="apple">🍎 Pommier</option>
+                    <option value="pear">🍐 Poirier</option>
+                    <option value="cherry">🍒 Cerisier</option>
+                    <option value="olive">🫒 Olivier</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="editTreeScale" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille / Hauteur</label>
+                  <select id="editTreeScale" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="0.8">Jeune arbre (petit)</option>
+                    <option value="1">Adulte standard (moyen)</option>
+                    <option value="1.3">Grand sujet (haut)</option>
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -223,21 +307,21 @@
             </div>
 
             <p class="text-xs text-stone-500">
-              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur un bac pour le déplacer (aimantation tous les 10 cm).
+              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur l'élément pour le déplacer (aimantation tous les 10 cm).
             </p>
           </div>
         </div>
 
-        <!-- Onglet 3 : Planter -->
+        <!-- 6. Onglet Planter : Bac ou sol labouré cible + Gomme + Palette + Grille 30×30 cm -->
         <div id="panelPlant" class="hidden space-y-4">
           <div id="noBedForPlanting" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Ajoute d'abord un carré potager pour commencer à planter sur sa grille de 30×30 cm.
+            Ajoute d'abord un carré potager ou un sol labouré pour commencer à planter sur sa grille de 30×30 cm.
           </div>
 
           <div id="plantingControls" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex-1">
-                <label for="plantTargetBed" class="block text-xs font-semibold text-stone-700 mb-1">Carré potager</label>
+                <label for="plantTargetBed" class="block text-xs font-semibold text-stone-700 mb-1">Bac ou sol labouré cible</label>
                 <select id="plantTargetBed" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
               </div>
               <div class="sm:pt-5">
@@ -270,7 +354,7 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     const CELL_SIZE = 0.30; // 30 cm en mètres
-    const SNAP_STEP = 0.10;  // Aimantation 10 cm en mètres
+    const SNAP_STEP = 0.10;  // Aimantation tous les 10 cm en mètres
 
     const MATERIALS = {
       wood: { label: 'Bois brut', color: 0xb5835a, roughness: 0.85, metalness: 0.05 },
@@ -287,9 +371,17 @@
       herb: { id: 'herb', name: 'Aromatique', icon: '🌿', color: 0x229954, stemColor: 0x1e8449, height: 0.20 }
     };
 
+    const TREE_SPECIES = {
+      apple: { label: 'Pommier', icon: '🍎', foliageColor: 0x3b873e, fruitColor: 0xdc2626, trunkHeight: 1.05, canopyRadius: 0.72 },
+      pear: { label: 'Poirier', icon: '🍐', foliageColor: 0x4c9a38, fruitColor: 0xa3be36, trunkHeight: 1.15, canopyRadius: 0.65 },
+      cherry: { label: 'Cerisier', icon: '🍒', foliageColor: 0x478c39, fruitColor: 0xb91c1c, trunkHeight: 1.0, canopyRadius: 0.70 },
+      olive: { label: 'Olivier', icon: '🫒', foliageColor: 0x6b8e67, fruitColor: 0x3f4d28, trunkHeight: 0.9, canopyRadius: 0.68 }
+    };
+
     const state = {
       beds: [],
       activeBedId: null,
+      addKind: 'bed', // 'bed' | 'plot' | 'tree'
       selectedPlant: 'tomato',
       eraserMode: false,
       isTopView: false,
@@ -297,21 +389,66 @@
       nextId: 1
     };
 
-    // Initialisation scène Three.js
+    // Notification discrète sans alert()
+    function showToast(msg, isError = false) {
+      const box = document.getElementById('toastContainer');
+      if (!box) return;
+      const item = document.createElement('div');
+      item.className = `px-3.5 py-2 rounded-xl text-xs font-semibold shadow-lg border transition-opacity duration-300 ${
+        isError
+          ? 'bg-red-600 text-white border-red-700'
+          : 'bg-stone-900/95 text-white border-white/15'
+      }`;
+      item.textContent = msg;
+      box.appendChild(item);
+      setTimeout(() => {
+        item.style.opacity = '0';
+        setTimeout(() => item.remove(), 300);
+      }, 2400);
+    }
+
+    // Texture de pelouse douce
+    function createGrassTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#568c34';
+      ctx.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 6000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const r = Math.random();
+        ctx.fillStyle = r < 0.33
+          ? 'rgba(67, 114, 39, 0.35)'
+          : r < 0.66
+            ? 'rgba(112, 162, 66, 0.25)'
+            : 'rgba(48, 88, 28, 0.30)';
+        ctx.fillRect(x, y, 2, 5);
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(24, 24);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // Initialisation de la scène Three.js
     const container = document.getElementById('canvasContainer');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x52822e);
 
     const camera = new THREE.PerspectiveCamera(
       45,
-      container.clientWidth / container.clientHeight,
+      Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
       0.1,
       100
     );
     camera.position.set(4.5, 5.2, 5.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(Math.max(1, container.clientWidth), Math.max(1, container.clientHeight));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -322,10 +459,10 @@
     controls.dampingFactor = 0.08;
     controls.maxPolarAngle = Math.PI / 2 - 0.03;
     controls.minDistance = 2;
-    controls.maxDistance = 22;
+    controls.maxDistance = 24;
     controls.target.set(0, 0, 0);
 
-    // Lumières
+    // Lumières et ombres douces
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x3f6212, 0.85);
     hemiLight.position.set(0, 15, 0);
     scene.add(hemiLight);
@@ -337,17 +474,21 @@
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 35;
-    const d = 8;
-    dirLight.shadow.camera.left = -d;
-    dirLight.shadow.camera.right = d;
-    dirLight.shadow.camera.top = d;
-    dirLight.shadow.camera.bottom = -d;
+    const shadowBound = 9;
+    dirLight.shadow.camera.left = -shadowBound;
+    dirLight.shadow.camera.right = shadowBound;
+    dirLight.shadow.camera.top = shadowBound;
+    dirLight.shadow.camera.bottom = -shadowBound;
     dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
-    // Pelouse et grille 1m
+    // Pelouse texturée + Grille de 1 mètre
     const groundGeo = new THREE.PlaneGeometry(40, 40);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 });
+    const groundMat = new THREE.MeshStandardMaterial({
+      map: createGrassTexture(),
+      roughness: 0.95,
+      metalness: 0.0
+    });
     const groundMesh = new THREE.Mesh(groundGeo, groundMat);
     groundMesh.rotation.x = -Math.PI / 2;
     groundMesh.receiveShadow = true;
@@ -363,7 +504,7 @@
     scene.add(bedsGroup);
     const bedMeshes = new Map();
 
-    // Raycasting & déplacement en vue du dessus uniquement sur clic direct d'un bac
+    // Déplacement uniquement en Vue Dessus (Plan) après clic direct sur l'élément
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -510,7 +651,69 @@
       return g;
     }
 
-    // Construction / reconstruction 3D d'un bac
+    // Construction 3D d'un arbre fruitier de verger
+    function createOrchardTreeMesh(speciesKey, scaleMultiplier = 1) {
+      const spec = TREE_SPECIES[speciesKey] || TREE_SPECIES.apple;
+      const scale = Number(scaleMultiplier) || 1;
+      const g = new THREE.Group();
+
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.065, 0.11, spec.trunkHeight, 10),
+        new THREE.MeshStandardMaterial({ color: 0x6d4c3d, roughness: 0.92, metalness: 0.02 })
+      );
+      trunk.position.y = spec.trunkHeight / 2;
+      trunk.castShadow = true;
+      trunk.receiveShadow = true;
+      g.add(trunk);
+
+      const foliageMat = new THREE.MeshStandardMaterial({
+        color: spec.foliageColor,
+        roughness: 0.8,
+        metalness: 0.02
+      });
+
+      const crownMain = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(spec.canopyRadius, 1),
+        foliageMat
+      );
+      crownMain.position.set(0, spec.trunkHeight + spec.canopyRadius * 0.55, 0);
+      crownMain.castShadow = true;
+      crownMain.receiveShadow = true;
+      g.add(crownMain);
+
+      const crownSub = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(spec.canopyRadius * 0.68, 1),
+        foliageMat
+      );
+      crownSub.position.set(spec.canopyRadius * 0.45, spec.trunkHeight + spec.canopyRadius * 0.35, spec.canopyRadius * 0.25);
+      crownSub.castShadow = true;
+      crownSub.receiveShadow = true;
+      g.add(crownSub);
+
+      const fruitMat = new THREE.MeshStandardMaterial({
+        color: spec.fruitColor,
+        roughness: 0.4,
+        metalness: 0.05
+      });
+
+      const fruitOffsets = [
+        [0.34, spec.trunkHeight + 0.25, 0.28],
+        [-0.32, spec.trunkHeight + 0.42, 0.26],
+        [0.12, spec.trunkHeight + 0.58, -0.36],
+        [-0.22, spec.trunkHeight + 0.18, -0.32]
+      ];
+      fruitOffsets.forEach(([fx, fy, fz]) => {
+        const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.052, 8, 8), fruitMat);
+        fruit.position.set(fx, fy, fz);
+        fruit.castShadow = true;
+        g.add(fruit);
+      });
+
+      g.scale.setScalar(scale);
+      return g;
+    }
+
+    // Construction / reconstruction 3D d'un élément
     function rebuildBedMesh(bed) {
       const old = bedMeshes.get(bed.id);
       if (old) {
@@ -518,77 +721,134 @@
         bedMeshes.delete(bed.id);
       }
 
+      const kind = bed.kind || 'bed';
       const w = bed.widthCm / 100;
       const d = bed.depthCm / 100;
       const h = bed.heightCm / 100;
-      const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
-      const matSpec = MATERIALS[bed.material] || MATERIALS.wood;
 
       const group = new THREE.Group();
       group.userData.bedId = bed.id;
 
-      const wallMat = new THREE.MeshStandardMaterial({
-        color: matSpec.color,
-        roughness: matSpec.roughness,
-        metalness: matSpec.metalness
-      });
+      if (kind === 'tree') {
+        const treeObj = createOrchardTreeMesh(bed.species || 'apple', bed.scale || 1);
+        group.add(treeObj);
 
-      const northWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
-      northWall.position.set(0, h / 2, -d / 2 + wallT / 2);
-      northWall.castShadow = true;
-      northWall.receiveShadow = true;
+        if (state.activeBedId === bed.id) {
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(0.45 * (bed.scale || 1), 0.54 * (bed.scale || 1), 28),
+            new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide })
+          );
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.y = 0.01;
+          group.add(ring);
+        }
+      } else if (kind === 'plot') {
+        const soilBase = new THREE.Mesh(
+          new THREE.BoxGeometry(w, 0.05, d),
+          new THREE.MeshStandardMaterial({ color: 0x3b2516, roughness: 0.96, metalness: 0.0 })
+        );
+        soilBase.position.y = 0.025;
+        soilBase.receiveShadow = true;
+        group.add(soilBase);
 
-      const southWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
-      southWall.position.set(0, h / 2, d / 2 - wallT / 2);
-      southWall.castShadow = true;
-      southWall.receiveShadow = true;
+        const furrowMat = new THREE.MeshStandardMaterial({ color: 0x4d311d, roughness: 0.95, metalness: 0.0 });
+        const furrowSpacing = 0.24;
+        const furrowCount = Math.max(2, Math.floor(d / furrowSpacing));
+        for (let i = 0; i < furrowCount; i++) {
+          const zPos = -((furrowCount - 1) * furrowSpacing) / 2 + i * furrowSpacing;
+          const ridge = new THREE.Mesh(new THREE.BoxGeometry(w * 0.96, 0.035, 0.09), furrowMat);
+          ridge.position.set(0, 0.055, zPos);
+          ridge.castShadow = true;
+          ridge.receiveShadow = true;
+          group.add(ridge);
+        }
 
-      const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
-      westWall.position.set(-w / 2 + wallT / 2, h / 2, 0);
-      westWall.castShadow = true;
-      westWall.receiveShadow = true;
+        if (state.activeBedId === bed.id) {
+          const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.03, 0.08, d + 0.03));
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
+          line.position.y = 0.04;
+          group.add(line);
+        }
 
-      const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
-      eastWall.position.set(w / 2 - wallT / 2, h / 2, 0);
-      eastWall.castShadow = true;
-      eastWall.receiveShadow = true;
+        const cols = Math.max(1, Math.floor(w / CELL_SIZE));
+        const rows = Math.max(1, Math.floor(d / CELL_SIZE));
+        const startX = -((cols - 1) * CELL_SIZE) / 2;
+        const startZ = -((rows - 1) * CELL_SIZE) / 2;
 
-      group.add(northWall, southWall, westWall, eastWall);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const plantType = bed.plants[`${r},${c}`];
+            if (plantType) {
+              const plantObj = createPlantMesh(plantType);
+              plantObj.position.set(startX + c * CELL_SIZE, 0.06, startZ + r * CELL_SIZE);
+              group.add(plantObj);
+            }
+          }
+        }
+      } else {
+        const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
+        const matSpec = MATERIALS[bed.material] || MATERIALS.wood;
 
-      // Terreau intérieur
-      const innerW = Math.max(0.05, w - wallT * 2);
-      const innerD = Math.max(0.05, d - wallT * 2);
-      const soilH = Math.max(0.04, h - 0.03);
-      const soilMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(innerW, soilH, innerD),
-        new THREE.MeshStandardMaterial({ color: 0x3e2718, roughness: 0.96, metalness: 0.0 })
-      );
-      soilMesh.position.y = soilH / 2;
-      soilMesh.receiveShadow = true;
-      group.add(soilMesh);
+        const wallMat = new THREE.MeshStandardMaterial({
+          color: matSpec.color,
+          roughness: matSpec.roughness,
+          metalness: matSpec.metalness
+        });
 
-      // Contour de sélection si bac actif
-      if (state.activeBedId === bed.id) {
-        const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.01, d + 0.02));
-        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
-        line.position.y = (h + 0.01) / 2;
-        group.add(line);
-      }
+        const northWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
+        northWall.position.set(0, h / 2, -d / 2 + wallT / 2);
+        northWall.castShadow = true;
+        northWall.receiveShadow = true;
 
-      // Plants sur la grille 30x30 cm
-      const cols = Math.max(1, Math.floor(innerW / CELL_SIZE));
-      const rows = Math.max(1, Math.floor(innerD / CELL_SIZE));
-      const startX = -((cols - 1) * CELL_SIZE) / 2;
-      const startZ = -((rows - 1) * CELL_SIZE) / 2;
+        const southWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, wallT), wallMat);
+        southWall.position.set(0, h / 2, d / 2 - wallT / 2);
+        southWall.castShadow = true;
+        southWall.receiveShadow = true;
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const key = `${r},${c}`;
-          const plantType = bed.plants[key];
-          if (plantType) {
-            const plantObj = createPlantMesh(plantType);
-            plantObj.position.set(startX + c * CELL_SIZE, soilH, startZ + r * CELL_SIZE);
-            group.add(plantObj);
+        const westWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
+        westWall.position.set(-w / 2 + wallT / 2, h / 2, 0);
+        westWall.castShadow = true;
+        westWall.receiveShadow = true;
+
+        const eastWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, h, Math.max(0.02, d - wallT * 2)), wallMat);
+        eastWall.position.set(w / 2 - wallT / 2, h / 2, 0);
+        eastWall.castShadow = true;
+        eastWall.receiveShadow = true;
+
+        group.add(northWall, southWall, westWall, eastWall);
+
+        const innerW = Math.max(0.05, w - wallT * 2);
+        const innerD = Math.max(0.05, d - wallT * 2);
+        const soilH = Math.max(0.04, h - 0.03);
+        const soilMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(innerW, soilH, innerD),
+          new THREE.MeshStandardMaterial({ color: 0x3e2718, roughness: 0.96, metalness: 0.0 })
+        );
+        soilMesh.position.y = soilH / 2;
+        soilMesh.receiveShadow = true;
+        group.add(soilMesh);
+
+        if (state.activeBedId === bed.id) {
+          const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w + 0.02, h + 0.01, d + 0.02));
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x34d399 }));
+          line.position.y = (h + 0.01) / 2;
+          group.add(line);
+        }
+
+        const cols = Math.max(1, Math.floor(innerW / CELL_SIZE));
+        const rows = Math.max(1, Math.floor(innerD / CELL_SIZE));
+        const startX = -((cols - 1) * CELL_SIZE) / 2;
+        const startZ = -((rows - 1) * CELL_SIZE) / 2;
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const key = `${r},${c}`;
+            const plantType = bed.plants[key];
+            if (plantType) {
+              const plantObj = createPlantMesh(plantType);
+              plantObj.position.set(startX + c * CELL_SIZE, soilH, startZ + r * CELL_SIZE);
+              group.add(plantObj);
+            }
           }
         }
       }
@@ -612,6 +872,13 @@
     }
 
     function getBedGridDimensions(bed) {
+      const kind = bed.kind || 'bed';
+      if (kind === 'plot') {
+        return {
+          cols: Math.max(1, Math.floor((bed.widthCm / 100) / CELL_SIZE)),
+          rows: Math.max(1, Math.floor((bed.depthCm / 100) / CELL_SIZE))
+        };
+      }
       const w = bed.widthCm / 100;
       const d = bed.depthCm / 100;
       const wallT = Math.min(0.05, Math.min(w, d) * 0.08);
@@ -621,21 +888,6 @@
         cols: Math.max(1, Math.floor(innerW / CELL_SIZE)),
         rows: Math.max(1, Math.floor(innerD / CELL_SIZE))
       };
-    }
-
-    function updateStats() {
-      document.getElementById('statBeds').textContent = String(state.beds.length);
-
-      let totalLiters = 0;
-      let totalPlants = 0;
-      for (const bed of state.beds) {
-        const volM3 = (bed.widthCm / 100) * (bed.depthCm / 100) * (bed.heightCm / 100);
-        totalLiters += Math.round(volM3 * 1000);
-        totalPlants += Object.keys(bed.plants || {}).length;
-      }
-
-      document.getElementById('statSoil').textContent = `${totalLiters} L`;
-      document.getElementById('statPlants').textContent = String(totalPlants);
     }
 
     function getActiveBed() {
@@ -654,13 +906,24 @@
       syncUI();
     }
 
-    function addBed({ widthCm, depthCm, heightCm, material, name, x, z, rotationDeg, plants }) {
+    function addBed({ kind, species, scale, widthCm, depthCm, heightCm, material, name, x, z, rotationDeg, plants }) {
       const id = state.nextId++;
+      const resolvedKind = kind === 'plot' || kind === 'tree' ? kind : 'bed';
+      const defaultName =
+        resolvedKind === 'tree'
+          ? `${(TREE_SPECIES[species] || TREE_SPECIES.apple).label} #${id}`
+          : resolvedKind === 'plot'
+            ? `Parcelle #${id}`
+            : `Carré #${id}`;
+
       const bed = {
         id,
-        name: name || `Carré #${id}`,
-        widthCm: Math.max(30, Math.min(600, Number(widthCm) || 120)),
-        depthCm: Math.max(30, Math.min(600, Number(depthCm) || 120)),
+        kind: resolvedKind,
+        species: resolvedKind === 'tree' ? (TREE_SPECIES[species] ? species : 'apple') : null,
+        scale: resolvedKind === 'tree' ? Math.max(0.5, Math.min(2, Number(scale) || 1)) : 1,
+        name: name || defaultName,
+        widthCm: Math.max(30, Math.min(800, Number(widthCm) || (resolvedKind === 'plot' ? 200 : 120))),
+        depthCm: Math.max(30, Math.min(800, Number(depthCm) || (resolvedKind === 'plot' ? 150 : 120))),
         heightCm: Math.max(10, Math.min(120, Number(heightCm) || 30)),
         material: MATERIALS[material] ? material : 'wood',
         x: x != null ? x : ((state.beds.length % 3) - 1) * 1.8,
@@ -701,7 +964,8 @@
     function renderBedCellGrid() {
       const gridEl = document.getElementById('bedCellGrid');
       const targetSelect = document.getElementById('plantTargetBed');
-      const targetBed = state.beds.find((b) => b.id === Number(targetSelect.value)) || getActiveBed() || state.beds[0];
+      const plantableBeds = state.beds.filter((b) => (b.kind || 'bed') !== 'tree');
+      const targetBed = plantableBeds.find((b) => b.id === Number(targetSelect.value)) || plantableBeds[0];
 
       if (!targetBed) {
         gridEl.innerHTML = '';
@@ -709,7 +973,8 @@
       }
 
       const { cols, rows } = getBedGridDimensions(targetBed);
-      document.getElementById('gridInfoLabel').textContent = `${targetBed.name} — ${cols}×${rows} cases (30×30 cm)`;
+      const kindLabel = (targetBed.kind || 'bed') === 'plot' ? 'Sol labouré' : 'Bac';
+      document.getElementById('gridInfoLabel').textContent = `${targetBed.name} (${kindLabel}) — ${cols}×${rows} cases (30×30 cm)`;
 
       const cellPx = Math.max(36, Math.min(54, Math.floor(420 / Math.max(cols, rows))));
       gridEl.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
@@ -742,7 +1007,6 @@
               targetBed.plants[key] = state.selectedPlant;
             }
             rebuildBedMesh(targetBed);
-            updateStats();
             renderBedCellGrid();
           });
 
@@ -752,12 +1016,40 @@
     }
 
     function syncUI() {
-      updateStats();
+      // Onglet + Ajouter : Bac / Sol labouré / Arbre verger
+      const btnTypeBed = document.getElementById('typeAddBed');
+      const btnTypePlot = document.getElementById('typeAddPlot');
+      const btnTypeTree = document.getElementById('typeAddTree');
+      const formAddBed = document.getElementById('formAddBed');
+      const formAddPlot = document.getElementById('formAddPlot');
+      const formAddTree = document.getElementById('formAddTree');
+      const btnCreateBed = document.getElementById('btnCreateBed');
 
-      // Onglet Bac Actif
+      const activeTypeClass = 'py-2.5 px-2 rounded-xl border-2 border-emerald-700 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-semibold transition';
+      const idleTypeClass = 'py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs sm:text-sm font-semibold transition';
+
+      btnTypeBed.className = state.addKind === 'bed' ? activeTypeClass : idleTypeClass;
+      btnTypePlot.className = state.addKind === 'plot' ? activeTypeClass : idleTypeClass;
+      btnTypeTree.className = state.addKind === 'tree' ? activeTypeClass : idleTypeClass;
+
+      formAddBed.classList.toggle('hidden', state.addKind !== 'bed');
+      formAddPlot.classList.toggle('hidden', state.addKind !== 'plot');
+      formAddTree.classList.toggle('hidden', state.addKind !== 'tree');
+
+      if (state.addKind === 'plot') {
+        btnCreateBed.textContent = '+ Créer le sol labouré';
+      } else if (state.addKind === 'tree') {
+        btnCreateBed.textContent = "+ Ajouter l'arbre au verger";
+      } else {
+        btnCreateBed.textContent = '+ Créer le carré potager';
+      }
+
+      // Onglet Élément Actif
       const activeBed = getActiveBed();
       const noActiveEl = document.getElementById('noActiveBed');
       const activeControlsEl = document.getElementById('activeBedControls');
+      const editMatWrapper = document.getElementById('editMaterialWrapper');
+      const editSpeciesWrapper = document.getElementById('editSpeciesWrapper');
 
       if (!activeBed) {
         noActiveEl.classList.remove('hidden');
@@ -765,32 +1057,52 @@
       } else {
         noActiveEl.classList.add('hidden');
         activeControlsEl.classList.remove('hidden');
-        document.getElementById('activeBedBadge').textContent = `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} CM)`;
+        const kind = activeBed.kind || 'bed';
+        const badgeText =
+          kind === 'tree'
+            ? `${activeBed.name} (${(TREE_SPECIES[activeBed.species] || TREE_SPECIES.apple).label})`
+            : kind === 'plot'
+              ? `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} cm · Sol labouré)`
+              : `${activeBed.name} (${activeBed.widthCm}×${activeBed.depthCm} CM)`;
+        document.getElementById('activeBedBadge').textContent = badgeText;
+        editMatWrapper.classList.toggle('hidden', kind !== 'bed');
+        editSpeciesWrapper.classList.toggle('hidden', kind !== 'tree');
+
         const nameInput = document.getElementById('editBedName');
         if (document.activeElement !== nameInput) {
           nameInput.value = activeBed.name;
         }
         document.getElementById('editBedMaterial').value = activeBed.material;
+        document.getElementById('editTreeSpecies').value = activeBed.species || 'apple';
+        document.getElementById('editTreeScale').value = String(activeBed.scale || 1);
       }
 
       // Onglet Planter
+      const plantableBeds = state.beds.filter((b) => (b.kind || 'bed') !== 'tree');
       const noPlantBedEl = document.getElementById('noBedForPlanting');
       const plantControlsEl = document.getElementById('plantingControls');
       const targetSelect = document.getElementById('plantTargetBed');
 
-      if (state.beds.length === 0) {
+      if (plantableBeds.length === 0) {
         noPlantBedEl.classList.remove('hidden');
         plantControlsEl.classList.add('hidden');
       } else {
         noPlantBedEl.classList.add('hidden');
         plantControlsEl.classList.remove('hidden');
 
-        const currentSelectedId = activeBed ? activeBed.id : Number(targetSelect.value) || state.beds[0].id;
+        const activeIsPlantable = activeBed && (activeBed.kind || 'bed') !== 'tree';
+        const currentSelectedId = activeIsPlantable
+          ? activeBed.id
+          : plantableBeds.some((b) => b.id === Number(targetSelect.value))
+            ? Number(targetSelect.value)
+            : plantableBeds[0].id;
+
         targetSelect.innerHTML = '';
-        state.beds.forEach((b) => {
+        plantableBeds.forEach((b) => {
           const opt = document.createElement('option');
           opt.value = String(b.id);
-          opt.textContent = `${b.name} (${b.widthCm}×${b.depthCm} cm)`;
+          const suffix = (b.kind || 'bed') === 'plot' ? ' · Sol labouré' : '';
+          opt.textContent = `${b.name} (${b.widthCm}×${b.depthCm} cm${suffix})`;
           if (b.id === currentSelectedId) opt.selected = true;
           targetSelect.appendChild(opt);
         });
@@ -806,7 +1118,7 @@
       }
     }
 
-    // Navigation onglets
+    // Navigation entre les 3 onglets
     const tabs = [
       { btn: document.getElementById('tabAdd'), panel: document.getElementById('panelAdd') },
       { btn: document.getElementById('tabActive'), panel: document.getElementById('panelActive') },
@@ -827,21 +1139,48 @@
       });
     });
 
-    // Création bac
-    document.getElementById('btnCreateBed').addEventListener('click', () => {
-      const widthCm = Number(document.getElementById('newWidth').value);
-      const depthCm = Number(document.getElementById('newDepth').value);
-      const heightCm = Number(document.getElementById('newHeight').value);
-      const material = document.getElementById('newMaterial').value;
-      addBed({ widthCm, depthCm, heightCm, material });
+    // Choix du type d'élément dans + Ajouter
+    document.getElementById('typeAddBed').addEventListener('click', () => {
+      state.addKind = 'bed';
+      syncUI();
+    });
+    document.getElementById('typeAddPlot').addEventListener('click', () => {
+      state.addKind = 'plot';
+      syncUI();
+    });
+    document.getElementById('typeAddTree').addEventListener('click', () => {
+      state.addKind = 'tree';
+      syncUI();
     });
 
-    // Édition bac actif
+    // Création bac / sol labouré / arbre verger
+    document.getElementById('btnCreateBed').addEventListener('click', () => {
+      if (state.addKind === 'plot') {
+        const widthCm = Number(document.getElementById('plotWidth').value);
+        const depthCm = Number(document.getElementById('plotDepth').value);
+        const created = addBed({ kind: 'plot', widthCm, depthCm, heightCm: 15 });
+        showToast(`${created.name} ajouté.`);
+      } else if (state.addKind === 'tree') {
+        const species = document.getElementById('newTreeSpecies').value;
+        const scale = Number(document.getElementById('newTreeScale').value) || 1;
+        const created = addBed({ kind: 'tree', species, scale, widthCm: 120, depthCm: 120, heightCm: 180 });
+        showToast(`${created.name} ajouté au verger.`);
+      } else {
+        const widthCm = Number(document.getElementById('newWidth').value);
+        const depthCm = Number(document.getElementById('newDepth').value);
+        const heightCm = Number(document.getElementById('newHeight').value);
+        const material = document.getElementById('newMaterial').value;
+        const created = addBed({ kind: 'bed', widthCm, depthCm, heightCm, material });
+        showToast(`${created.name} créé.`);
+      }
+    });
+
+    // Édition élément actif
     document.getElementById('editBedName').addEventListener('input', (e) => {
       const bed = getActiveBed();
       if (!bed) return;
       const trimmed = e.target.value;
-      bed.name = trimmed.trim().length > 0 ? trimmed : `Carré #${bed.id}`;
+      bed.name = trimmed.trim().length > 0 ? trimmed : `Élément #${bed.id}`;
       syncUI();
     });
 
@@ -849,6 +1188,21 @@
       const bed = getActiveBed();
       if (!bed) return;
       bed.material = e.target.value;
+      rebuildBedMesh(bed);
+    });
+
+    document.getElementById('editTreeSpecies').addEventListener('change', (e) => {
+      const bed = getActiveBed();
+      if (!bed || (bed.kind || 'bed') !== 'tree') return;
+      bed.species = e.target.value;
+      rebuildBedMesh(bed);
+      syncUI();
+    });
+
+    document.getElementById('editTreeScale').addEventListener('change', (e) => {
+      const bed = getActiveBed();
+      if (!bed || (bed.kind || 'bed') !== 'tree') return;
+      bed.scale = Number(e.target.value) || 1;
       rebuildBedMesh(bed);
     });
 
@@ -880,6 +1234,7 @@
       state.activeBedId = state.beds.length > 0 ? state.beds[state.beds.length - 1].id : null;
       rebuildAllBeds();
       syncUI();
+      showToast('Élément supprimé.');
     });
 
     // Plantation
@@ -893,7 +1248,7 @@
       syncUI();
     });
 
-    // Vues 3D / Dessus
+    // Vues 3D / Dessus (Plan)
     const btnView3D = document.getElementById('btnView3D');
     const btnViewTop = document.getElementById('btnViewTop');
 
@@ -926,20 +1281,25 @@
       dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
     });
 
-    // Export / Import / Reset JSON
+    // Export / Import / Réinitialisation JSON
     document.getElementById('btnExportJson').addEventListener('click', () => {
-      const payload = {
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        beds: state.beds
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'potager-3d.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      try {
+        const payload = {
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          beds: state.beds
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'potager-3d.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Plan exporté vers potager-3d.json.');
+      } catch (err) {
+        showToast("Erreur lors de l'export JSON.", true);
+      }
     });
 
     const fileInputJson = document.getElementById('fileInputJson');
@@ -959,8 +1319,8 @@
           state.nextId = 1;
           list.forEach((item) => {
             const created = addBed(item);
-            if (item.id && item.id >= state.nextId) {
-              state.nextId = item.id + 1;
+            if (item.id && Number(item.id) >= state.nextId) {
+              state.nextId = Number(item.id) + 1;
             }
             created.id = item.id || created.id;
           });
@@ -971,8 +1331,9 @@
             state.activeBedId = null;
           }
           syncUI();
+          showToast('Plan JSON importé.');
         } catch (err) {
-          alert('Fichier JSON invalide.');
+          showToast('Fichier JSON invalide.', true);
         }
       };
       reader.readAsText(file);
@@ -986,9 +1347,10 @@
       state.activeBedId = null;
       state.nextId = 1;
       syncUI();
+      showToast('Scène réinitialisée.');
     });
 
-    // Redimensionnement fluide
+    // Redimensionnement fluide via ResizeObserver
     const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -1000,28 +1362,41 @@
     });
     resizeObserver.observe(container);
 
-    // Scène de départ
+    // Scène initiale avec bac potager, sol labouré et arbre de verger
     addBed({
+      kind: 'bed',
       name: 'Carré #1',
       widthCm: 120,
       depthCm: 120,
       heightCm: 30,
       material: 'wood',
-      x: -1.1,
-      z: 0,
+      x: -1.4,
+      z: -0.4,
       rotationDeg: 0,
       plants: { '0,0': 'tomato', '1,2': 'lettuce', '2,1': 'carrot' }
     });
     addBed({
-      name: 'Carré #2',
-      widthCm: 150,
-      depthCm: 90,
-      heightCm: 30,
-      material: 'corten',
-      x: 1.3,
-      z: 0.2,
+      kind: 'plot',
+      name: 'Parcelle #2',
+      widthCm: 180,
+      depthCm: 120,
+      heightCm: 15,
+      x: 1.2,
+      z: -0.5,
       rotationDeg: 0,
       plants: { '0,1': 'strawberry', '1,3': 'herb' }
+    });
+    addBed({
+      kind: 'tree',
+      species: 'apple',
+      scale: 1,
+      name: 'Pommier #3',
+      widthCm: 120,
+      depthCm: 120,
+      heightCm: 180,
+      x: 0,
+      z: 1.7,
+      rotationDeg: 0
     });
     setActiveBed(1);
 
@@ -1033,5 +1408,5 @@
     animate();
   </script>
 </body>
-
 </html>
+```
