@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Potager 3D — Modélisation, Verger &amp; Planification</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script type="importmap">
     {
       "imports": {
@@ -14,13 +17,18 @@
     }
   </script>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #f4f6f2;
       color: #1f2923;
+      overflow-x: hidden;
     }
+
     .canvas-wrap {
       position: relative;
       width: 100%;
@@ -30,22 +38,26 @@
       user-select: none;
       touch-action: none;
     }
+
     @media (min-width: 768px) {
       .canvas-wrap {
         height: 510px;
       }
     }
+
     .big-select {
       min-height: 48px;
       font-size: 16px;
       padding: 10px 14px;
     }
+
     .tab-btn.active {
       color: #166534;
       border-bottom: 2px solid #166534;
       font-weight: 600;
       background-color: #f0fdf4;
     }
+
     .subtab-btn.active {
       background-color: #15803d;
       color: #ffffff;
@@ -56,8 +68,8 @@
 </head>
 <body>
   <div class="max-w-3xl mx-auto p-3 sm:p-5 space-y-3">
-    <!-- Bandeau d'en-tête supérieur avec actions JSON -->
-    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3 flex items-center justify-between gap-3">
+    <!-- Bandeau d'en-tête supérieur avec actions JSON et réinitialisation -->
+    <header class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
           ✦
@@ -69,27 +81,27 @@
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+        <button id="btnExportJson" type="button" title="Exporter en JSON" aria-label="Exporter en JSON" class="p-2.5 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
         </button>
-        <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+        <button id="btnImportJson" type="button" title="Importer un JSON" aria-label="Importer un JSON" class="p-2.5 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
         </button>
         <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
-        <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
+        <button id="btnClearAll" type="button" title="Tout effacer" aria-label="Tout effacer" class="p-2.5 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
       </div>
-    </div>
+    </header>
 
-    <!-- Zone 3D (sans bandeau statistique superposé) -->
-    <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
+    <!-- Zone 3D (ou repli 2D si WebGL est indisponible) -->
+    <section id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70" aria-label="Vue interactive du potager et du verger">
       <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
           <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
@@ -98,7 +110,7 @@
           <button id="btnViewTop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition">
             Vue Dessus (Plan)
           </button>
-          <button id="btnResetCamera" type="button" title="Réinitialiser la caméra" class="ml-1 p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 transition">
+          <button id="btnResetCamera" type="button" title="Réinitialiser la caméra" aria-label="Réinitialiser la caméra" class="ml-1 p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -110,10 +122,10 @@
           <span>Grille (1m)</span>
         </button>
       </div>
-    </div>
+    </section>
 
-    <!-- Panneau principal avec onglets en haut -->
-    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+    <!-- Panneau principal avec trois onglets -->
+    <main class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
       <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600">
         <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
           + Ajouter
@@ -420,31 +432,65 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Bandeau discret d'information (sans utiliser alert()) -->
-  <div id="toastBanner" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] bg-stone-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg border border-stone-700 text-center"></div>
+  <!-- Bandeau de notification discret (sans alert/confirm) -->
+  <div id="statusToast" role="status" aria-live="polite" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] bg-stone-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg border border-stone-700 text-center"></div>
 
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    const CELL_SIZE = 0.30; // 30 cm en mètres
-    const SNAP_STEP = 0.10;  // Aimantation 10 cm en mètres
+    // Constantes métriques : chaque case fait 30 cm, l'aimantation en plan fait 10 cm
+    const CELL_SIZE = 0.30;
+    const SNAP_STEP = 0.10;
 
-    let toastTimer = null;
-    function showNotice(message) {
-      const banner = document.getElementById('toastBanner');
-      if (!banner) return;
-      banner.textContent = message;
-      banner.classList.remove('hidden');
-      if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        banner.classList.add('hidden');
-      }, 3600);
+    // Espèces occupant une emprise exclusive de 3x3 (9 cases de 30x30 cm)
+    const THREE_BY_THREE_PLANTS = new Set([
+      'Cassis',
+      'Framboise',
+      'Groseille rouge',
+      'Mûre',
+      'Myrtille',
+      'Melon'
+    ]);
+
+    // Arbustes à baies modélisés avec le grand buisson de type Cassis (échelle 3.0 / étalement 2.6)
+    const LARGE_BUSH_FRUITS = new Set([
+      'Cassis',
+      'Framboise',
+      'Groseille rouge',
+      'Mûre',
+      'Myrtille'
+    ]);
+
+    function isThreeByThreePlant(spec) {
+      return Boolean(spec && THREE_BY_THREE_PLANTS.has(spec.name));
     }
 
+    function isLargeBushFruit(spec) {
+      return Boolean(spec && spec.category === 'fruits' && LARGE_BUSH_FRUITS.has(spec.name));
+    }
+
+    // Affichage d'un message discret non bloquant
+    let toastTimeout = null;
+    function showNotice(message) {
+      try {
+        const toast = document.getElementById('statusToast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 3600);
+      } catch (_err) {
+        // Ignore les erreurs d'affichage transitoires
+      }
+    }
+
+    // Matériaux disponibles pour les bacs surélevés
     const MATERIALS = {
       wood: { label: 'Bois brut', color: 0xb5835a, roughness: 0.85, metalness: 0.05 },
       burned_wood: { label: 'Bois brûlé', color: 0x3b302b, roughness: 0.9, metalness: 0.05 },
@@ -452,6 +498,7 @@
       stone: { label: 'Pierre naturelle', color: 0x9ca39b, roughness: 0.92, metalness: 0.02 }
     };
 
+    // 20 essences d'arbres fruitiers du verger
     const ORCHARD_FRUIT_TREES_FR = [
       'Abricotier', 'Amandier', 'Cerisier', 'Châtaignier', 'Citronnier',
       'Clémentinier', 'Cognassier', 'Figuier', 'Kiwaï / Kiwi grimpant', 'Mirabellier',
@@ -461,26 +508,26 @@
 
     const TREE_SPECIES = {};
     const TREE_ICONS_BY_NAME = {
-      "Abricotier": "🍑",
-      "Amandier": "🌰",
-      "Cerisier": "🍒",
-      "Châtaignier": "🌰",
-      "Citronnier": "🍋",
-      "Clémentinier": "🍊",
-      "Cognassier": "🍐",
-      "Figuier": "🟣",
-      "Kiwaï / Kiwi grimpant": "🥝",
-      "Mirabellier": "🟡",
-      "Nectarinier": "🍑",
-      "Noisetier": "🌰",
-      "Noyer": "🥜",
-      "Oranger": "🍊",
-      "Pêcher": "🍑",
-      "Poirier": "🍐",
-      "Pommier": "🍎",
-      "Prunier": "🟣",
-      "Reine-Claude (prunier)": "🟢",
-      "Vigne fruitière": "🍇"
+      'Abricotier': '🍑',
+      'Amandier': '🌰',
+      'Cerisier': '🍒',
+      'Châtaignier': '🌰',
+      'Citronnier': '🍋',
+      'Clémentinier': '🍊',
+      'Cognassier': '🍐',
+      'Figuier': '🟣',
+      'Kiwaï / Kiwi grimpant': '🥝',
+      'Mirabellier': '🟡',
+      'Nectarinier': '🍑',
+      'Noisetier': '🌰',
+      'Noyer': '🥜',
+      'Oranger': '🍊',
+      'Pêcher': '🍑',
+      'Poirier': '🍐',
+      'Pommier': '🍎',
+      'Prunier': '🟣',
+      'Reine-Claude (prunier)': '🟢',
+      'Vigne fruitière': '🍇'
     };
 
     const TREE_PALETTES = [
@@ -510,7 +557,9 @@
     }
     initDefaultTreeSpecies();
 
-    const DEFAULT_TREE_KEY = Object.keys(TREE_SPECIES).find((k) => /pommier/i.test(TREE_SPECIES[k].label)) || Object.keys(TREE_SPECIES)[0];
+    const DEFAULT_TREE_KEY =
+      Object.keys(TREE_SPECIES).find((k) => /pommier/i.test(TREE_SPECIES[k].label)) ||
+      Object.keys(TREE_SPECIES)[0];
 
     const TREE_SIZES = {
       dwarf: { label: 'Compact', height: 1.8, crownRadius: 0.52 },
@@ -518,6 +567,7 @@
       tall: { label: 'Haute-tige', height: 3.5, crownRadius: 1.05 }
     };
 
+    // 70 légumes et 9 petits fruits
     const VEGETABLE_NAMES_FR = [
       'Ail', 'Aneth', 'Artichaut', 'Asperge', 'Aubergine',
       'Basilic', 'Batavia', 'Betterave rouge', 'Blette (carde)', 'Brocoli',
@@ -541,41 +591,42 @@
     ];
 
     const VEG_ICONS_BY_NAME = {
-      "Ail": "🧄", "Aneth": "🌿", "Artichaut": "🌵", "Asperge": "🎍", "Aubergine": "🍆",
-      "Basilic": "🌿", "Batavia": "🥬", "Betterave rouge": "🫜", "Blette (carde)": "🥬", "Brocoli": "🥦",
-      "Carotte": "🥕", "Céleri branche": "🥬", "Céleri-rave": "🫜", "Cerfeuil": "🌿", "Chicorée frisée": "🥬",
-      "Chou chinois": "🥬", "Chou de Bruxelles": "🥦", "Chou kale": "🥬", "Chou pointu": "🥬", "Chou pommé": "🥬",
-      "Chou rouge": "🟣", "Chou-fleur": "🥦", "Chou-rave": "🫜", "Ciboulette": "🌱", "Concombre": "🥒",
-      "Coriandre": "🌿", "Cornichon": "🥒", "Courge butternut": "🎃", "Courgette": "🥒", "Cresson": "🌱",
-      "Échalote": "🧅", "Endive": "🥬", "Épinard": "🍃", "Estragon": "🌿", "Fenouil bulbe": "🫜",
-      "Fève": "🫘", "Haricot à rames": "🫛", "Haricot vert": "🫛", "Laitue iceberg": "🥬", "Laitue romaine": "🥬",
-      "Mâche": "🌱", "Menthe": "🍃", "Mizuna": "🥬", "Navet": "🫜", "Oignon": "🧅",
-      "Origan": "🌿", "Oseille": "🍃", "Pak choï": "🥬", "Panais": "🥕", "Patate douce": "🍠",
-      "Persil": "🌿", "Petit pois": "🫛", "Piment doux": "🫑", "Piment fort": "🌶️", "Poireau": "🧅",
-      "Poivron": "🫑", "Pomme de terre": "🥔", "Potiron": "🎃", "Pourpier": "🌱", "Radis noir": "🫜",
-      "Radis rose": "🔴", "Rave longue": "🫜", "Romarin": "🌿", "Roquette": "🥬", "Salade laitue": "🥗",
-      "Sauge": "🌿", "Scarole": "🥬", "Thym": "🌿", "Tomate": "🍅", "Topinambour": "🥔"
+      'Ail': '🧄', 'Aneth': '🌿', 'Artichaut': '🌵', 'Asperge': '🎍', 'Aubergine': '🍆',
+      'Basilic': '🌿', 'Batavia': '🥬', 'Betterave rouge': '🫜', 'Blette (carde)': '🥬', 'Brocoli': '🥦',
+      'Carotte': '🥕', 'Céleri branche': '🥬', 'Céleri-rave': '🫜', 'Cerfeuil': '🌿', 'Chicorée frisée': '🥬',
+      'Chou chinois': '🥬', 'Chou de Bruxelles': '🥦', 'Chou kale': '🥬', 'Chou pointu': '🥬', 'Chou pommé': '🥬',
+      'Chou rouge': '🟣', 'Chou-fleur': '🥦', 'Chou-rave': '🫜', 'Ciboulette': '🌱', 'Concombre': '🥒',
+      'Coriandre': '🌿', 'Cornichon': '🥒', 'Courge butternut': '🎃', 'Courgette': '🥒', 'Cresson': '🌱',
+      'Échalote': '🧅', 'Endive': '🥬', 'Épinard': '🍃', 'Estragon': '🌿', 'Fenouil bulbe': '🫜',
+      'Fève': '🫘', 'Haricot à rames': '🫛', 'Haricot vert': '🫛', 'Laitue iceberg': '🥬', 'Laitue romaine': '🥬',
+      'Mâche': '🌱', 'Menthe': '🍃', 'Mizuna': '🥬', 'Navet': '🫜', 'Oignon': '🧅',
+      'Origan': '🌿', 'Oseille': '🍃', 'Pak choï': '🥬', 'Panais': '🥕', 'Patate douce': '🍠',
+      'Persil': '🌿', 'Petit pois': '🫛', 'Piment doux': '🫑', 'Piment fort': '🌶️', 'Poireau': '🧅',
+      'Poivron': '🫑', 'Pomme de terre': '🥔', 'Potiron': '🎃', 'Pourpier': '🌱', 'Radis noir': '🫜',
+      'Radis rose': '🔴', 'Rave longue': '🫜', 'Romarin': '🌿', 'Roquette': '🥬', 'Salade laitue': '🥗',
+      'Sauge': '🌿', 'Scarole': '🥬', 'Thym': '🌿', 'Tomate': '🍅', 'Topinambour': '🥔'
     };
 
     const FRUIT_ICONS_BY_NAME = {
-      "Cassis": "⚫",
-      "Fraise": "🍓",
-      "Framboise": "🍒",
-      "Groseille rouge": "🍎",
-      "Melon": "🍈",
-      "Mûre": "🍇",
-      "Myrtille": "🫐",
-      "Physalis": "🏮",
-      "Raisin de table": "🍐"
+      'Cassis': '⚫',
+      'Fraise': '🍓',
+      'Framboise': '🍒',
+      'Groseille rouge': '🍎',
+      'Melon': '🍈',
+      'Mûre': '🍇',
+      'Myrtille': '🫐',
+      'Physalis': '🏮',
+      'Raisin de table': '🍐'
     };
 
+    // Logos SVG détaillés pour les baies et fruits caractéristiques
     const FRUIT_SVG_BY_NAME = {
-      "Mûre": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18 9C14 5 9 5 7 7C10 8 13 10 15 11C11 11 8 13 7 15C11 14 15 13 18 11C21 13 25 14 29 15C28 13 25 11 21 11C23 10 26 8 29 7C27 5 22 5 18 9Z\" fill=\"#4da135\" stroke=\"#1f3b14\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18 11V6\" stroke=\"#4da135\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M18 11C12.5 11 9 15.5 9.5 21.5C10 27 14 31.5 18 31.5C22 31.5 26 27 26.5 21.5C27 15.5 23.5 11 18 11Z\" fill=\"#3b3675\" stroke=\"#1d1b38\" stroke-width=\"1.6\"/><circle cx=\"14.5\" cy=\"15\" r=\"2.6\" fill=\"#5b54a8\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"21.5\" cy=\"15\" r=\"2.6\" fill=\"#5b54a8\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"12\" cy=\"19.5\" r=\"2.7\" fill=\"#4a4491\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18\" cy=\"19\" r=\"2.9\" fill=\"#635bb5\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"24\" cy=\"19.5\" r=\"2.7\" fill=\"#4a4491\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"13.5\" cy=\"24.5\" r=\"2.6\" fill=\"#433d85\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18.5\" cy=\"24.5\" r=\"2.7\" fill=\"#554ea6\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"23\" cy=\"24.2\" r=\"2.5\" fill=\"#433d85\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/><circle cx=\"18\" cy=\"28.8\" r=\"2.3\" fill=\"#393473\" stroke=\"#1d1b38\" stroke-width=\"1.2\"/></svg>",
-      "Myrtille": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M16 11C12 6 7 7 6 10C10 10 13 12 15 14Z\" fill=\"#69a338\" stroke=\"#223612\" stroke-width=\"1.3\"/><path d=\"M21 10C25 5 30 6 31 9C27 10 24 12 22 14Z\" fill=\"#7ab843\" stroke=\"#223612\" stroke-width=\"1.3\"/><path d=\"M25 18C29 15 32 18 31 22C28 21 26 20 24 19Z\" fill=\"#5e9430\" stroke=\"#223612\" stroke-width=\"1.3\"/><circle cx=\"24\" cy=\"14\" r=\"4.3\" fill=\"#4c69a8\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"14\" cy=\"15\" r=\"4.5\" fill=\"#5575ba\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"11.5\" cy=\"21.5\" r=\"4.3\" fill=\"#45619c\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"21.5\" cy=\"21\" r=\"4.6\" fill=\"#5d7ec4\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><circle cx=\"16.5\" cy=\"18.5\" r=\"4.8\" fill=\"#6587cf\" stroke=\"#1e2942\" stroke-width=\"1.5\"/><circle cx=\"14\" cy=\"26.8\" r=\"4.1\" fill=\"#4a66a3\" stroke=\"#1e2942\" stroke-width=\"1.4\"/><path d=\"M15 15.5L16.5 14.5L18 15.5L17.3 17L15.7 17Z\" fill=\"#29385c\"/><path d=\"M20 18.5L21.5 17.5L23 18.5L22.3 20L20.7 20Z\" fill=\"#29385c\"/></svg>",
-      "Framboise": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 9L24 5\" stroke=\"#5ca329\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M18 11C14 7 9 7 7 9C11 10 14 12 16 13C12 13 9 15 8 17C12 16 15 15 18 13C21 15 24 16 28 17C27 15 24 13 20 13C22 12 25 10 28 9C26 7 22 7 18 11Z\" fill=\"#76c435\" stroke=\"#1b2e0c\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/><path d=\"M18 12.5C12.5 12.5 8.5 16.5 9 22.5C9.5 28 13.8 31.5 18 31.5C22.2 31.5 26.5 28 27 22.5C27.5 16.5 23.5 12.5 18 12.5Z\" fill=\"#df1e38\" stroke=\"#1a1114\" stroke-width=\"1.7\"/><circle cx=\"14.2\" cy=\"16.2\" r=\"2.7\" fill=\"#f22b46\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"21.8\" cy=\"16.2\" r=\"2.7\" fill=\"#f22b46\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"11.5\" cy=\"20.8\" r=\"2.8\" fill=\"#d61831\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18\" cy=\"20.2\" r=\"3\" fill=\"#fa3751\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"24.5\" cy=\"20.8\" r=\"2.8\" fill=\"#d61831\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"13\" cy=\"25.5\" r=\"2.6\" fill=\"#c9142c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18.2\" cy=\"25.8\" r=\"2.8\" fill=\"#e6223c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"23.2\" cy=\"25.3\" r=\"2.6\" fill=\"#c9142c\" stroke=\"#1a1114\" stroke-width=\"1.3\"/><circle cx=\"18\" cy=\"29.4\" r=\"2.2\" fill=\"#ba1127\" stroke=\"#1a1114\" stroke-width=\"1.2\"/></svg>",
-      "Groseille rouge": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z\" fill=\"#68a832\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z\" fill=\"#78bd3c\" stroke=\"#2c4714\" stroke-width=\"1.2\"/><path d=\"M19 10L11 27\" stroke=\"#6d9c2b\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M17 15L14 16.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M15.5 19L21 20.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M14 22.5L18.5 25.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><circle cx=\"17.5\" cy=\"14.5\" r=\"2.9\" fill=\"#e62222\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"13.5\" cy=\"18\" r=\"3\" fill=\"#f02929\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"21.5\" cy=\"20.5\" r=\"3.1\" fill=\"#e01d1d\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"11.5\" cy=\"23.5\" r=\"3\" fill=\"#db1a1a\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"16.5\" cy=\"24.5\" r=\"3.2\" fill=\"#f22c2c\" stroke=\"#8f1111\" stroke-width=\"1\"/><circle cx=\"19.5\" cy=\"27.5\" r=\"2.9\" fill=\"#d41717\" stroke=\"#8f1111\" stroke-width=\"1\"/></svg>",
-      "Cassis": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z\" fill=\"#68a832\" stroke=\"#223810\" stroke-width=\"1.2\"/><path d=\"M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z\" fill=\"#78bd3c\" stroke=\"#223810\" stroke-width=\"1.2\"/><path d=\"M19 10L11 27\" stroke=\"#6d9c2b\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M17 15L14 16.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M15.5 19L21 20.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M14 22.5L18.5 25.5\" stroke=\"#6d9c2b\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><circle cx=\"17.5\" cy=\"14.5\" r=\"2.9\" fill=\"#27272a\" stroke=\"#09090b\" stroke-width=\"1\"/><circle cx=\"13.5\" cy=\"18\" r=\"3\" fill=\"#3f3f46\" stroke=\"#09090b\" stroke-width=\"1\"/><circle cx=\"21.5\" cy=\"20.5\" r=\"3.1\" fill=\"#27272a\" stroke=\"#09090b\" stroke-width=\"1\"/><circle cx=\"11.5\" cy=\"23.5\" r=\"3\" fill=\"#18181b\" stroke=\"#09090b\" stroke-width=\"1\"/><circle cx=\"16.5\" cy=\"24.5\" r=\"3.2\" fill=\"#3f3f46\" stroke=\"#09090b\" stroke-width=\"1\"/><circle cx=\"19.5\" cy=\"27.5\" r=\"2.9\" fill=\"#18181b\" stroke=\"#09090b\" stroke-width=\"1\"/></svg>",
-      "Raisin de table": "<svg viewBox=\"0 0 36 36\" class=\"w-6 h-6 shrink-0\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18 11V6\" stroke=\"#6b4f2a\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><path d=\"M17.5 9.5C14 5.5 9.5 5.5 7.5 8C10.5 8.5 13 9.5 15 11C12.5 11 10 12 8.5 13.5C12 13 15 12 17.5 10.5Z\" fill=\"#7ec832\" stroke=\"#2f5212\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><path d=\"M18.5 9.5C22 5.5 26.5 5.5 28.5 8C25.5 8.5 23 9.5 21 11C23.5 11 26 12 27.5 13.5C24 13 21 12 18.5 10.5Z\" fill=\"#8ed63e\" stroke=\"#2f5212\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><circle cx=\"13.5\" cy=\"14.5\" r=\"3.1\" fill=\"#9333ea\" stroke=\"#6b21a8\" stroke-width=\"0.9\"/><circle cx=\"18\" cy=\"14\" r=\"3.2\" fill=\"#a855f7\" stroke=\"#6b21a8\" stroke-width=\"0.9\"/><circle cx=\"22.5\" cy=\"14.5\" r=\"3.1\" fill=\"#9333ea\" stroke=\"#6b21a8\" stroke-width=\"0.9\"/><circle cx=\"15.5\" cy=\"18.8\" r=\"3.1\" fill=\"#9333ea\" stroke=\"#6b21a8\" stroke-width=\"0.9\"/><circle cx=\"20.5\" cy=\"18.8\" r=\"3.1\" fill=\"#7e22ce\" stroke=\"#581c87\" stroke-width=\"0.9\"/><circle cx=\"13.8\" cy=\"22.8\" r=\"2.9\" fill=\"#7e22ce\" stroke=\"#581c87\" stroke-width=\"0.9\"/><circle cx=\"18\" cy=\"23\" r=\"3.1\" fill=\"#9333ea\" stroke=\"#6b21a8\" stroke-width=\"0.9\"/><circle cx=\"22.2\" cy=\"22.8\" r=\"2.9\" fill=\"#7e22ce\" stroke=\"#581c87\" stroke-width=\"0.9\"/><circle cx=\"15.8\" cy=\"27\" r=\"2.8\" fill=\"#7e22ce\" stroke=\"#581c87\" stroke-width=\"0.9\"/><circle cx=\"20.2\" cy=\"27\" r=\"2.8\" fill=\"#6b21a8\" stroke=\"#581c87\" stroke-width=\"0.9\"/><circle cx=\"18\" cy=\"30.8\" r=\"2.6\" fill=\"#6b21a8\" stroke=\"#581c87\" stroke-width=\"0.9\"/></svg>"
+      'Mûre': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 9C14 5 9 5 7 7C10 8 13 10 15 11C11 11 8 13 7 15C11 14 15 13 18 11C21 13 25 14 29 15C28 13 25 11 21 11C23 10 26 8 29 7C27 5 22 5 18 9Z" fill="#4da135" stroke="#1f3b14" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 11V6" stroke="#4da135" stroke-width="2.4" stroke-linecap="round"/><path d="M18 11C12.5 11 9 15.5 9.5 21.5C10 27 14 31.5 18 31.5C22 31.5 26 27 26.5 21.5C27 15.5 23.5 11 18 11Z" fill="#3b3675" stroke="#1d1b38" stroke-width="1.6"/><circle cx="14.5" cy="15" r="2.6" fill="#5b54a8" stroke="#1d1b38" stroke-width="1.2"/><circle cx="21.5" cy="15" r="2.6" fill="#5b54a8" stroke="#1d1b38" stroke-width="1.2"/><circle cx="12" cy="19.5" r="2.7" fill="#4a4491" stroke="#1d1b38" stroke-width="1.2"/><circle cx="18" cy="19" r="2.9" fill="#635bb5" stroke="#1d1b38" stroke-width="1.2"/><circle cx="24" cy="19.5" r="2.7" fill="#4a4491" stroke="#1d1b38" stroke-width="1.2"/><circle cx="13.5" cy="24.5" r="2.6" fill="#433d85" stroke="#1d1b38" stroke-width="1.2"/><circle cx="18.5" cy="24.5" r="2.7" fill="#554ea6" stroke="#1d1b38" stroke-width="1.2"/><circle cx="23" cy="24.2" r="2.5" fill="#433d85" stroke="#1d1b38" stroke-width="1.2"/><circle cx="18" cy="28.8" r="2.3" fill="#393473" stroke="#1d1b38" stroke-width="1.2"/></svg>',
+      'Myrtille': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 11C12 6 7 7 6 10C10 10 13 12 15 14Z" fill="#69a338" stroke="#223612" stroke-width="1.3"/><path d="M21 10C25 5 30 6 31 9C27 10 24 12 22 14Z" fill="#7ab843" stroke="#223612" stroke-width="1.3"/><path d="M25 18C29 15 32 18 31 22C28 21 26 20 24 19Z" fill="#5e9430" stroke="#223612" stroke-width="1.3"/><circle cx="24" cy="14" r="4.3" fill="#4c69a8" stroke="#1e2942" stroke-width="1.4"/><circle cx="14" cy="15" r="4.5" fill="#5575ba" stroke="#1e2942" stroke-width="1.4"/><circle cx="11.5" cy="21.5" r="4.3" fill="#45619c" stroke="#1e2942" stroke-width="1.4"/><circle cx="21.5" cy="21" r="4.6" fill="#5d7ec4" stroke="#1e2942" stroke-width="1.4"/><circle cx="16.5" cy="18.5" r="4.8" fill="#6587cf" stroke="#1e2942" stroke-width="1.5"/><circle cx="14" cy="26.8" r="4.1" fill="#4a66a3" stroke="#1e2942" stroke-width="1.4"/><path d="M15 15.5L16.5 14.5L18 15.5L17.3 17L15.7 17Z" fill="#29385c"/><path d="M20 18.5L21.5 17.5L23 18.5L22.3 20L20.7 20Z" fill="#29385c"/></svg>',
+      'Framboise': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 9L24 5" stroke="#5ca329" stroke-width="2.4" stroke-linecap="round"/><path d="M18 11C14 7 9 7 7 9C11 10 14 12 16 13C12 13 9 15 8 17C12 16 15 15 18 13C21 15 24 16 28 17C27 15 24 13 20 13C22 12 25 10 28 9C26 7 22 7 18 11Z" fill="#76c435" stroke="#1b2e0c" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 12.5C12.5 12.5 8.5 16.5 9 22.5C9.5 28 13.8 31.5 18 31.5C22.2 31.5 26.5 28 27 22.5C27.5 16.5 23.5 12.5 18 12.5Z" fill="#df1e38" stroke="#1a1114" stroke-width="1.7"/><circle cx="14.2" cy="16.2" r="2.7" fill="#f22b46" stroke="#1a1114" stroke-width="1.3"/><circle cx="21.8" cy="16.2" r="2.7" fill="#f22b46" stroke="#1a1114" stroke-width="1.3"/><circle cx="11.5" cy="20.8" r="2.8" fill="#d61831" stroke="#1a1114" stroke-width="1.3"/><circle cx="18" cy="20.2" r="3" fill="#fa3751" stroke="#1a1114" stroke-width="1.3"/><circle cx="24.5" cy="20.8" r="2.8" fill="#d61831" stroke="#1a1114" stroke-width="1.3"/><circle cx="13" cy="25.5" r="2.6" fill="#c9142c" stroke="#1a1114" stroke-width="1.3"/><circle cx="18.2" cy="25.8" r="2.8" fill="#e6223c" stroke="#1a1114" stroke-width="1.3"/><circle cx="23.2" cy="25.3" r="2.6" fill="#c9142c" stroke="#1a1114" stroke-width="1.3"/><circle cx="18" cy="29.4" r="2.2" fill="#ba1127" stroke="#1a1114" stroke-width="1.2"/></svg>',
+      'Groseille rouge': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z" fill="#68a832" stroke="#2c4714" stroke-width="1.2"/><path d="M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z" fill="#78bd3c" stroke="#2c4714" stroke-width="1.2"/><path d="M19 10L11 27" stroke="#6d9c2b" stroke-width="1.8" stroke-linecap="round"/><path d="M17 15L14 16.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><path d="M15.5 19L21 20.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><path d="M14 22.5L18.5 25.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><circle cx="17.5" cy="14.5" r="2.9" fill="#e62222" stroke="#8f1111" stroke-width="1"/><circle cx="13.5" cy="18" r="3" fill="#f02929" stroke="#8f1111" stroke-width="1"/><circle cx="21.5" cy="20.5" r="3.1" fill="#e01d1d" stroke="#8f1111" stroke-width="1"/><circle cx="11.5" cy="23.5" r="3" fill="#db1a1a" stroke="#8f1111" stroke-width="1"/><circle cx="16.5" cy="24.5" r="3.2" fill="#f22c2c" stroke="#8f1111" stroke-width="1"/><circle cx="19.5" cy="27.5" r="2.9" fill="#d41717" stroke="#8f1111" stroke-width="1"/></svg>',
+      'Cassis': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 5C18 6 17 9 18 12C21 11 23 8 21 5Z" fill="#68a832" stroke="#223810" stroke-width="1.2"/><path d="M23 9C26 9 28 11 27 14C24 14 22 12 23 9Z" fill="#78bd3c" stroke="#223810" stroke-width="1.2"/><path d="M19 10L11 27" stroke="#6d9c2b" stroke-width="1.8" stroke-linecap="round"/><path d="M17 15L14 16.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><path d="M15.5 19L21 20.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><path d="M14 22.5L18.5 25.5" stroke="#6d9c2b" stroke-width="1.4" stroke-linecap="round"/><circle cx="17.5" cy="14.5" r="2.9" fill="#27272a" stroke="#09090b" stroke-width="1"/><circle cx="13.5" cy="18" r="3" fill="#3f3f46" stroke="#09090b" stroke-width="1"/><circle cx="21.5" cy="20.5" r="3.1" fill="#27272a" stroke="#09090b" stroke-width="1"/><circle cx="11.5" cy="23.5" r="3" fill="#18181b" stroke="#09090b" stroke-width="1"/><circle cx="16.5" cy="24.5" r="3.2" fill="#3f3f46" stroke="#09090b" stroke-width="1"/><circle cx="19.5" cy="27.5" r="2.9" fill="#18181b" stroke="#09090b" stroke-width="1"/></svg>',
+      'Raisin de table': '<svg viewBox="0 0 36 36" class="w-6 h-6 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 11V6" stroke="#6b4f2a" stroke-width="2.2" stroke-linecap="round"/><path d="M17.5 9.5C14 5.5 9.5 5.5 7.5 8C10.5 8.5 13 9.5 15 11C12.5 11 10 12 8.5 13.5C12 13 15 12 17.5 10.5Z" fill="#7ec832" stroke="#2f5212" stroke-width="1.2" stroke-linejoin="round"/><path d="M18.5 9.5C22 5.5 26.5 5.5 28.5 8C25.5 8.5 23 9.5 21 11C23.5 11 26 12 27.5 13.5C24 13 21 12 18.5 10.5Z" fill="#8ed63e" stroke="#2f5212" stroke-width="1.2" stroke-linejoin="round"/><circle cx="13.5" cy="14.5" r="3.1" fill="#9333ea" stroke="#6b21a8" stroke-width="0.9"/><circle cx="18" cy="14" r="3.2" fill="#a855f7" stroke="#6b21a8" stroke-width="0.9"/><circle cx="22.5" cy="14.5" r="3.1" fill="#9333ea" stroke="#6b21a8" stroke-width="0.9"/><circle cx="15.5" cy="18.8" r="3.1" fill="#9333ea" stroke="#6b21a8" stroke-width="0.9"/><circle cx="20.5" cy="18.8" r="3.1" fill="#7e22ce" stroke="#581c87" stroke-width="0.9"/><circle cx="13.8" cy="22.8" r="2.9" fill="#7e22ce" stroke="#581c87" stroke-width="0.9"/><circle cx="18" cy="23" r="3.1" fill="#9333ea" stroke="#6b21a8" stroke-width="0.9"/><circle cx="22.2" cy="22.8" r="2.9" fill="#7e22ce" stroke="#581c87" stroke-width="0.9"/><circle cx="15.8" cy="27" r="2.8" fill="#7e22ce" stroke="#581c87" stroke-width="0.9"/><circle cx="20.2" cy="27" r="2.8" fill="#6b21a8" stroke="#581c87" stroke-width="0.9"/><circle cx="18" cy="30.8" r="2.6" fill="#6b21a8" stroke="#581c87" stroke-width="0.9"/></svg>'
     };
 
     const PLANTS = {};
@@ -593,7 +644,14 @@
         const isRoot = /carotte|betterave|navet|radis|panais|pomme de terre|topinambour|patate douce|rave|céleri-rave/i.test(name);
         const isTall = /tomate|haricot à rames|poireau|asperge|maïs|céleri branche|fenouil/i.test(name);
         const hueColor = isRoot ? 0xe06d1b : isTall ? 0x388e3c : 0x4caf50;
-        const fruitAccent = /tomate/i.test(name) ? 0xd93829 : /poivron|piment/i.test(name) ? 0xeab308 : /aubergine/i.test(name) ? 0x6b21a8 : null;
+        const fruitAccent = /tomate/i.test(name)
+          ? 0xd93829
+          : /poivron|piment/i.test(name)
+            ? 0xeab308
+            : /aubergine/i.test(name)
+              ? 0x6b21a8
+              : null;
+
         PLANTS[id] = {
           id,
           category: 'vegetables',
@@ -621,6 +679,7 @@
               : /citron|poire|kiwi|pomme/i.test(name)
                 ? 0x84cc16
                 : 0xa16207;
+
         PLANTS[id] = {
           id,
           category: 'fruits',
@@ -636,6 +695,7 @@
     }
     initDefaultPlants();
 
+    // État global de l'application
     const state = {
       items: [], // 'bed' | 'tilled_soil' | 'orchard_tree'
       activeItemId: null,
@@ -673,74 +733,183 @@
       reader.readAsDataURL(file);
     }
 
-    // Initialisation scène Three.js
+    // Initialisation sécurisée de Three.js avec repli 2D si WebGL est indisponible
     const container = document.getElementById('canvasContainer');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x52822e);
+    let use2DFallback = false;
+    let fallback2DCanvas = null;
+    let fallback2DCtx = null;
 
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      100
-    );
-    camera.position.set(4.8, 5.4, 5.8);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.maxPolarAngle = Math.PI / 2 - 0.03;
-    controls.minDistance = 2;
-    controls.maxDistance = 24;
-    controls.target.set(0, 0, 0);
-
-    // Lumières
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x3f6212, 0.85);
-    hemiLight.position.set(0, 15, 0);
-    scene.add(hemiLight);
-
-    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
-    dirLight.position.set(6, 11, 7);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-    dirLight.shadow.camera.near = 1;
-    dirLight.shadow.camera.far = 35;
-    const dShadow = 9;
-    dirLight.shadow.camera.left = -dShadow;
-    dirLight.shadow.camera.right = dShadow;
-    dirLight.shadow.camera.top = dShadow;
-    dirLight.shadow.camera.bottom = -dShadow;
-    dirLight.shadow.bias = -0.0005;
-    scene.add(dirLight);
-
-    // Pelouse et grille 1m
-    const groundMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(40, 40),
-      new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 })
-    );
-    groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.receiveShadow = true;
-    scene.add(groundMesh);
-
-    const gridHelper = new THREE.GridHelper(24, 24, 0x86efac, 0x65a30d);
-    gridHelper.position.y = 0.003;
-    gridHelper.material.transparent = true;
-    gridHelper.material.opacity = 0.35;
-    scene.add(gridHelper);
-
-    const itemsGroup = new THREE.Group();
-    scene.add(itemsGroup);
+    let scene = null;
+    let camera = null;
+    let renderer = null;
+    let controls = null;
+    let gridHelper = null;
+    let itemsGroup = null;
     const itemMeshes = new Map();
 
-    // Raycasting & déplacement en vue du dessus uniquement sur clic direct d'un élément
+    function init2DFallback() {
+      use2DFallback = true;
+      fallback2DCanvas = document.createElement('canvas');
+      fallback2DCanvas.className = 'w-full h-full block';
+      container.appendChild(fallback2DCanvas);
+      fallback2DCtx = fallback2DCanvas.getContext('2d');
+      resizeFallback2D();
+    }
+
+    function resizeFallback2D() {
+      if (!fallback2DCanvas) return;
+      const w = Math.max(1, container.clientWidth);
+      const h = Math.max(1, container.clientHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      fallback2DCanvas.width = Math.floor(w * dpr);
+      fallback2DCanvas.height = Math.floor(h * dpr);
+      if (fallback2DCtx) {
+        fallback2DCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      render2DFallback();
+    }
+
+    function render2DFallback() {
+      if (!use2DFallback || !fallback2DCtx) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      const ctx = fallback2DCtx;
+      const scale = 68; // 68 px par mètre
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.fillStyle = '#4e7c2a';
+      ctx.fillRect(0, 0, w, h);
+
+      if (state.showGrid) {
+        ctx.strokeStyle = 'rgba(220, 252, 231, 0.25)';
+        ctx.lineWidth = 1;
+        for (let gx = -12; gx <= 12; gx++) {
+          const px = cx + gx * scale;
+          ctx.beginPath();
+          ctx.moveTo(px, 0);
+          ctx.lineTo(px, h);
+          ctx.stroke();
+        }
+        for (let gz = -12; gz <= 12; gz++) {
+          const py = cy + gz * scale;
+          ctx.beginPath();
+          ctx.moveTo(0, py);
+          ctx.lineTo(w, py);
+          ctx.stroke();
+        }
+      }
+
+      state.items.forEach((item) => {
+        const px = cx + item.x * scale;
+        const py = cy + item.z * scale;
+        const isSel = item.id === state.activeItemId;
+
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(THREE.MathUtils.degToRad(item.rotationDeg || 0));
+
+        if (item.type === 'orchard_tree') {
+          const sp = TREE_SPECIES[item.species] || TREE_SPECIES[DEFAULT_TREE_KEY];
+          const sz = TREE_SIZES[item.size] || TREE_SIZES.medium;
+          const rPx = Math.max(18, sz.crownRadius * scale);
+          ctx.fillStyle = `#${sp.foliageColor.toString(16).padStart(6, '0')}`;
+          ctx.beginPath();
+          ctx.arc(0, 0, rPx, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = isSel ? 3 : 1.5;
+          ctx.strokeStyle = isSel ? '#34d399' : '#1f3b14';
+          ctx.stroke();
+        } else {
+          const bw = (item.widthCm / 100) * scale;
+          const bd = (item.depthCm / 100) * scale;
+          ctx.fillStyle = item.type === 'bed'
+            ? `#${(MATERIALS[item.material] || MATERIALS.wood).color.toString(16).padStart(6, '0')}`
+            : '#5b381e';
+          ctx.fillRect(-bw / 2, -bd / 2, bw, bd);
+          ctx.lineWidth = isSel ? 3 : 1.5;
+          ctx.strokeStyle = isSel ? '#34d399' : '#291d14';
+          ctx.strokeRect(-bw / 2, -bd / 2, bw, bd);
+        }
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(item.name, 0, 4);
+        ctx.restore();
+      });
+    }
+
+    try {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x52822e);
+
+      camera = new THREE.PerspectiveCamera(
+        45,
+        Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight),
+        0.1,
+        100
+      );
+      camera.position.set(4.8, 5.4, 5.8);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.maxPolarAngle = Math.PI / 2 - 0.03;
+      controls.minDistance = 2;
+      controls.maxDistance = 24;
+      controls.target.set(0, 0, 0);
+
+      // Lumières hémisphérique et directionnelle avec ombres douces
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x3f6212, 0.85);
+      hemiLight.position.set(0, 15, 0);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
+      dirLight.position.set(6, 11, 7);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.camera.near = 1;
+      dirLight.shadow.camera.far = 35;
+      const dShadow = 9;
+      dirLight.shadow.camera.left = -dShadow;
+      dirLight.shadow.camera.right = dShadow;
+      dirLight.shadow.camera.top = dShadow;
+      dirLight.shadow.camera.bottom = -dShadow;
+      dirLight.shadow.bias = -0.0005;
+      scene.add(dirLight);
+
+      // Sol et grille de 1 mètre
+      const groundMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(40, 40),
+        new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 })
+      );
+      groundMesh.rotation.x = -Math.PI / 2;
+      groundMesh.receiveShadow = true;
+      scene.add(groundMesh);
+
+      gridHelper = new THREE.GridHelper(24, 24, 0x86efac, 0x65a30d);
+      gridHelper.position.y = 0.003;
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.35;
+      scene.add(gridHelper);
+
+      itemsGroup = new THREE.Group();
+      scene.add(itemsGroup);
+    } catch (_webglErr) {
+      init2DFallback();
+      showNotice('Mode plan 2D activé (contexte WebGL indisponible sur cet appareil).');
+    }
+
+    // Raycasting et déplacement aimanté (10 cm) en "Vue Dessus (Plan)"
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -748,8 +917,8 @@
     let draggingItem = null;
     let dragOffset = new THREE.Vector3();
 
-    function updatePointer(clientX, clientY) {
-      const rect = renderer.domElement.getBoundingClientRect();
+    function updatePointer(clientX, clientY, domEl) {
+      const rect = domEl.getBoundingClientRect();
       pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     }
@@ -765,57 +934,471 @@
       return null;
     }
 
-    renderer.domElement.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return;
-      updatePointer(e.clientX, e.clientY);
-      raycaster.setFromCamera(pointer, camera);
+    if (!use2DFallback && renderer && controls && itemsGroup) {
+      renderer.domElement.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        updatePointer(e.clientX, e.clientY, renderer.domElement);
+        raycaster.setFromCamera(pointer, camera);
 
-      const hits = raycaster.intersectObjects(itemsGroup.children, true);
-      const clickedItem = hits.length > 0 ? findItemFromObject(hits[0].object) : null;
+        const hits = raycaster.intersectObjects(itemsGroup.children, true);
+        const clickedItem = hits.length > 0 ? findItemFromObject(hits[0].object) : null;
 
-      if (clickedItem) {
-        setActiveItem(clickedItem.id);
-        if (state.isTopView && raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
-          draggingItem = clickedItem;
-          dragOffset.set(
-            dragIntersection.x - clickedItem.x,
-            0,
-            dragIntersection.z - clickedItem.z
-          );
-          controls.enabled = false;
+        if (clickedItem) {
+          setActiveItem(clickedItem.id);
+          if (state.isTopView && raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
+            draggingItem = clickedItem;
+            dragOffset.set(
+              dragIntersection.x - clickedItem.x,
+              0,
+              dragIntersection.z - clickedItem.z
+            );
+            controls.enabled = false;
+          }
         }
-      }
-    });
+      });
 
-    window.addEventListener('pointermove', (e) => {
-      if (!draggingItem) return;
-      if (!state.isTopView) {
-        draggingItem = null;
-        controls.enabled = true;
-        return;
-      }
-      updatePointer(e.clientX, e.clientY);
-      raycaster.setFromCamera(pointer, camera);
-      if (raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
-        const rawX = dragIntersection.x - dragOffset.x;
-        const rawZ = dragIntersection.z - dragOffset.z;
-        draggingItem.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
-        draggingItem.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
-        updateItemTransform(draggingItem);
-      }
-    });
+      window.addEventListener('pointermove', (e) => {
+        if (!draggingItem) return;
+        if (!state.isTopView) {
+          draggingItem = null;
+          controls.enabled = true;
+          return;
+        }
+        updatePointer(e.clientX, e.clientY, renderer.domElement);
+        raycaster.setFromCamera(pointer, camera);
+        if (raycaster.ray.intersectPlane(dragPlane, dragIntersection)) {
+          const rawX = dragIntersection.x - dragOffset.x;
+          const rawZ = dragIntersection.z - dragOffset.z;
+          draggingItem.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
+          draggingItem.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
+          updateItemTransform(draggingItem);
+        }
+      });
+    } else if (use2DFallback && fallback2DCanvas) {
+      fallback2DCanvas.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        const rect = fallback2DCanvas.getBoundingClientRect();
+        const scale = 68;
+        const wx = (e.clientX - rect.left - rect.width / 2) / scale;
+        const wz = (e.clientY - rect.top - rect.height / 2) / scale;
+
+        const hit = [...state.items].reverse().find((it) => {
+          const halfW = it.type === 'orchard_tree'
+            ? (TREE_SIZES[it.size] || TREE_SIZES.medium).crownRadius
+            : (it.widthCm / 100) / 2;
+          const halfD = it.type === 'orchard_tree'
+            ? (TREE_SIZES[it.size] || TREE_SIZES.medium).crownRadius
+            : (it.depthCm / 100) / 2;
+          return Math.abs(wx - it.x) <= Math.max(0.25, halfW) && Math.abs(wz - it.z) <= Math.max(0.25, halfD);
+        });
+
+        if (hit) {
+          setActiveItem(hit.id);
+          if (state.isTopView) {
+            draggingItem = hit;
+            dragOffset.set(wx - hit.x, 0, wz - hit.z);
+          }
+        }
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!draggingItem || !state.isTopView) return;
+        const rect = fallback2DCanvas.getBoundingClientRect();
+        const scale = 68;
+        const wx = (e.clientX - rect.left - rect.width / 2) / scale;
+        const wz = (e.clientY - rect.top - rect.height / 2) / scale;
+        draggingItem.x = Math.round((wx - dragOffset.x) / SNAP_STEP) * SNAP_STEP;
+        draggingItem.z = Math.round((wz - dragOffset.z) / SNAP_STEP) * SNAP_STEP;
+        render2DFallback();
+      });
+    }
 
     function stopDragging() {
       if (draggingItem) {
         draggingItem = null;
-        controls.enabled = true;
+        if (controls) controls.enabled = true;
       }
     }
 
     window.addEventListener('pointerup', stopDragging);
     window.addEventListener('pointercancel', stopDragging);
 
-    // Maillage 3D d'un plant
+    // Construit une grappe de drupéoles (framboise ou mûre)
+    function createDrupeletClusterMesh(ripeMat, brightMat) {
+      const rGroup = new THREE.Group();
+      const drupelets = [
+        [0.0, 0.016, 0.0, 0.014],
+        [-0.012, 0.008, 0.009, 0.013],
+        [0.012, 0.008, 0.009, 0.013],
+        [0.0, 0.007, -0.012, 0.013],
+        [-0.013, -0.003, -0.006, 0.013],
+        [0.013, -0.003, -0.006, 0.013],
+        [0.0, -0.004, 0.013, 0.014],
+        [-0.01, -0.014, 0.008, 0.012],
+        [0.01, -0.014, 0.008, 0.012],
+        [0.0, -0.022, 0.0, 0.011]
+      ];
+      drupelets.forEach(([dx, dy, dz, rad], idx) => {
+        const dMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(rad, 7, 7),
+          idx % 2 === 0 ? ripeMat : brightMat
+        );
+        dMesh.position.set(dx, dy, dz);
+        dMesh.castShadow = true;
+        rGroup.add(dMesh);
+      });
+      return rGroup;
+    }
+
+    // Construit le grand buisson type Cassis (3x3 / 9 cases de 30x30 cm) avec fruits adaptés à chaque logo
+    function createLargeBerryBushMesh(fruitName) {
+      const isRaspberry = fruitName === 'Framboise';
+      const isBlackberry = fruitName === 'Mûre';
+      const isBlueberry = fruitName === 'Myrtille';
+      const isDrupeletBush = isRaspberry || isBlackberry;
+      const isRedCurrant = fruitName === 'Groseille rouge';
+
+      const bushScaleY = 3.0;
+      const bushSpreadXZ = 2.6;
+      const g = new THREE.Group();
+
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0x6b422b, roughness: 0.9 });
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x4f8a2d, roughness: 0.76 });
+      const currantStemMat = new THREE.MeshStandardMaterial({ color: 0x6d9c2b, roughness: 0.82 });
+
+      const ripeBerryMat = new THREE.MeshStandardMaterial(
+        isBlueberry
+          ? { color: 0x5d7ec4, roughness: 0.38, metalness: 0.06 }
+          : isBlackberry
+            ? { color: 0x3b3675, roughness: 0.34, metalness: 0.06 }
+            : isRaspberry || isRedCurrant
+              ? { color: isRedCurrant ? 0xe62222 : 0xdf1e38, roughness: 0.32, metalness: 0.05 }
+              : { color: 0x2a3142, roughness: 0.45, metalness: 0.08 }
+      );
+
+      const brightBerryMat = new THREE.MeshStandardMaterial(
+        isBlueberry
+          ? { color: 0x7a99dc, roughness: 0.34, metalness: 0.06 }
+          : isBlackberry
+            ? { color: 0x635bb5, roughness: 0.3, metalness: 0.06 }
+            : isRaspberry || isRedCurrant
+              ? { color: isRedCurrant ? 0xf22c2c : 0xf42b47, roughness: 0.3, metalness: 0.05 }
+              : { color: 0x3f3f46, roughness: 0.42, metalness: 0.08 }
+      );
+
+      const unripeBerryMat = new THREE.MeshStandardMaterial({ color: 0x76946b, roughness: 0.65 });
+
+      const branches = [
+        { x: 0.0, z: 0.0, h: 0.23 * bushScaleY, tiltX: 0.04, tiltZ: -0.03 },
+        { x: -0.045 * bushSpreadXZ, z: 0.02 * bushSpreadXZ, h: 0.21 * bushScaleY, tiltX: 0.14, tiltZ: 0.22 },
+        { x: 0.048 * bushSpreadXZ, z: 0.015 * bushSpreadXZ, h: 0.215 * bushScaleY, tiltX: 0.12, tiltZ: -0.24 },
+        { x: 0.01 * bushSpreadXZ, z: -0.045 * bushSpreadXZ, h: 0.195 * bushScaleY, tiltX: -0.22, tiltZ: 0.06 },
+        { x: -0.025 * bushSpreadXZ, z: -0.035 * bushSpreadXZ, h: 0.18 * bushScaleY, tiltX: -0.18, tiltZ: 0.16 },
+        { x: 0.06 * bushSpreadXZ, z: -0.035 * bushSpreadXZ, h: 0.20 * bushScaleY, tiltX: -0.15, tiltZ: -0.20 },
+        { x: -0.055 * bushSpreadXZ, z: -0.025 * bushSpreadXZ, h: 0.19 * bushScaleY, tiltX: -0.12, tiltZ: 0.24 }
+      ];
+
+      branches.forEach((br) => {
+        const stem = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.008, 0.016, br.h, 7),
+          stemMat
+        );
+        stem.position.set(br.x * 0.5, br.h * 0.5, br.z * 0.5);
+        stem.rotation.x = br.tiltX;
+        stem.rotation.z = br.tiltZ;
+        stem.castShadow = true;
+        g.add(stem);
+
+        const tipX = br.x + Math.sin(br.tiltZ) * br.h * 0.45;
+        const tipY = br.h * 0.92;
+        const tipZ = br.z - Math.sin(br.tiltX) * br.h * 0.45;
+
+        for (let l = 0; l < 4; l++) {
+          const ang = (l / 4) * Math.PI * 2 + br.h * 2;
+          const leaf = new THREE.Mesh(
+            new THREE.ConeGeometry(0.055, 0.11, 5),
+            leafMat
+          );
+          leaf.scale.set(1.15, 1.0, 0.28);
+          leaf.position.set(
+            tipX + Math.cos(ang) * 0.045,
+            tipY - l * 0.09,
+            tipZ + Math.sin(ang) * 0.045
+          );
+          leaf.rotation.y = -ang;
+          leaf.rotation.x = 0.65;
+          leaf.castShadow = true;
+          g.add(leaf);
+        }
+
+        for (let cl = 0; cl < 4; cl++) {
+          const cFrac = 0.34 + cl * 0.19;
+          const cx = br.x + Math.sin(br.tiltZ) * br.h * cFrac * 0.45 + (cl % 2 === 0 ? 0.032 : -0.032);
+          const cy = br.h * cFrac;
+          const cz = br.z - Math.sin(br.tiltX) * br.h * cFrac * 0.45 + (cl === 1 ? 0.03 : -0.024);
+
+          if (isDrupeletBush) {
+            const drupCluster = createDrupeletClusterMesh(ripeBerryMat, brightBerryMat);
+            drupCluster.position.set(cx, cy - 0.018, cz);
+            drupCluster.rotation.set(0.25 * (cl % 2 === 0 ? 1 : -1), cl * 1.1, 0.2);
+            g.add(drupCluster);
+          } else if (isRedCurrant) {
+            const strigGroup = new THREE.Group();
+            const strigLen = 0.072;
+            const strig = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.0022, 0.0018, strigLen, 6),
+              currantStemMat
+            );
+            strig.position.set(0, -strigLen * 0.5, 0);
+            strigGroup.add(strig);
+
+            const currantSpots = [
+              [0.004, -0.014, 0.008, 0.014, true],
+              [-0.011, -0.024, 0.006, 0.0145, false],
+              [0.012, -0.034, -0.005, 0.015, true],
+              [-0.008, -0.044, -0.009, 0.0145, false],
+              [0.009, -0.055, 0.007, 0.0155, true],
+              [0.0, -0.068, 0.002, 0.014, false]
+            ];
+            currantSpots.forEach(([ox, oy, oz, rad, useBright]) => {
+              const cBerry = new THREE.Mesh(
+                new THREE.SphereGeometry(rad, 8, 8),
+                useBright ? brightBerryMat : ripeBerryMat
+              );
+              cBerry.position.set(ox, oy, oz);
+              cBerry.castShadow = true;
+              strigGroup.add(cBerry);
+            });
+
+            strigGroup.position.set(cx, cy, cz);
+            strigGroup.rotation.set(0.22 * (cl % 2 === 0 ? 1 : -1), cl * 1.3, 0.28 * (cl % 2 === 0 ? 1 : -1));
+            g.add(strigGroup);
+          } else {
+            for (let b = 0; b < 5; b++) {
+              const bAng = (b / 5) * Math.PI * 2 + cl;
+              const berry = new THREE.Mesh(
+                new THREE.SphereGeometry(0.026, 8, 8),
+                (isBlueberry ? (b % 2 === 0 ? brightBerryMat : ripeBerryMat) : ((cl === 3 && b === 4) ? unripeBerryMat : ripeBerryMat))
+              );
+              berry.position.set(
+                cx + Math.cos(bAng) * 0.026,
+                cy - b * 0.014,
+                cz + Math.sin(bAng) * 0.026
+              );
+              berry.castShadow = true;
+              g.add(berry);
+            }
+          }
+        }
+      });
+
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        const baseLeaf = new THREE.Mesh(
+          new THREE.ConeGeometry(0.065, 0.12, 5),
+          leafMat
+        );
+        baseLeaf.scale.set(1.15, 1.0, 0.25);
+        baseLeaf.position.set(Math.cos(ang) * 0.13, 0.11, Math.sin(ang) * 0.13);
+        baseLeaf.rotation.y = -ang;
+        baseLeaf.rotation.z = -0.85;
+        baseLeaf.castShadow = true;
+        g.add(baseLeaf);
+      }
+
+      return g;
+    }
+
+    // Construit le fraisier compact (1x1 / 30x30 cm) avec fleurs blanches à cœur jaune et fraises rouges
+    function createStrawberryPlantMesh(spec) {
+      const g = new THREE.Group();
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x4c8c2b, roughness: 0.76 });
+      const darkLeafMat = new THREE.MeshStandardMaterial({ color: 0x3a7320, roughness: 0.8 });
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0x6b9e37, roughness: 0.85 });
+      const berryMat = new THREE.MeshStandardMaterial({
+        color: spec.fruitAccent || 0xd91e36,
+        roughness: 0.34,
+        metalness: 0.04
+      });
+      const petalMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.55 });
+      const centerMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
+
+      const coreMound = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.072, 1),
+        darkLeafMat
+      );
+      coreMound.scale.set(1.15, 0.72, 1.15);
+      coreMound.position.set(0, 0.058, 0);
+      coreMound.castShadow = true;
+      g.add(coreMound);
+
+      const leafAngles = [0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4];
+      leafAngles.forEach((ang, idx) => {
+        const rDist = idx % 2 === 0 ? 0.058 : 0.042;
+        const yPos = idx % 2 === 0 ? 0.068 : 0.088;
+        const leafCluster = new THREE.Mesh(
+          new THREE.ConeGeometry(0.036, 0.055, 6),
+          idx % 2 === 0 ? leafMat : darkLeafMat
+        );
+        leafCluster.scale.set(1.25, 0.65, 0.55);
+        leafCluster.position.set(
+          Math.cos(ang) * rDist,
+          yPos,
+          Math.sin(ang) * rDist
+        );
+        leafCluster.rotation.y = -ang;
+        leafCluster.rotation.z = -0.72;
+        leafCluster.castShadow = true;
+        g.add(leafCluster);
+      });
+
+      const flowerCoords = [
+        [0.055, 0.115, 0.045],
+        [-0.05, 0.105, -0.045],
+        [0.02, 0.125, -0.062]
+      ];
+      flowerCoords.forEach(([fx, fy, fz]) => {
+        const fGroup = new THREE.Group();
+        const stalk = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.0025, 0.003, 0.045, 5),
+          stemMat
+        );
+        stalk.position.y = -0.02;
+        fGroup.add(stalk);
+
+        for (let p = 0; p < 5; p++) {
+          const pAng = (p / 5) * Math.PI * 2;
+          const petal = new THREE.Mesh(
+            new THREE.SphereGeometry(0.008, 6, 6),
+            petalMat
+          );
+          petal.scale.set(1.2, 0.35, 0.8);
+          petal.position.set(Math.cos(pAng) * 0.008, 0.002, Math.sin(pAng) * 0.008);
+          petal.rotation.y = -pAng;
+          fGroup.add(petal);
+        }
+        const core = new THREE.Mesh(
+          new THREE.SphereGeometry(0.005, 6, 6),
+          centerMat
+        );
+        core.scale.y = 0.6;
+        core.position.y = 0.003;
+        fGroup.add(core);
+
+        fGroup.position.set(fx, fy, fz);
+        g.add(fGroup);
+      });
+
+      const berrySpots = [
+        [0.072, 0.068, 0.048, 0.35, -0.25],
+        [-0.074, 0.062, 0.042, 0.25, 0.35],
+        [0.032, 0.055, -0.078, -0.32, 0.15],
+        [-0.048, 0.076, -0.064, -0.22, 0.28],
+        [0.082, 0.048, -0.015, 0.1, -0.4],
+        [-0.018, 0.045, 0.082, 0.42, 0.08]
+      ];
+      berrySpots.forEach(([bx, by, bz, rx, rz]) => {
+        const bGroup = new THREE.Group();
+        const pedicel = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.0022, 0.0028, 0.035, 5),
+          stemMat
+        );
+        pedicel.position.y = 0.016;
+        bGroup.add(pedicel);
+
+        const berry = new THREE.Mesh(
+          new THREE.ConeGeometry(0.015, 0.028, 8),
+          berryMat
+        );
+        berry.rotation.x = Math.PI;
+        berry.castShadow = true;
+        bGroup.add(berry);
+
+        bGroup.position.set(bx, by, bz);
+        bGroup.rotation.set(rx, 0, rz);
+        g.add(bGroup);
+      });
+
+      return g;
+    }
+
+    // Construit le pied de melon (3x3 / 9 cases de 30x30 cm) avec tiges rampantes, feuilles lobées et melons côtelés
+    function createMelonPlantMesh() {
+      const g = new THREE.Group();
+      const vineMat = new THREE.MeshStandardMaterial({ color: 0x679c35, roughness: 0.84 });
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x45852b, roughness: 0.78 });
+      const lightLeafMat = new THREE.MeshStandardMaterial({ color: 0x5da138, roughness: 0.75 });
+      const melonSkinMat = new THREE.MeshStandardMaterial({ color: 0xcbd2b4, roughness: 0.65 });
+      const melonRibMat = new THREE.MeshStandardMaterial({ color: 0x748c42, roughness: 0.72 });
+
+      const runnerAngles = [0.2, 1.5, 2.8, 4.1, 5.3];
+      runnerAngles.forEach((ang, rIdx) => {
+        const len = rIdx % 2 === 0 ? 0.34 : 0.27;
+        const vine = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.006, 0.009, len, 6),
+          vineMat
+        );
+        vine.rotation.z = Math.PI / 2;
+        vine.rotation.y = -ang;
+        vine.position.set(
+          Math.cos(ang) * (len * 0.5),
+          0.015 + (rIdx % 2) * 0.008,
+          Math.sin(ang) * (len * 0.5)
+        );
+        vine.castShadow = true;
+        g.add(vine);
+
+        for (let l = 1; l <= 3; l++) {
+          const frac = l / 3.4;
+          const lx = Math.cos(ang) * len * frac + Math.sin(ang) * (l % 2 === 0 ? 0.045 : -0.045);
+          const lz = Math.sin(ang) * len * frac - Math.cos(ang) * (l % 2 === 0 ? 0.045 : -0.045);
+          const leaf = new THREE.Mesh(
+            new THREE.ConeGeometry(0.075, 0.13, 5),
+            l % 2 === 0 ? leafMat : lightLeafMat
+          );
+          leaf.scale.set(1.25, 0.35, 1.05);
+          leaf.position.set(lx, 0.045 + l * 0.014, lz);
+          leaf.rotation.y = -ang + (l % 2 === 0 ? 0.4 : -0.4);
+          leaf.rotation.x = 0.22;
+          leaf.castShadow = true;
+          g.add(leaf);
+        }
+      });
+
+      const melonSpots = [
+        [0.14, 0.068, 0.11, 0.068],
+        [-0.16, 0.062, -0.09, 0.062]
+      ];
+      melonSpots.forEach(([mx, my, mz, rad]) => {
+        const mGroup = new THREE.Group();
+        const body = new THREE.Mesh(
+          new THREE.SphereGeometry(rad, 14, 12),
+          melonSkinMat
+        );
+        body.scale.set(1.05, 0.92, 1.05);
+        body.castShadow = true;
+        body.receiveShadow = true;
+        mGroup.add(body);
+
+        for (let rib = 0; rib < 6; rib++) {
+          const rAng = (rib / 6) * Math.PI * 2;
+          const ribArc = new THREE.Mesh(
+            new THREE.TorusGeometry(rad * 0.99, rad * 0.045, 6, 16),
+            melonRibMat
+          );
+          ribArc.scale.set(1.05, 0.92, 1.05);
+          ribArc.rotation.y = rAng;
+          mGroup.add(ribArc);
+        }
+
+        mGroup.position.set(mx, my, mz);
+        g.add(mGroup);
+      });
+
+      return g;
+    }
+
+    // Construit le maillage 3D d'un légume ou petit fruit
     function createPlantMesh(plantType) {
       const spec = PLANTS[plantType] || PLANTS[VEGETABLE_IDS[0]];
       const g = new THREE.Group();
@@ -870,96 +1453,12 @@
           pod.castShadow = true;
           g.add(pod);
         }
-      } else if (spec.name === 'Cassis') {
-        // Arbrisseau de cassis 3x plus haut (90x90 cm / 3x3 cases de 30x30 cm), tiges brunes, feuillage vert moyen et grappes de baies bleu-noir
-        const bushScaleY = 3.0;
-        const bushSpreadXZ = 2.6;
-        const stemMat = new THREE.MeshStandardMaterial({ color: 0x6b422b, roughness: 0.9 });
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x4f8a2d, roughness: 0.76 });
-        const ripeBerryMat = new THREE.MeshStandardMaterial({ color: 0x2a3142, roughness: 0.45, metalness: 0.08 });
-        const unripeBerryMat = new THREE.MeshStandardMaterial({ color: 0x76946b, roughness: 0.65 });
-
-        const branches = [
-          { x: 0.0, z: 0.0, h: 0.23 * bushScaleY, tiltX: 0.04, tiltZ: -0.03 },
-          { x: -0.045 * bushSpreadXZ, z: 0.02 * bushSpreadXZ, h: 0.21 * bushScaleY, tiltX: 0.14, tiltZ: 0.22 },
-          { x: 0.048 * bushSpreadXZ, z: 0.015 * bushSpreadXZ, h: 0.215 * bushScaleY, tiltX: 0.12, tiltZ: -0.24 },
-          { x: 0.01 * bushSpreadXZ, z: -0.045 * bushSpreadXZ, h: 0.195 * bushScaleY, tiltX: -0.22, tiltZ: 0.06 },
-          { x: -0.025 * bushSpreadXZ, z: -0.035 * bushSpreadXZ, h: 0.18 * bushScaleY, tiltX: -0.18, tiltZ: 0.16 },
-          { x: 0.06 * bushSpreadXZ, z: -0.035 * bushSpreadXZ, h: 0.20 * bushScaleY, tiltX: -0.15, tiltZ: -0.20 },
-          { x: -0.055 * bushSpreadXZ, z: -0.025 * bushSpreadXZ, h: 0.19 * bushScaleY, tiltX: -0.12, tiltZ: 0.24 }
-        ];
-
-        branches.forEach((br) => {
-          const stem = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.008, 0.016, br.h, 7),
-            stemMat
-          );
-          stem.position.set(br.x * 0.5, br.h * 0.5, br.z * 0.5);
-          stem.rotation.x = br.tiltX;
-          stem.rotation.z = br.tiltZ;
-          stem.castShadow = true;
-          g.add(stem);
-
-          const tipX = br.x + Math.sin(br.tiltZ) * br.h * 0.45;
-          const tipY = br.h * 0.92;
-          const tipZ = br.z - Math.sin(br.tiltX) * br.h * 0.45;
-
-          for (let l = 0; l < 4; l++) {
-            const ang = (l / 4) * Math.PI * 2 + br.h * 2;
-            const leaf = new THREE.Mesh(
-              new THREE.ConeGeometry(0.055, 0.11, 5),
-              leafMat
-            );
-            leaf.scale.set(1.15, 1.0, 0.28);
-            leaf.position.set(
-              tipX + Math.cos(ang) * 0.045,
-              tipY - l * 0.09,
-              tipZ + Math.sin(ang) * 0.045
-            );
-            leaf.rotation.y = -ang;
-            leaf.rotation.x = 0.65;
-            leaf.castShadow = true;
-            g.add(leaf);
-          }
-
-          // Grappes de baies serrées le long de la tige
-          for (let cl = 0; cl < 4; cl++) {
-            const cFrac = 0.34 + cl * 0.19;
-            const cx = br.x + Math.sin(br.tiltZ) * br.h * cFrac * 0.45 + (cl % 2 === 0 ? 0.032 : -0.032);
-            const cy = br.h * cFrac;
-            const cz = br.z - Math.sin(br.tiltX) * br.h * cFrac * 0.45 + (cl === 1 ? 0.03 : -0.024);
-
-            for (let b = 0; b < 5; b++) {
-              const bAng = (b / 5) * Math.PI * 2 + cl;
-              const berry = new THREE.Mesh(
-                new THREE.SphereGeometry(0.026, 8, 8),
-                (cl === 3 && b === 4) ? unripeBerryMat : ripeBerryMat
-              );
-              berry.position.set(
-                cx + Math.cos(bAng) * 0.026,
-                cy - b * 0.014,
-                cz + Math.sin(bAng) * 0.026
-              );
-              berry.castShadow = true;
-              g.add(berry);
-            }
-          }
-        });
-
-        // Feuillage bas du buisson
-        for (let i = 0; i < 8; i++) {
-          const ang = (i / 8) * Math.PI * 2;
-          const baseLeaf = new THREE.Mesh(
-            new THREE.ConeGeometry(0.065, 0.12, 5),
-            leafMat
-          );
-          baseLeaf.scale.set(1.15, 1.0, 0.25);
-          baseLeaf.position.set(Math.cos(ang) * 0.13, 0.11, Math.sin(ang) * 0.13);
-          baseLeaf.rotation.y = -ang;
-          baseLeaf.rotation.z = -0.85;
-          baseLeaf.castShadow = true;
-          g.add(baseLeaf);
-        }
+      } else if (isLargeBushFruit(spec)) {
+        return createLargeBerryBushMesh(spec.name);
+      } else if (spec.name === 'Fraise') {
+        return createStrawberryPlantMesh(spec);
+      } else if (spec.name === 'Melon') {
+        return createMelonPlantMesh();
       } else {
         const bush = new THREE.Mesh(
           new THREE.DodecahedronGeometry(0.088, 1),
@@ -988,9 +1487,10 @@
       return g;
     }
 
+    // Emprise en cases de 30x30 cm : 3x3 pour Cassis, Framboise, Groseille rouge, Mûre, Myrtille et Melon
     function getPlantFootprint(plantId) {
       const spec = plantId ? PLANTS[plantId] : null;
-      if (spec && spec.name === 'Cassis') {
+      if (isThreeByThreePlant(spec)) {
         return { spanRows: 3, spanCols: 3 };
       }
       return { spanRows: 1, spanCols: 1 };
@@ -1065,6 +1565,12 @@
     }
 
     function rebuildItemMesh(item) {
+      if (use2DFallback) {
+        render2DFallback();
+        return;
+      }
+      if (!scene || !itemsGroup) return;
+
       const old = itemMeshes.get(item.id);
       if (old) {
         itemsGroup.remove(old);
@@ -1250,6 +1756,10 @@
     }
 
     function updateItemTransform(item) {
+      if (use2DFallback) {
+        render2DFallback();
+        return;
+      }
       const mesh = itemMeshes.get(item.id);
       if (!mesh) return;
       mesh.position.set(item.x, 0, item.z);
@@ -1257,6 +1767,10 @@
     }
 
     function rebuildAllItems() {
+      if (use2DFallback) {
+        render2DFallback();
+        return;
+      }
       state.items.forEach(rebuildItemMesh);
     }
 
@@ -1315,7 +1829,7 @@
       return state.items.filter((it) => it.type === 'bed' || it.type === 'tilled_soil');
     }
 
-    // Rafraîchit la liste déroulante des arbres fruitiers (incluant les créations personnalisées)
+    // Sélecteur des arbres fruitiers
     const treeSpeciesSelect = document.getElementById('newTreeSpecies');
     function refreshTreeSpeciesSelect(selectedKey = null) {
       const currentVal = selectedKey || treeSpeciesSelect.value || DEFAULT_TREE_KEY;
@@ -1330,7 +1844,7 @@
     }
     refreshTreeSpeciesSelect(DEFAULT_TREE_KEY);
 
-    // Formulaire création d'un arbre fruitier personnalisé
+    // Création d'un arbre fruitier personnalisé
     let pendingCustomTreeImage = null;
     document.getElementById('btnToggleCustomTree').addEventListener('click', () => {
       const form = document.getElementById('customTreeForm');
@@ -1396,7 +1910,7 @@
       showNotice(`Fruitier "${rawName}" ajouté à la liste.`);
     });
 
-    // Formulaire création d'un légume ou petit fruit personnalisé
+    // Création d'un légume ou petit fruit personnalisé
     let pendingCustomPlantImage = null;
     document.getElementById('btnToggleCustomPlant').addEventListener('click', () => {
       const form = document.getElementById('customPlantForm');
@@ -1500,7 +2014,7 @@
 
       plantPaletteEl.innerHTML = '';
       if (filteredIds.length === 0) {
-        plantPaletteEl.innerHTML = `<div class="col-span-2 sm:col-span-3 text-center py-4 text-xs text-stone-500">Aucun résultat pour ce filtre.</div>`;
+        plantPaletteEl.innerHTML = '<div class="col-span-2 sm:col-span-3 text-center py-4 text-xs text-stone-500">Aucun résultat pour ce filtre.</div>';
         return;
       }
 
@@ -1523,6 +2037,7 @@
       });
     }
 
+    // Grille de plantation 30x30 cm avec marqueurs de zone réservée 3x3
     function renderItemCellGrid() {
       const gridEl = document.getElementById('itemCellGrid');
       const plantables = getPlantableItems();
@@ -1555,24 +2070,24 @@
           const isAnchor = occupant && occupant.anchorR === r && occupant.anchorC === c;
           const plantId = occupant ? occupant.plantId : null;
           const plantSpec = plantId ? PLANTS[plantId] : null;
-          const isCassisZone = Boolean(plantSpec && plantSpec.name === 'Cassis');
+          const isReserved3x3Zone = isThreeByThreePlant(plantSpec);
 
           const cellBtn = document.createElement('button');
           cellBtn.type = 'button';
           cellBtn.style.width = `${cellPx}px`;
           cellBtn.style.height = `${cellPx}px`;
 
-          if (isCassisZone && !isAnchor) {
-            cellBtn.title = `Emprise du Cassis (9 cases 30×30 cm — aucun plant à côté) — (${c + 1}, ${r + 1})`;
+          if (isReserved3x3Zone && !isAnchor) {
+            cellBtn.title = `Zone réservée de ${plantSpec.name} (9 cases 30×30 cm — 3×3) — (${c + 1}, ${r + 1})`;
             cellBtn.className = 'rounded-lg border border-stone-700/40 bg-stone-800/20 text-stone-700 flex items-center justify-center text-[11px] font-bold transition hover:bg-red-500/20';
             cellBtn.innerHTML = '•';
           } else {
             cellBtn.title = plantSpec
-              ? `${plantSpec.name}${isCassisZone ? ' (9 cases 30×30 cm)' : ''} — (${c + 1}, ${r + 1})`
+              ? `${plantSpec.name}${isReserved3x3Zone ? ' (9 cases 30×30 cm — 3×3)' : ''} — (${c + 1}, ${r + 1})`
               : `Case vide (${c + 1}, ${r + 1})`;
             cellBtn.className = `rounded-lg border flex items-center justify-center text-base sm:text-lg transition ${
               plantSpec
-                ? isCassisZone
+                ? isReserved3x3Zone
                   ? 'bg-stone-800/25 border-stone-700/50 hover:bg-stone-800/35'
                   : plantSpec.category === 'fruits'
                     ? 'bg-rose-500/15 border-rose-500/40 hover:bg-rose-500/25'
@@ -1589,7 +2104,7 @@
               renderItemCellGrid();
               return;
             }
-            if (occupant && isCassisZone) {
+            if (occupant && isReserved3x3Zone) {
               delete targetItem.plants[anchorKey];
               rebuildItemMesh(targetItem);
               renderItemCellGrid();
@@ -1604,10 +2119,10 @@
               renderItemCellGrid();
             } else {
               const selSpec = PLANTS[state.selectedPlant];
-              if (selSpec && selSpec.name === 'Cassis') {
-                showNotice('Le Cassis occupe 9 cases de 30×30 cm (3×3) et ne peut pas chevaucher d’autres plants ni dépasser du bord.');
+              if (isThreeByThreePlant(selSpec)) {
+                showNotice(`${selSpec.name} occupe 9 cases de 30×30 cm (3×3) et ne peut pas chevaucher d’autres plants ni dépasser du bord.`);
               } else {
-                showNotice('Impossible de planter ici : cet emplacement est réservé au Cassis (9 cases de 30×30 cm).');
+                showNotice(`Impossible de planter ici : zone réservée à ${plantSpec ? plantSpec.name : 'un plant 3×3'} (9 cases de 30×30 cm).`);
               }
             }
           });
@@ -1618,7 +2133,6 @@
     }
 
     function syncUI() {
-      // Onglet Élément Actif
       const activeItem = getActiveItem();
       const noActiveEl = document.getElementById('noActiveItem');
       const activeControlsEl = document.getElementById('activeItemControls');
@@ -1653,7 +2167,6 @@
         }
       }
 
-      // Onglet Planter
       const plantables = getPlantableItems();
       const noPlotEl = document.getElementById('noPlotForPlanting');
       const plantControlsEl = document.getElementById('plantingControls');
@@ -1699,7 +2212,7 @@
       }
     }
 
-    // Navigation onglets principaux
+    // Navigation entre onglets
     const tabs = [
       { btn: document.getElementById('tabAdd'), panel: document.getElementById('panelAdd') },
       { btn: document.getElementById('tabActive'), panel: document.getElementById('panelActive') },
@@ -1755,7 +2268,7 @@
       }
     });
 
-    // Édition élément actif
+    // Édition de l'élément actif
     document.getElementById('editItemName').addEventListener('input', (e) => {
       const item = getActiveItem();
       if (!item) return;
@@ -1790,10 +2303,12 @@
     document.getElementById('btnDeleteItem').addEventListener('click', () => {
       const item = getActiveItem();
       if (!item) return;
-      const mesh = itemMeshes.get(item.id);
-      if (mesh) {
-        itemsGroup.remove(mesh);
-        itemMeshes.delete(item.id);
+      if (!use2DFallback && itemsGroup) {
+        const mesh = itemMeshes.get(item.id);
+        if (mesh) {
+          itemsGroup.remove(mesh);
+          itemMeshes.delete(item.id);
+        }
       }
       state.items = state.items.filter((it) => it.id !== item.id);
       state.activeItemId = state.items.length > 0 ? state.items[state.items.length - 1].id : null;
@@ -1828,7 +2343,7 @@
       if (id) setActiveItem(id);
     });
 
-    // Vues 3D / Dessus
+    // Vues 3D / Dessus (Plan)
     const btnView3D = document.getElementById('btnView3D');
     const btnViewTop = document.getElementById('btnViewTop');
 
@@ -1838,30 +2353,39 @@
       if (top) {
         btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
         btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
-        camera.position.set(0, 10.5, 0.001);
-        controls.target.set(0, 0, 0);
+        if (!use2DFallback && camera && controls) {
+          camera.position.set(0, 10.5, 0.001);
+          controls.target.set(0, 0, 0);
+          controls.update();
+        }
       } else {
         btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
         btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
-        camera.position.set(4.8, 5.4, 5.8);
-        controls.target.set(0, 0, 0);
+        if (!use2DFallback && camera && controls) {
+          camera.position.set(4.8, 5.4, 5.8);
+          controls.target.set(0, 0, 0);
+          controls.update();
+        }
       }
-      controls.update();
+      if (use2DFallback) render2DFallback();
     }
 
     btnView3D.addEventListener('click', () => setViewMode(false));
     btnViewTop.addEventListener('click', () => setViewMode(true));
     document.getElementById('btnResetCamera').addEventListener('click', () => setViewMode(state.isTopView));
 
-    // Grille 1m
+    // Grille 1 mètre
     document.getElementById('btnToggleGrid').addEventListener('click', () => {
       state.showGrid = !state.showGrid;
-      gridHelper.visible = state.showGrid;
+      if (!use2DFallback && gridHelper) {
+        gridHelper.visible = state.showGrid;
+      }
+      if (use2DFallback) render2DFallback();
       const dot = document.querySelector('#btnToggleGrid span:first-child');
       dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
     });
 
-    // Export / Import / Reset JSON (inclut les créations personnalisées)
+    // Export / Import / Réinitialisation JSON (préserve les créations personnalisées)
     document.getElementById('btnExportJson').addEventListener('click', () => {
       const customPlants = Object.values(PLANTS).filter((p) => p.custom);
       const customTrees = Object.values(TREE_SPECIES).filter((t) => t.custom);
@@ -1879,6 +2403,7 @@
       a.download = 'potager-3d.json';
       a.click();
       URL.revokeObjectURL(url);
+      showNotice('Plan exporté au format JSON.');
     });
 
     const fileInputJson = document.getElementById('fileInputJson');
@@ -1927,10 +2452,14 @@
               : Array.isArray(data.beds)
                 ? data.beds.map((b) => ({ ...b, type: b.type || 'bed' }))
                 : [];
-          itemsGroup.clear();
-          itemMeshes.clear();
+
+          if (!use2DFallback && itemsGroup) {
+            itemsGroup.clear();
+            itemMeshes.clear();
+          }
           state.items = [];
           state.nextId = 1;
+
           list.forEach((raw) => {
             const created = addItem(raw);
             if (raw.id && raw.id >= state.nextId) {
@@ -1938,6 +2467,7 @@
             }
             created.id = raw.id || created.id;
           });
+
           if (state.items.length > 0) {
             state.activeItemId = state.items[0].id;
             rebuildAllItems();
@@ -1945,8 +2475,8 @@
             state.activeItemId = null;
           }
           syncUI();
-          showNotice('Projet JSON importé avec succès.');
-        } catch (err) {
+          showNotice('Plan JSON importé avec succès.');
+        } catch (_err) {
           showNotice('Fichier JSON invalide.');
         }
       };
@@ -1955,20 +2485,30 @@
     });
 
     document.getElementById('btnClearAll').addEventListener('click', () => {
-      itemsGroup.clear();
-      itemMeshes.clear();
+      if (!use2DFallback && itemsGroup) {
+        itemsGroup.clear();
+        itemMeshes.clear();
+      }
       state.items = [];
       state.activeItemId = null;
       state.nextId = 1;
       syncUI();
-      showNotice('Tous les éléments du jardin ont été effacés.');
+      if (use2DFallback) render2DFallback();
+      showNotice('Tous les éléments ont été effacés.');
     });
 
-    // Redimensionnement fluide
+    // Redimensionnement réactif du conteneur
     const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth;
       const h = container.clientHeight;
-      if (w > 0 && h > 0) {
+      if (w <= 0 || h <= 0) return;
+
+      if (use2DFallback) {
+        resizeFallback2D();
+        return;
+      }
+
+      if (camera && renderer) {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.setSize(w, h);
@@ -1976,7 +2516,7 @@
     });
     resizeObserver.observe(container);
 
-    // Scène initiale avec bac potager, sol labouré et arbre fruitier
+    // Scène initiale : Carré #1, Parcelle labourée #2 et Pommier #3
     addItem({
       type: 'bed',
       name: 'Carré #1',
@@ -2010,12 +2550,19 @@
     });
     setActiveItem(1);
 
+    // Boucle d'animation
     function animate() {
       requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
+      if (use2DFallback) {
+        render2DFallback();
+        return;
+      }
+      if (controls && renderer && scene && camera) {
+        controls.update();
+        renderer.render(scene, camera);
+      }
     }
     animate();
   </script>
 </body>
-          </html>
+            </html>
