@@ -3,224 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azalée — Création, Gestion &amp; Planning du Jardin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f3f6f1;
-      color: #1c2821;
-      overflow-x: hidden;
-    }
-    .menu-tab.active {
-      background-color: #166534;
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(22, 101, 52, 0.24);
-    }
-  </style>
-</head>
-<body class="min-h-screen">
-  <div class="max-w-5xl mx-auto p-3 sm:p-6 space-y-4">
-    <!-- En-tête Azalée -->
-    <header class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center text-xl shrink-0">
-          🌺
-        </div>
-        <div class="min-w-0">
-          <h1 class="text-lg sm:text-xl font-bold text-stone-900 tracking-tight truncate">Azalée</h1>
-          <p class="text-xs text-stone-500 truncate">Création 3D · Gestion des zones · Planning du jardin</p>
-        </div>
-      </div>
-
-      <button id="btnQuickOpenPotager3D" type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition shrink-0">
-        <span>↗</span>
-        <span>Ouvrir Potager 3D</span>
-      </button>
-    </header>
-
-    <!-- Menu principal en 3 parties -->
-    <nav aria-label="Menu principal Azalée" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-1.5 grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-      <button id="tabPart1" type="button" class="menu-tab active flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
-        <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center shrink-0">1</span>
-        <span class="truncate">Création de mon jardin</span>
-      </button>
-      <button id="tabPart2" type="button" class="menu-tab flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
-        <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center shrink-0">2</span>
-        <span class="truncate">Gestion de mon jardin</span>
-      </button>
-      <button id="tabPart3" type="button" class="menu-tab flex items-center justify-center sm:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition text-left">
-        <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 text-xs font-bold flex items-center justify-center shrink-0">3</span>
-        <span class="truncate">Planning de mon jardin</span>
-      </button>
-    </nav>
-
-    <!-- Bannière de retour / notification (sans alert ni confirm) -->
-    <div id="azaleeNotice" role="status" aria-live="polite" class="hidden rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition">
-      <span id="azaleeNoticeText"></span>
-      <button id="btnCloseNotice" type="button" class="text-current opacity-75 hover:opacity-100 font-bold px-1.5">✕</button>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- PARTIE 1 : CRÉATION DE MON JARDIN (OUVERTURE NOUVELLE PAGE CODE 3D)  -->
-    <!-- ===================================================================== -->
-    <section id="part1Section" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5 sm:p-7 space-y-5">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-5">
-        <div class="space-y-1">
-          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-            Partie 1 · Création de mon jardin
-          </span>
-          <h2 class="text-lg sm:text-xl font-bold text-stone-900">
-            Studio Potager 3D (Nouvelle page)
-          </h2>
-          <p class="text-xs sm:text-sm text-stone-600">
-            Cliquez sur le bouton ci-dessous pour ouvrir votre code <strong>Potager 3D — Modélisation, Verger &amp; Planification</strong> dans une nouvelle page.
-          </p>
-        </div>
-
-        <button id="btnOpenPotager3DPage" type="button" class="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow-sm transition shrink-0">
-          ↗ Ouvrir dans une nouvelle page
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
-        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
-          <div class="font-bold text-stone-900">🪵 Bacs &amp; Sol labouré</div>
-          <p class="text-stone-600 mt-1">Dimensions en cm, matériaux, protections serre ou filet et grille 30×30 cm.</p>
-        </div>
-        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
-          <div class="font-bold text-stone-900">🌳 Verger &amp; Fruitiers</div>
-          <p class="text-stone-600 mt-1">Essences fruitières, gabarits et création d'arbres personnalisés.</p>
-        </div>
-        <div class="rounded-xl bg-stone-50 border border-stone-200/80 p-3.5">
-          <div class="font-bold text-stone-900">🌱 70 Légumes &amp; 9 Fruits</div>
-          <p class="text-stone-600 mt-1">Palette complète, recherche, emprises et export/import JSON.</p>
-        </div>
-      </div>
-
-      <!-- Accès rapide au code source intégré -->
-      <div class="rounded-2xl border border-stone-200 bg-stone-50 overflow-hidden">
-        <div class="px-4 py-2.5 bg-stone-100 border-b border-stone-200 flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-stone-600">
-            Code source Potager 3D intégré
-          </span>
-          <div class="flex items-center gap-2">
-            <button id="btnCopyPotagerCode" type="button" class="px-3 py-1 rounded-lg bg-white hover:bg-stone-50 border border-stone-300 text-xs font-semibold text-stone-800 transition">
-              Copier le code
-            </button>
-            <button id="btnToggleCodePreview" type="button" class="px-3 py-1 rounded-lg bg-stone-800 hover:bg-stone-900 text-xs font-semibold text-white transition">
-              Afficher / Masquer
-            </button>
-          </div>
-        </div>
-        <div id="potagerCodeBox" class="hidden p-3.5 max-h-72 overflow-auto">
-          <pre id="potagerCodePre" class="text-[11px] leading-relaxed font-mono text-stone-800 whitespace-pre"></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- PARTIE 2 : GESTION DE MON JARDIN                                      -->
-    <!-- ===================================================================== -->
-    <section id="part2Section" class="hidden space-y-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 mb-1">
-              Partie 2 · Gestion de mon jardin
-            </span>
-            <h2 class="text-lg font-bold text-stone-900">Suivi des zones, arrosage &amp; entretien</h2>
-          </div>
-          <button id="btnAddZoneFormToggle" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold transition">
-            + Nouvelle zone
-          </button>
-        </div>
-
-        <!-- Ajout rapide d'une zone à gérer -->
-        <form id="newZoneForm" class="hidden grid grid-cols-1 sm:grid-cols-4 gap-3 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
-          <input id="newZoneName" type="text" maxlength="45" placeholder="Nom de la zone (ex: Carré Tomates)" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900" />
-          <select id="newZoneFreq" class="rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-900">
-            <option value="Tous les 2 jours">Tous les 2 jours</option>
-            <option value="2 fois / semaine">2 fois / semaine</option>
-            <option value="1 fois / semaine">1 fois / semaine</option>
-            <option value="Paillage / léger">Paillage / léger</option>
-          </select>
-          <button type="submit" class="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
-            Enregistrer
-          </button>
-        </form>
-
-        <div id="zonesListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
-      </div>
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- PARTIE 3 : PLANNING DE MON JARDIN                                      -->
-    <!-- ===================================================================== -->
-    <section id="part3Section" class="hidden space-y-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-900 mb-1">
-              Partie 3 · Planning de mon jardin
-            </span>
-            <h2 class="text-lg font-bold text-stone-900">Calendrier &amp; tâches du jardin</h2>
-          </div>
-          <span id="planningCounterBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-800">
-            0 / 0 terminées
-          </span>
-        </div>
-
-        <form id="planningTaskForm" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
-          <input id="planningTaskTitle" type="text" maxlength="80" placeholder="Nouvelle tâche (ex: Semer des carottes, tailler les framboisiers...)" class="sm:col-span-5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900" />
-          <select id="planningTaskType" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-900">
-            <option value="semis">🌱 Semis</option>
-            <option value="plantation">🪴 Plantation</option>
-            <option value="taille">✂️ Taille</option>
-            <option value="arrosage">💧 Arrosage</option>
-            <option value="recolte">🧺 Récolte</option>
-          </select>
-          <select id="planningTaskPeriod" class="sm:col-span-3 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-900">
-            <option value="Cette semaine">Cette semaine</option>
-            <option value="Printemps">Printemps</option>
-            <option value="Été">Été</option>
-            <option value="Automne">Automne</option>
-            <option value="Hiver">Hiver</option>
-          </select>
-          <button type="submit" class="sm:col-span-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
-            + Ajouter
-          </button>
-        </form>
-
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div id="planningFilterBar" class="flex flex-wrap items-center gap-1.5">
-            <button data-cat="all" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-700 text-white transition">Toutes</button>
-            <button data-cat="semis" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🌱 Semis</button>
-            <button data-cat="plantation" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🪴 Plantation</button>
-            <button data-cat="taille" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">✂️ Taille</button>
-            <button data-cat="arrosage" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">💧 Arrosage</button>
-            <button data-cat="recolte" type="button" class="pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">🧺 Récolte</button>
-          </div>
-          <button id="btnPruneDoneTasks" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-700 transition">
-            Supprimer terminées
-          </button>
-        </div>
-
-        <div id="planningTasksList" class="space-y-2"></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Code exact Potager 3D fourni, conservé intégralement pour ouverture dans une nouvelle page -->
-  <script id="potager3DSourceCode" type="text/plain">
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Potager 3D — Modélisation, Verger &amp; Planification</title>
+  <title>Azalée — Modélisation, Verger &amp; Planification</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
     {
@@ -237,11 +20,12 @@
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #f4f6f2;
       color: #1f2923;
+      overflow-x: hidden;
     }
     .canvas-wrap {
       position: relative;
       width: 100%;
-      height: 430px;
+      height: 440px;
       background: #4e7c2a;
       overflow: hidden;
       user-select: none;
@@ -249,7 +33,7 @@
     }
     @media (min-width: 768px) {
       .canvas-wrap {
-        height: 510px;
+        height: 520px;
       }
     }
     .big-select {
@@ -258,46 +42,52 @@
       padding: 10px 14px;
     }
     .tab-btn.active {
-      color: #166534;
+      color: #052e16;
       border-bottom: 2px solid #166534;
-      font-weight: 600;
-      background-color: #f0fdf4;
+      font-weight: 700;
+      background-color: #dcfce7;
     }
     .subtab-btn.active {
-      background-color: #15803d;
-      color: #ffffff;
-      border-color: #15803d;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      background-color: #dcfce7;
+      color: #052e16;
+      border-color: #166534;
+      box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.24);
+    }
+    .azalee-nav-btn.active {
+      background-color: #dcfce7;
+      color: #052e16;
+      border: 1.5px solid #166534;
+      box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.2);
     }
   </style>
 </head>
 <body>
   <div class="max-w-3xl mx-auto p-3 sm:p-5 space-y-3">
-    <!-- Bandeau d'en-tête supérieur avec actions JSON -->
+    <!-- Bandeau d'en-tête supérieur avec logo Azalée et actions JSON -->
     <div class="bg-white rounded-2xl shadow-sm border border-stone-200 px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-lg">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-stone-950 border border-emerald-700/30 flex items-center justify-center shrink-0 font-bold text-lg">
           ✦
         </div>
         <div class="truncate">
-          <h1 class="text-base sm:text-lg font-bold text-stone-900 truncate">Potager 3D</h1>
-          <p class="text-xs text-stone-500 truncate">Modélisation, Verger &amp; Planification</p>
+          <h1 class="text-base sm:text-lg font-bold text-stone-950 truncate">Azalée — Modélisation, Verger &amp; Planification</h1>
+          <p class="text-xs text-stone-600 truncate">1. Création · 2. Gestion · 3. Planning</p>
         </div>
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+        <button id="btnExportJson" type="button" title="Exporter en JSON" class="p-2 rounded-xl text-stone-700 hover:bg-stone-100 hover:text-stone-950 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
         </button>
-        <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition">
+        <button id="btnImportJson" type="button" title="Importer un JSON" class="p-2 rounded-xl text-stone-700 hover:bg-stone-100 hover:text-stone-950 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
         </button>
         <input id="fileInputJson" type="file" accept=".json,application/json" class="hidden" />
-        <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-500 hover:bg-red-50 hover:text-red-600 transition">
+        <button id="btnClearAll" type="button" title="Tout effacer" class="p-2 rounded-xl text-stone-600 hover:bg-red-50 hover:text-red-700 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
@@ -305,225 +95,111 @@
       </div>
     </div>
 
+    <!-- Barre de navigation des 3 sections d'Azalée -->
+    <nav aria-label="Sections Azalée" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-1.5 grid grid-cols-3 gap-1.5">
+      <button id="navCreation" type="button" class="azalee-nav-btn active py-2.5 px-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-950 hover:bg-stone-100 transition truncate">
+        1. Création de mon jardin
+      </button>
+      <button id="navGestion" type="button" class="azalee-nav-btn py-2.5 px-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-950 hover:bg-stone-100 transition truncate">
+        2. Gestion de mon jardin
+      </button>
+      <button id="navPlanning" type="button" class="azalee-nav-btn py-2.5 px-2.5 rounded-xl text-xs sm:text-sm font-semibold text-stone-950 hover:bg-stone-100 transition truncate">
+        3. Planning de mon jardin
+      </button>
+    </nav>
+
     <!-- Bannière de notification non bloquante -->
     <div id="statusBanner" class="hidden rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition">
       <span id="statusBannerText"></span>
-      <button id="btnCloseBanner" type="button" class="text-current opacity-70 hover:opacity-100 font-bold px-1.5">✕</button>
+      <button id="btnCloseBanner" type="button" class="text-current opacity-75 hover:opacity-100 font-bold px-1.5">✕</button>
     </div>
 
-    <!-- Zone 3D -->
-    <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
-      <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
-          <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
-            Vue 3D
-          </button>
-          <button id="btnViewTop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition">
-            Vue Dessus (Plan)
-          </button>
-          <button id="btnResetCamera" type="button" title="Réinitialiser la caméra" class="ml-1 p-1.5 rounded-lg text-stone-600 hover:bg-stone-100 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+    <!-- =================================================================== -->
+    <!-- SECTION 1 : CRÉATION DE MON JARDIN (3D)                              -->
+    <!-- =================================================================== -->
+    <section id="viewCreation" class="space-y-3">
+      <!-- Zone 3D -->
+      <div id="canvasContainer" class="canvas-wrap rounded-2xl shadow-md border border-stone-300/70">
+        <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+          <div class="flex items-center bg-white/95 backdrop-blur rounded-xl shadow p-1 pointer-events-auto border border-stone-200/80">
+            <button id="btnView3D" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition">
+              Vue 3D
+            </button>
+            <button id="btnViewTop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-900 hover:bg-stone-100 transition">
+              Vue Dessus (Plan)
+            </button>
+            <button id="btnResetCamera" type="button" title="Réinitialiser la caméra" class="ml-1 p-1.5 rounded-lg text-stone-700 hover:bg-stone-100 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+
+          <button id="btnToggleGrid" type="button" class="pointer-events-auto flex items-center gap-2 bg-white/95 backdrop-blur px-3.5 py-2 rounded-xl shadow text-xs sm:text-sm font-semibold text-stone-950 border border-stone-200/80 hover:bg-white transition">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+            <span>Grille (1m)</span>
           </button>
         </div>
 
-        <button id="btnToggleGrid" type="button" class="pointer-events-auto flex items-center gap-2 bg-white/95 backdrop-blur px-3.5 py-2 rounded-xl shadow text-xs sm:text-sm font-semibold text-stone-800 border border-stone-200/80 hover:bg-white transition">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Grille (1m)</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Panneau principal avec onglets en haut -->
-    <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-      <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-medium text-stone-600">
-        <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
-          + Ajouter
-        </button>
-        <button id="tabActive" type="button" class="tab-btn py-3 px-2 text-center transition">
-          Élément Actif
-        </button>
-        <button id="tabPlant" type="button" class="tab-btn py-3 px-2 text-center transition">
-          🌱 Planter
-        </button>
+        <!-- Compteur d'éléments et plants en bas de la vue 3D -->
+        <div class="absolute bottom-3 left-3 z-10 pointer-events-none">
+          <div id="gardenItemCountBadge" class="bg-white/95 text-stone-950 backdrop-blur px-3 py-1.5 rounded-xl text-xs font-semibold shadow border border-stone-200/80">
+            3 éléments · 5 plants
+          </div>
+        </div>
       </div>
 
-      <div class="p-4 sm:p-5">
-        <!-- Onglet 1 : Ajouter Bac / Sol labouré / Arbre de verger -->
-        <div id="panelAdd" class="space-y-4">
-          <div>
-            <label for="addKind" class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1.5">
-              Type d'aménagement à ajouter
-            </label>
-            <select id="addKind" class="big-select w-full rounded-xl border border-stone-300 bg-white font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-              <option value="bed">🪵 Bac potager (carré surélevé)</option>
-              <option value="tilled_soil">🌾 Sol labouré (parcelle pleine terre)</option>
-              <option value="orchard_tree">🌳 Arbre de verger</option>
-            </select>
-          </div>
+      <!-- Panneau principal avec onglets en haut -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="grid grid-cols-3 border-b border-stone-200 text-sm font-semibold text-stone-800">
+          <button id="tabAdd" type="button" class="tab-btn active py-3 px-2 text-center transition">
+            + Ajouter
+          </button>
+          <button id="tabActive" type="button" class="tab-btn py-3 px-2 text-center transition">
+            Élément Actif
+          </button>
+          <button id="tabPlant" type="button" class="tab-btn py-3 px-2 text-center transition">
+            🌱 Planter
+          </button>
+        </div>
 
-          <!-- Options Bac potager -->
-          <div id="sectionBedOptions" class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
-            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-              Dimensions du bac potager
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label for="newWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
-                <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              </div>
-              <div>
-                <label for="newDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
-                <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              </div>
-              <div>
-                <label for="newHeight" class="block text-xs font-semibold text-stone-700 mb-1.5">Hauteur (cm)</label>
-                <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              </div>
-            </div>
-
+        <div class="p-4 sm:p-5">
+          <!-- Onglet 1 : Ajouter Bac / Sol labouré / Arbre de verger -->
+          <div id="panelAdd" class="space-y-4">
             <div>
-              <label for="newMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
-              <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                <option value="wood">Bois brut</option>
-                <option value="burned_wood">Bois brûlé</option>
-                <option value="corten">Acier corten</option>
-                <option value="stone">Pierre naturelle</option>
+              <label for="addKind" class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                Type d'aménagement à ajouter
+              </label>
+              <select id="addKind" class="big-select w-full rounded-xl border border-stone-300 bg-white font-semibold text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <option value="bed">🪵 Bac potager (carré surélevé)</option>
+                <option value="tilled_soil">🌾 Sol labouré (parcelle pleine terre)</option>
+                <option value="orchard_tree">🌳 Arbre de verger</option>
               </select>
             </div>
 
-            <div>
-              <label for="newBedCover" class="block text-xs font-semibold text-stone-700 mb-1.5">Protection / Couverture</label>
-              <select id="newBedCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                <option value="none">Aucune protection</option>
-                <option value="greenhouse">🏡 Serre</option>
-                <option value="butterfly_net">🦋 Filet à papillon</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Options Sol labouré -->
-          <div id="sectionTilledOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
-            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-              Dimensions du sol labouré
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="tilledWidth" class="block text-xs font-semibold text-stone-700 mb-1.5">Largeur (cm)</label>
-                <input id="tilledWidth" type="number" min="60" max="1000" step="10" value="180" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+            <!-- Options Bac potager -->
+            <div id="sectionBedOptions" class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-600">
+                Dimensions du bac potager
               </div>
-              <div>
-                <label for="tilledDepth" class="block text-xs font-semibold text-stone-700 mb-1.5">Profondeur (cm)</label>
-                <input id="tilledDepth" type="number" min="60" max="1000" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              </div>
-            </div>
-
-            <div>
-              <label for="newTilledCover" class="block text-xs font-semibold text-stone-700 mb-1.5">Protection / Couverture</label>
-              <select id="newTilledCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                <option value="none">Aucune protection</option>
-                <option value="greenhouse">🏡 Serre</option>
-                <option value="butterfly_net">🦋 Filet à papillon</option>
-              </select>
-            </div>
-
-            <p class="text-xs text-stone-500">
-              Planche de culture en pleine terre avec sillons labourés et grille de plantation de 30×30 cm.
-            </p>
-          </div>
-
-          <!-- Options Arbre de verger + Création d'un nouvel arbre fruitier -->
-          <div id="sectionTreeOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
-            <div class="text-xs font-bold tracking-wider uppercase text-stone-500">
-              Essence &amp; gabarit d'arbre fruitier
-            </div>
-            <div>
-              <label for="newTreeSpecies" class="block text-xs font-semibold text-stone-700 mb-1.5">Arbre fruitier du verger</label>
-              <select id="newTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
-            </div>
-            <div>
-              <label for="newTreeSize" class="block text-xs font-semibold text-stone-700 mb-1.5">Taille de l'arbre</label>
-              <select id="newTreeSize" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                <option value="dwarf">Compact / Scion (1,8 m)</option>
-                <option value="medium" selected>Demi-tige (2,6 m)</option>
-                <option value="tall">Haute-tige (3,5 m)</option>
-              </select>
-            </div>
-
-            <!-- Formulaire création d'un nouvel arbre fruitier -->
-            <div class="border-t border-stone-200 pt-3">
-              <button id="btnToggleCustomTree" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-emerald-800 hover:text-emerald-950 py-1">
-                <span>+ Créer un nouvel arbre fruitier personnalisé</span>
-                <span id="customTreeCaret">▼</span>
-              </button>
-
-              <div id="customTreeForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
+              <div class="grid grid-cols-3 gap-3">
                 <div>
-                  <label for="customTreeName" class="block text-xs font-semibold text-stone-700 mb-1">Nom du fruitier</label>
-                  <input id="customTreeName" type="text" maxlength="40" placeholder="Ex: Néflier, Grenadier, Argousier..." class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                  <label for="newWidth" class="block text-xs font-semibold text-stone-800 mb-1.5">Largeur (cm)</label>
+                  <input id="newWidth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label for="customTreeEmoji" class="block text-xs font-semibold text-stone-700 mb-1">Logo (emoji)</label>
-                    <input id="customTreeEmoji" type="text" maxlength="8" value="🌳" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                  </div>
-                  <div>
-                    <label for="customTreeFile" class="block text-xs font-semibold text-stone-700 mb-1">Ou importer un logo (image)</label>
-                    <input id="customTreeFile" type="file" accept="image/*" class="block w-full text-xs text-stone-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-                  </div>
+                <div>
+                  <label for="newDepth" class="block text-xs font-semibold text-stone-800 mb-1.5">Profondeur (cm)</label>
+                  <input id="newDepth" type="number" min="30" max="600" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
                 </div>
-
-                <div class="grid grid-cols-2 gap-3 items-center">
-                  <div>
-                    <label for="customTreeFruitColor" class="block text-xs font-semibold text-stone-700 mb-1">Couleur des fruits 3D</label>
-                    <input id="customTreeFruitColor" type="color" value="#dc2626" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
-                  </div>
-                  <div class="flex items-center gap-2 pt-4">
-                    <span class="text-xs text-stone-500">Aperçu :</span>
-                    <div id="customTreeLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌳</div>
-                  </div>
+                <div>
+                  <label for="newHeight" class="block text-xs font-semibold text-stone-800 mb-1.5">Hauteur (cm)</label>
+                  <input id="newHeight" type="number" min="10" max="120" step="5" value="30" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
                 </div>
-
-                <button id="btnSaveCustomTree" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
-                  Enregistrer ce fruitier dans la liste
-                </button>
               </div>
-            </div>
-          </div>
 
-          <button id="btnCreateItem" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-base shadow-sm transition">
-            + Ajouter au jardin
-          </button>
-        </div>
-
-        <!-- Onglet 2 : Élément Actif -->
-        <div id="panelActive" class="hidden space-y-4">
-          <div id="noActiveItem" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Aucun élément sélectionné. Clique sur un bac, un sol labouré ou un arbre dans la vue 3D, ou ajoute-en un dans l'onglet <strong>+ Ajouter</strong>.
-          </div>
-
-          <div id="activeItemControls" class="hidden space-y-4">
-            <div class="flex items-center justify-between gap-2">
-              <span id="activeItemBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">
-                ÉLÉMENT #1
-              </span>
-              <button id="btnDeleteItem" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition">
-                <span>🗑</span>
-                <span>Supprimer</span>
-              </button>
-            </div>
-
-            <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
               <div>
-                <label for="editItemName" class="block text-xs font-semibold text-stone-700 mb-1.5">Nom de l'élément</label>
-                <input id="editItemName" type="text" maxlength="40" placeholder="Ex: Carré Tomates ou Pommier" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              </div>
-
-              <div id="editBedMaterialWrap">
-                <label for="editBedMaterial" class="block text-xs font-semibold text-stone-700 mb-1.5">Matériau du bac</label>
-                <select id="editBedMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <label for="newMaterial" class="block text-xs font-semibold text-stone-800 mb-1.5">Matériau du bac</label>
+                <select id="newMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                   <option value="wood">Bois brut</option>
                   <option value="burned_wood">Bois brûlé</option>
                   <option value="corten">Acier corten</option>
@@ -531,147 +207,389 @@
                 </select>
               </div>
 
-              <div id="editPlotCoverWrap">
-                <label for="editPlotCover" class="block text-xs font-semibold text-stone-700 mb-1.5">Protection / Couverture</label>
-                <select id="editPlotCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+              <div>
+                <label for="newBedCover" class="block text-xs font-semibold text-stone-800 mb-1.5">Protection / Couverture</label>
+                <select id="newBedCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                  <option value="none">Aucune protection</option>
+                  <option value="greenhouse">🏡 Serre</option>
+                  <option value="butterfly_net">🦋 Filet à papillon</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Options Sol labouré -->
+            <div id="sectionTilledOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-600">
+                Dimensions du sol labouré
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="tilledWidth" class="block text-xs font-semibold text-stone-800 mb-1.5">Largeur (cm)</label>
+                  <input id="tilledWidth" type="number" min="60" max="1000" step="10" value="180" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+                <div>
+                  <label for="tilledDepth" class="block text-xs font-semibold text-stone-800 mb-1.5">Profondeur (cm)</label>
+                  <input id="tilledDepth" type="number" min="60" max="1000" step="10" value="120" class="w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+              </div>
+
+              <div>
+                <label for="newTilledCover" class="block text-xs font-semibold text-stone-800 mb-1.5">Protection / Couverture</label>
+                <select id="newTilledCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                   <option value="none">Aucune protection</option>
                   <option value="greenhouse">🏡 Serre</option>
                   <option value="butterfly_net">🦋 Filet à papillon</option>
                 </select>
               </div>
 
+              <p class="text-xs text-stone-600">
+                Planche de culture en pleine terre avec sillons labourés et grille de plantation de 30×30 cm.
+              </p>
+            </div>
+
+            <!-- Options Arbre de verger + Création d'un nouvel arbre fruitier -->
+            <div id="sectionTreeOptions" class="hidden bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+              <div class="text-xs font-bold tracking-wider uppercase text-stone-600">
+                Essence &amp; gabarit d'arbre fruitier
+              </div>
               <div>
-                <div class="text-xs font-semibold text-stone-700 mb-2">Rotation</div>
-                <div class="grid grid-cols-4 gap-2">
-                  <button id="btnRotMinus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
-                    ↺ -15°
-                  </button>
-                  <button id="btnRotPlus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
-                    ↻ +15°
-                  </button>
-                  <button id="btnRot90" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
-                    +90°
-                  </button>
-                  <button id="btnRotReset" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-800 transition">
-                    0°
+                <label for="newTreeSpecies" class="block text-xs font-semibold text-stone-800 mb-1.5">Arbre fruitier du verger</label>
+                <select id="newTreeSpecies" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+              </div>
+              <div>
+                <label for="newTreeSize" class="block text-xs font-semibold text-stone-800 mb-1.5">Taille de l'arbre</label>
+                <select id="newTreeSize" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                  <option value="dwarf">Compact / Scion (1,8 m)</option>
+                  <option value="medium" selected>Demi-tige (2,6 m)</option>
+                  <option value="tall">Haute-tige (3,5 m)</option>
+                </select>
+              </div>
+
+              <!-- Formulaire création d'un nouvel arbre fruitier -->
+              <div class="border-t border-stone-200 pt-3">
+                <button id="btnToggleCustomTree" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-stone-950 hover:text-emerald-900 py-1">
+                  <span>+ Créer un nouvel arbre fruitier personnalisé</span>
+                  <span id="customTreeCaret">▼</span>
+                </button>
+
+                <div id="customTreeForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
+                  <div>
+                    <label for="customTreeName" class="block text-xs font-semibold text-stone-800 mb-1">Nom du fruitier</label>
+                    <input id="customTreeName" type="text" maxlength="40" placeholder="Ex: Néflier, Grenadier, Argousier..." class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label for="customTreeEmoji" class="block text-xs font-semibold text-stone-800 mb-1">Logo (emoji)</label>
+                      <input id="customTreeEmoji" type="text" maxlength="8" value="🌳" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                    </div>
+                    <div>
+                      <label for="customTreeFile" class="block text-xs font-semibold text-stone-800 mb-1">Ou importer un logo (image)</label>
+                      <input id="customTreeFile" type="file" accept="image/*" class="block w-full text-xs text-stone-700 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-stone-950 hover:file:bg-emerald-200" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                      <label for="customTreeFruitColor" class="block text-xs font-semibold text-stone-800 mb-1">Couleur des fruits 3D</label>
+                      <input id="customTreeFruitColor" type="color" value="#dc2626" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
+                    </div>
+                    <div class="flex items-center gap-2 pt-4">
+                      <span class="text-xs text-stone-600">Aperçu :</span>
+                      <div id="customTreeLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌳</div>
+                    </div>
+                  </div>
+
+                  <button id="btnSaveCustomTree" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition">
+                    Enregistrer ce fruitier dans la liste
                   </button>
                 </div>
               </div>
             </div>
 
-            <p class="text-xs text-stone-500">
-              Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur un élément pour le déplacer (aimantation tous les 10 cm).
-            </p>
+            <button id="btnCreateItem" type="button" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-base shadow-sm transition">
+              + Ajouter au jardin
+            </button>
           </div>
-        </div>
 
-        <!-- Onglet 3 : Planter (légumes + petits fruits + création personnalisée) -->
-        <div id="panelPlant" class="hidden space-y-4">
-          <div id="noPlotForPlanting" class="text-center py-8 text-stone-500 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
-            Ajoute d'abord un <strong>bac potager</strong> ou un <strong>sol labouré</strong> pour planter sur la grille de 30×30 cm.
+          <!-- Onglet 2 : Élément Actif -->
+          <div id="panelActive" class="hidden space-y-4">
+            <div id="noActiveItem" class="text-center py-8 text-stone-600 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+              Aucun élément sélectionné. Clique sur un bac, un sol labouré ou un arbre dans la vue 3D, ou ajoute-en un dans l'onglet <strong>+ Ajouter</strong>.
+            </div>
+
+            <div id="activeItemControls" class="hidden space-y-4">
+              <div class="flex items-center justify-between gap-2">
+                <span id="activeItemBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-100 text-stone-950 border border-emerald-700">
+                  ÉLÉMENT #1
+                </span>
+                <button id="btnDeleteItem" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 transition">
+                  <span>🗑</span>
+                  <span>Supprimer</span>
+                </button>
+              </div>
+
+              <div class="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 space-y-4">
+                <div>
+                  <label for="editItemName" class="block text-xs font-semibold text-stone-800 mb-1.5">Nom de l'élément</label>
+                  <input id="editItemName" type="text" maxlength="40" placeholder="Ex: Carré Tomates ou Pommier" class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                </div>
+
+                <div id="editBedMaterialWrap">
+                  <label for="editBedMaterial" class="block text-xs font-semibold text-stone-800 mb-1.5">Matériau du bac</label>
+                  <select id="editBedMaterial" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="wood">Bois brut</option>
+                    <option value="burned_wood">Bois brûlé</option>
+                    <option value="corten">Acier corten</option>
+                    <option value="stone">Pierre naturelle</option>
+                  </select>
+                </div>
+
+                <div id="editPlotCoverWrap">
+                  <label for="editPlotCover" class="block text-xs font-semibold text-stone-800 mb-1.5">Protection / Couverture</label>
+                  <select id="editPlotCover" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <option value="none">Aucune protection</option>
+                    <option value="greenhouse">🏡 Serre</option>
+                    <option value="butterfly_net">🦋 Filet à papillon</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-xs font-semibold text-stone-800">Déplacement (pas de 10 cm)</span>
+                    <span id="activeItemCoordsLabel" class="text-xs font-mono text-stone-600">X: 0.0m · Z: 0.0m</span>
+                  </div>
+                  <div class="grid grid-cols-4 gap-2">
+                    <button id="btnMoveLeft" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      ← 10cm
+                    </button>
+                    <button id="btnMoveRight" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      10cm →
+                    </button>
+                    <button id="btnMoveUp" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      ↑ 10cm
+                    </button>
+                    <button id="btnMoveDown" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      ↓ 10cm
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-xs font-semibold text-stone-800 mb-2">Rotation</div>
+                  <div class="grid grid-cols-4 gap-2">
+                    <button id="btnRotMinus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      ↺ -15°
+                    </button>
+                    <button id="btnRotPlus15" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      ↻ +15°
+                    </button>
+                    <button id="btnRot90" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      +90°
+                    </button>
+                    <button id="btnRotReset" type="button" class="py-2.5 px-2 rounded-xl border border-stone-300 bg-white hover:bg-stone-100 text-sm font-semibold text-stone-950 transition">
+                      0°
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-stone-600">
+                Astuce : passe en <strong>Vue Dessus (Plan)</strong> puis clique directement sur un élément pour le déplacer (aimantation tous les 10 cm).
+              </p>
+            </div>
           </div>
 
-          <div id="plantingControls" class="hidden space-y-4">
-            <div>
-              <label for="plantTargetItem" class="block text-xs font-semibold text-stone-700 mb-1.5">Bac ou sol labouré cible</label>
-              <select id="plantTargetItem" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
+          <!-- Onglet 3 : Planter (légumes + petits fruits + création personnalisée) -->
+          <div id="panelPlant" class="hidden space-y-4">
+            <div id="noPlotForPlanting" class="text-center py-8 text-stone-600 text-sm bg-stone-50 rounded-2xl border border-dashed border-stone-300">
+              Ajoute d'abord un <strong>bac potager</strong> ou un <strong>sol labouré</strong> pour planter sur la grille de 30×30 cm.
             </div>
 
-            <!-- Sous-menu Légumes / Fruits -->
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-xs font-semibold text-stone-700">Catégorie à planter</span>
-                <span id="categoryCountBadge" class="text-xs font-semibold text-emerald-700">70 légumes</span>
+            <div id="plantingControls" class="hidden space-y-4">
+              <div>
+                <label for="plantTargetItem" class="block text-xs font-semibold text-stone-800 mb-1.5">Bac ou sol labouré cible</label>
+                <select id="plantTargetItem" class="big-select w-full rounded-xl border border-stone-300 bg-white font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600"></select>
               </div>
-              <div class="grid grid-cols-2 gap-2.5">
-                <button id="subtabVegetables" type="button" class="subtab-btn active py-2.5 px-3 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 transition">
-                  🥕 Légumes (70)
-                </button>
-                <button id="subtabFruits" type="button" class="subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition">
-                  🍓 Petits fruits (9)
-                </button>
-              </div>
-            </div>
 
-            <!-- Création personnalisée d'un légume ou petit fruit -->
-            <div class="bg-emerald-50/60 border border-emerald-200/80 rounded-xl p-3">
-              <button id="btnToggleCustomPlant" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-emerald-800 hover:text-emerald-950">
-                <span id="customPlantToggleLabel">+ Ajouter un légume ou fruit personnalisé</span>
-                <span id="customPlantCaret">▼</span>
-              </button>
-
-              <div id="customPlantForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label for="customPlantName" class="block text-xs font-semibold text-stone-700 mb-1">Nom</label>
-                    <input id="customPlantName" type="text" maxlength="40" placeholder="Ex: Chou romanesco ou Framboise jaune" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                  </div>
-                  <div>
-                    <label for="customPlantCategory" class="block text-xs font-semibold text-stone-700 mb-1">Type</label>
-                    <select id="customPlantCategory" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                      <option value="vegetables">Légume</option>
-                      <option value="fruits">Petit fruit</option>
-                    </select>
-                  </div>
+              <!-- Sous-menu Légumes / Fruits -->
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-semibold text-stone-800">Catégorie à planter</span>
+                  <span id="categoryCountBadge" class="text-xs font-bold text-stone-950">70 légumes</span>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label for="customPlantEmoji" class="block text-xs font-semibold text-stone-700 mb-1">Logo (emoji)</label>
-                    <input id="customPlantEmoji" type="text" maxlength="8" value="🌱" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                  </div>
-                  <div>
-                    <label for="customPlantFile" class="block text-xs font-semibold text-stone-700 mb-1">Ou importer un logo (image)</label>
-                    <input id="customPlantFile" type="file" accept="image/*" class="block w-full text-xs text-stone-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-                  </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button id="subtabVegetables" type="button" class="subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold text-stone-950 transition">
+                    🥕 Légumes (70)
+                  </button>
+                  <button id="subtabFruits" type="button" class="subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-950 hover:bg-stone-50 transition">
+                    🍓 Petits fruits (9)
+                  </button>
                 </div>
+              </div>
 
-                <div class="grid grid-cols-2 gap-3 items-center">
-                  <div>
-                    <label for="customPlantColor" class="block text-xs font-semibold text-stone-700 mb-1">Couleur 3D</label>
-                    <input id="customPlantColor" type="color" value="#3b82f6" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
-                  </div>
-                  <div class="flex items-center gap-2 pt-4">
-                    <span class="text-xs text-stone-500">Aperçu :</span>
-                    <div id="customPlantLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌱</div>
-                  </div>
-                </div>
-
-                <button id="btnSaveCustomPlant" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition">
-                  Ajouter à la palette et sélectionner
+              <!-- Création personnalisée d'un légume ou petit fruit -->
+              <div class="bg-emerald-50/70 border border-emerald-200/90 rounded-xl p-3">
+                <button id="btnToggleCustomPlant" type="button" class="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-stone-950 hover:text-emerald-900">
+                  <span id="customPlantToggleLabel">+ Ajouter un légume ou fruit personnalisé</span>
+                  <span id="customPlantCaret">▼</span>
                 </button>
-              </div>
-            </div>
 
-            <!-- Filtre & palette -->
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <label id="paletteTitleLabel" for="plantSearchInput" class="text-xs font-semibold text-stone-700">
-                  Choisir un légume (parcelles de 30×30 cm)
-                </label>
-                <span id="selectedPlantSummary" class="text-xs font-semibold text-stone-600"></span>
-              </div>
-              <input
-                id="plantSearchInput"
-                type="search"
-                placeholder="Filtrer par nom..."
-                class="w-full mb-2.5 rounded-xl border border-stone-300 bg-stone-50 px-3.5 py-2 text-sm text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
-              />
-              <div id="plantPalette" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1"></div>
-            </div>
+                <div id="customPlantForm" class="hidden mt-3 bg-white border border-stone-200 rounded-xl p-3.5 space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label for="customPlantName" class="block text-xs font-semibold text-stone-800 mb-1">Nom</label>
+                      <input id="customPlantName" type="text" maxlength="40" placeholder="Ex: Chou romanesco ou Framboise jaune" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                    </div>
+                    <div>
+                      <label for="customPlantCategory" class="block text-xs font-semibold text-stone-800 mb-1">Type</label>
+                      <select id="customPlantCategory" class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                        <option value="vegetables">Légume</option>
+                        <option value="fruits">Petit fruit</option>
+                      </select>
+                    </div>
+                  </div>
 
-            <!-- Grille de plantation 30x30 cm -->
-            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 overflow-x-auto">
-              <div class="flex flex-wrap items-center justify-between gap-1 text-xs text-stone-500 mb-2.5">
-                <span id="gridInfoLabel">Grille 30×30 cm</span>
-                <span>Clic sur plant identique = retrait</span>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label for="customPlantEmoji" class="block text-xs font-semibold text-stone-800 mb-1">Logo (emoji)</label>
+                      <input id="customPlantEmoji" type="text" maxlength="8" value="🌱" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+                    </div>
+                    <div>
+                      <label for="customPlantFile" class="block text-xs font-semibold text-stone-800 mb-1">Ou importer un logo (image)</label>
+                      <input id="customPlantFile" type="file" accept="image/*" class="block w-full text-xs text-stone-700 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-stone-950 hover:file:bg-emerald-200" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                      <label for="customPlantColor" class="block text-xs font-semibold text-stone-800 mb-1">Couleur 3D</label>
+                      <input id="customPlantColor" type="color" value="#3b82f6" class="h-9 w-full rounded-lg border border-stone-300 cursor-pointer" />
+                    </div>
+                    <div class="flex items-center gap-2 pt-4">
+                      <span class="text-xs text-stone-600">Aperçu :</span>
+                      <div id="customPlantLogoPreview" class="w-8 h-8 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-lg overflow-hidden">🌱</div>
+                    </div>
+                  </div>
+
+                  <button id="btnSaveCustomPlant" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition">
+                    Ajouter à la palette et sélectionner
+                  </button>
+                </div>
               </div>
-              <div id="itemCellGrid" class="inline-grid gap-1.5 mx-auto"></div>
+
+              <!-- Filtre & palette -->
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <label id="paletteTitleLabel" for="plantSearchInput" class="text-xs font-semibold text-stone-800">
+                    Choisir un légume (parcelles de 30×30 cm)
+                  </label>
+                  <span id="selectedPlantSummary" class="text-xs font-semibold text-stone-950"></span>
+                </div>
+                <input
+                  id="plantSearchInput"
+                  type="search"
+                  placeholder="Filtrer par nom..."
+                  class="w-full mb-2.5 rounded-xl border border-stone-300 bg-stone-50 px-3.5 py-2 text-sm text-stone-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                />
+                <div id="plantPalette" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1"></div>
+              </div>
+
+              <!-- Grille de plantation 30x30 cm -->
+              <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 overflow-x-auto">
+                <div class="flex flex-wrap items-center justify-between gap-1 text-xs text-stone-600 mb-2.5">
+                  <span id="gridInfoLabel">Grille 30×30 cm</span>
+                  <span>Clic sur plant identique = retrait</span>
+                </div>
+                <div id="itemCellGrid" class="inline-grid gap-1.5 mx-auto"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SECTION 2 : GESTION DE MON JARDIN                                   -->
+    <!-- =================================================================== -->
+    <section id="viewGestion" class="hidden bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-stone-950">2. Gestion de mon jardin</h2>
+          <p class="text-xs text-stone-600">Suivi des zones, arrosage et notes d'entretien</p>
+        </div>
+        <button id="btnToggleNewZone" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold transition">
+          + Nouvelle zone
+        </button>
+      </div>
+
+      <form id="newZoneForm" class="hidden grid-cols-1 sm:grid-cols-4 gap-2.5 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
+        <input id="newZoneName" type="text" maxlength="45" placeholder="Nom de la zone (ex: Carré Tomates)" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+        <select id="newZoneFreq" class="rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+          <option value="Tous les 2 jours">Tous les 2 jours</option>
+          <option value="2 fois / semaine">2 fois / semaine</option>
+          <option value="1 fois / semaine">1 fois / semaine</option>
+          <option value="Paillage / léger">Paillage / léger</option>
+        </select>
+        <button type="submit" class="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
+          Enregistrer
+        </button>
+      </form>
+
+      <div id="zonesList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SECTION 3 : PLANNING DE MON JARDIN                                   -->
+    <!-- =================================================================== -->
+    <section id="viewPlanning" class="hidden bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-stone-950">3. Planning de mon jardin</h2>
+          <p class="text-xs text-stone-600">Semis, plantations, tailles, arrosages et récoltes</p>
+        </div>
+        <span id="planningBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-950">
+          0 / 0 terminées
+        </span>
+      </div>
+
+      <form id="planningForm" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
+        <input id="planningTitle" type="text" maxlength="80" placeholder="Nouvelle tâche (ex: Semer des carottes...)" class="sm:col-span-5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600" />
+        <select id="planningCategory" class="sm:col-span-2 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+          <option value="semis">🌱 Semis</option>
+          <option value="plantation">🪴 Plantation</option>
+          <option value="taille">✂️ Taille</option>
+          <option value="arrosage">💧 Arrosage</option>
+          <option value="recolte">🧺 Récolte</option>
+        </select>
+        <select id="planningPeriod" class="sm:col-span-3 rounded-xl border border-stone-300 bg-white px-2.5 py-2 text-sm font-medium text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+          <option value="Cette semaine">Cette semaine</option>
+          <option value="Printemps">Printemps</option>
+          <option value="Été">Été</option>
+          <option value="Automne">Automne</option>
+          <option value="Hiver">Hiver</option>
+        </select>
+        <button type="submit" class="sm:col-span-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2 px-3 transition">
+          + Ajouter
+        </button>
+      </form>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button data-filter="all" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-stone-950 border-2 border-emerald-800 ring-2 ring-emerald-700/25 transition">Toutes</button>
+          <button data-filter="semis" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition">🌱 Semis</button>
+          <button data-filter="plantation" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition">🪴 Plantation</button>
+          <button data-filter="taille" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition">✂️ Taille</button>
+          <button data-filter="arrosage" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition">💧 Arrosage</button>
+          <button data-filter="recolte" type="button" class="task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition">🧺 Récolte</button>
+        </div>
+        <button id="btnClearDoneTasks" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-900 transition">
+          Supprimer terminées
+        </button>
+      </div>
+
+      <div id="planningList" class="space-y-2"></div>
+    </section>
   </div>
 
   <script type="module">
@@ -680,9 +598,10 @@
 
     // Constantes spatiales du potager (en mètres)
     const CELL_SIZE = 0.30; // 30 cm par case de plantation
-    const SNAP_STEP = 0.10;  // Aimantation de 10 cm en vue du dessus
+    const SNAP_STEP = 0.10;  // Aimantation de 10 cm en vue du dessus et pour les déplacements
+    const WORKSPACE_STORAGE_KEY = 'azalee_potager3d_workspace_v3';
 
-    // Bannière d'information / avertissement non bloquante (jamais d'alert/confirm)
+    // Bannière de notification non bloquante
     const statusBanner = document.getElementById('statusBanner');
     const statusBannerText = document.getElementById('statusBannerText');
     let bannerTimeoutId = null;
@@ -691,9 +610,9 @@
       if (!statusBanner || !statusBannerText) return;
       if (bannerTimeoutId) clearTimeout(bannerTimeoutId);
       const toneClasses = {
-        info: 'bg-emerald-50 border-emerald-200 text-emerald-900',
-        warn: 'bg-amber-50 border-amber-300 text-amber-950',
-        error: 'bg-red-50 border-red-200 text-red-900'
+        info: 'bg-emerald-50 border-emerald-200 text-stone-950',
+        warn: 'bg-amber-50 border-amber-300 text-stone-950',
+        error: 'bg-red-50 border-red-200 text-red-950'
       };
       statusBanner.className = `rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition ${toneClasses[tone] || toneClasses.info}`;
       statusBannerText.textContent = message;
@@ -992,7 +911,7 @@
     scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.35);
-    dirLight.position.set(6, 11, 7);
+    dirLight.position.set(6, 10.5, 6.5);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
@@ -1007,10 +926,8 @@
     scene.add(dirLight);
 
     // Pelouse et grille 1m
-    const groundMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(40, 40),
-      new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 })
-    );
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x4d7c2c, roughness: 0.95, metalness: 0.0 });
+    const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), groundMat);
     groundMesh.rotation.x = -Math.PI / 2;
     groundMesh.receiveShadow = true;
     scene.add(groundMesh);
@@ -1104,6 +1021,7 @@
         draggingItem.x = Math.round(rawX / SNAP_STEP) * SNAP_STEP;
         draggingItem.z = Math.round(rawZ / SNAP_STEP) * SNAP_STEP;
         updateItemTransform(draggingItem);
+        updateCoordsLabel(draggingItem);
       }
     });
 
@@ -1885,7 +1803,7 @@
       return g;
     }
 
-    // Emprise sur grille 30x30 cm : 3x3 (9 cases = 90x90 cm) pour Melon, Raisin de table et grands arbustes
+    // Emprise sur grille 30x30 cm : 3x3 (9 cases = 90x90 cm) pour Melon, Raisin de table et arbustes à fruits rouges
     function getPlantFootprint(plantId) {
       const spec = plantId ? PLANTS[plantId] : null;
       if (
@@ -1981,7 +1899,6 @@
       const archCount = Math.max(2, Math.min(9, Math.round(spanD / 0.45) + 1));
 
       if (coverType === 'greenhouse') {
-        // Coque tunnel transparente/polycarbonate avec reflet léger
         const shellMat = new THREE.MeshPhysicalMaterial({
           color: 0xdff6ff,
           transparent: true,
@@ -2008,7 +1925,6 @@
         const halfW = spanW * 0.5;
         const halfD = spanD * 0.5;
 
-        // Coque semi-cylindrique couvrant la longueur (axe Z) et la largeur (axe X)
         const cylGeo = new THREE.CylinderGeometry(
           halfW,
           halfW,
@@ -2025,7 +1941,6 @@
         shellMesh.position.set(0, baseY, 0);
         cGroup.add(shellMesh);
 
-        // Extrémités semi-circulaires vitrées
         const endGeo = new THREE.CircleGeometry(halfW, 24, 0, Math.PI);
         const frontCap = new THREE.Mesh(endGeo, shellMat);
         frontCap.position.set(0, baseY, halfD);
@@ -2036,7 +1951,6 @@
         backCap.rotation.y = Math.PI;
         cGroup.add(backCap);
 
-        // Arceaux métalliques espacés sur la longueur
         for (let i = 0; i < archCount; i++) {
           const zPos = archCount === 1 ? 0 : -halfD + (i / (archCount - 1)) * spanD;
           const torusGeo = new THREE.TorusGeometry(halfW, 0.011, 8, 28, Math.PI);
@@ -2046,7 +1960,6 @@
           cGroup.add(hoop);
         }
 
-        // Faîtière supérieure et longerons latéraux de base
         const ridgeBar = new THREE.Mesh(
           new THREE.CylinderGeometry(0.012, 0.012, spanD, 8),
           frameMat
@@ -2066,7 +1979,6 @@
           cGroup.add(sill);
         });
       } else if (coverType === 'butterfly_net') {
-        // Filet à papillon : maille fine claire semi-transparente sur arceaux flexibles sombres
         const netMat = new THREE.MeshStandardMaterial({
           color: 0xf8fafc,
           transparent: true,
@@ -2095,7 +2007,6 @@
         const halfW = spanW * 0.5;
         const halfD = spanD * 0.5;
 
-        // Voile supérieur et côtés de maille fine (très léger pour laisser voir les plants)
         const topNet = new THREE.Mesh(new THREE.PlaneGeometry(spanW, spanD, 16, 16), netMat);
         topNet.rotation.x = -Math.PI / 2;
         topNet.position.set(0, baseY + archHeight, 0);
@@ -2120,7 +2031,6 @@
           cGroup.add(endWall);
         });
 
-        // Arceaux / piquets soutenant le filet
         for (let i = 0; i < archCount; i++) {
           const zPos = archCount === 1 ? 0 : -halfD + (i / (archCount - 1)) * spanD;
           const arcGeo = new THREE.TorusGeometry(halfW, 0.0085, 6, 24, Math.PI);
@@ -2146,6 +2056,7 @@
       const group = new THREE.Group();
       group.userData.itemId = item.id;
       const isSelected = state.activeItemId === item.id;
+      const soilColor = new THREE.Color(0x3b2313);
 
       if (item.type === 'bed') {
         const w = item.widthCm / 100;
@@ -2185,7 +2096,7 @@
         const { cols, rows, surfaceY, innerW, innerD } = getPlotGridDimensions(item);
         const soilMesh = new THREE.Mesh(
           new THREE.BoxGeometry(innerW, surfaceY, innerD),
-          new THREE.MeshStandardMaterial({ color: 0x3e2718, roughness: 0.96, metalness: 0.0 })
+          new THREE.MeshStandardMaterial({ color: soilColor, roughness: 0.96, metalness: 0.0 })
         );
         soilMesh.position.y = surfaceY / 2;
         soilMesh.receiveShadow = true;
@@ -2223,14 +2134,14 @@
 
         const baseSoil = new THREE.Mesh(
           new THREE.BoxGeometry(w, surfaceY, d),
-          new THREE.MeshStandardMaterial({ color: 0x4b2e19, roughness: 0.98, metalness: 0.0 })
+          new THREE.MeshStandardMaterial({ color: soilColor, roughness: 0.98, metalness: 0.0 })
         );
         baseSoil.position.y = surfaceY / 2;
         baseSoil.receiveShadow = true;
         group.add(baseSoil);
 
         const ridgeCount = Math.max(3, Math.floor(d / 0.22));
-        const ridgeMat = new THREE.MeshStandardMaterial({ color: 0x5b381e, roughness: 0.95 });
+        const ridgeMat = new THREE.MeshStandardMaterial({ color: soilColor.clone().multiplyScalar(1.15), roughness: 0.95 });
         for (let i = 0; i < ridgeCount; i++) {
           const zPos = -d / 2 + ((i + 0.5) / ridgeCount) * d;
           const ridge = new THREE.Mesh(
@@ -2334,8 +2245,15 @@
       mesh.rotation.y = THREE.MathUtils.degToRad(item.rotationDeg || 0);
     }
 
+    function updateCoordsLabel(item) {
+      const lbl = document.getElementById('activeItemCoordsLabel');
+      if (!lbl || !item) return;
+      lbl.textContent = `X: ${Number(item.x || 0).toFixed(1)}m · Z: ${Number(item.z || 0).toFixed(1)}m`;
+    }
+
     function rebuildAllItems() {
       state.items.forEach(rebuildItemMesh);
+      updateGardenCountBadge();
     }
 
     function clearAllItemsAndMeshes() {
@@ -2347,6 +2265,7 @@
       state.items = [];
       state.activeItemId = null;
       state.nextId = 1;
+      updateGardenCountBadge();
     }
 
     function getActiveItem() {
@@ -2408,6 +2327,13 @@
 
     function getPlantableItems() {
       return state.items.filter((it) => it.type === 'bed' || it.type === 'tilled_soil');
+    }
+
+    function updateGardenCountBadge() {
+      const badgeEl = document.getElementById('gardenItemCountBadge');
+      if (!badgeEl) return;
+      const totalPlants = state.items.reduce((acc, it) => acc + Object.keys(it.plants || {}).length, 0);
+      badgeEl.textContent = `${state.items.length} élément${state.items.length > 1 ? 's' : ''} · ${totalPlants} plant${totalPlants > 1 ? 's' : ''}`;
     }
 
     // Liste déroulante des arbres fruitiers
@@ -2572,7 +2498,7 @@
       showNotice(`"${rawName}" ajouté à la palette.`, 'info');
     });
 
-    // Palette Légumes / Fruits
+    // Palette Légumes / Fruits (garde la couleur de texte sombre text-stone-950 quand sélectionné)
     const plantPaletteEl = document.getElementById('plantPalette');
     function renderPlantPalette() {
       const ids = state.activePlantCategory === 'vegetables' ? VEGETABLE_IDS : FRUIT_IDS;
@@ -2590,12 +2516,12 @@
 
       const selSpec = PLANTS[state.selectedPlant];
       document.getElementById('selectedPlantSummary').innerHTML = selSpec
-        ? `<span class="inline-flex items-center gap-1.5">Sélection : ${renderLogoHTML(selSpec, 'w-4 h-4', 'text-sm')} <span>${selSpec.name}</span></span>`
+        ? `<span class="inline-flex items-center gap-1.5 text-stone-950 font-bold">Sélection : ${renderLogoHTML(selSpec, 'w-4 h-4', 'text-sm')} <span>${selSpec.name}</span></span>`
         : '';
 
       plantPaletteEl.innerHTML = '';
       if (filteredIds.length === 0) {
-        plantPaletteEl.innerHTML = '<div class="col-span-2 sm:col-span-3 text-center py-4 text-xs text-stone-500">Aucun résultat pour ce filtre.</div>';
+        plantPaletteEl.innerHTML = '<div class="col-span-2 sm:col-span-3 text-center py-4 text-xs text-stone-600">Aucun résultat pour ce filtre.</div>';
         return;
       }
 
@@ -2604,12 +2530,19 @@
         const isSelected = state.selectedPlant === plant.id;
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `flex items-center gap-2 px-3 py-2 rounded-xl border text-left text-xs sm:text-sm font-medium transition ${
+        btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        btn.className = `flex items-center justify-between gap-2 px-3 py-2 rounded-xl border-2 text-left text-xs sm:text-sm transition ${
           isSelected
-            ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm font-semibold'
-            : 'bg-white text-stone-800 border-stone-200 hover:bg-stone-50'
+            ? 'bg-emerald-100 text-stone-950 border-emerald-800 ring-2 ring-emerald-700/35 font-bold shadow-sm'
+            : 'bg-white text-stone-950 border-stone-200 hover:bg-stone-50 hover:border-stone-300 font-medium'
         }`;
-        btn.innerHTML = `${renderLogoHTML(plant, 'w-6 h-6', 'text-base')}<span class="truncate">${plant.name}</span>`;
+        btn.innerHTML = `
+          <span class="flex items-center gap-2 min-w-0">
+            ${renderLogoHTML(plant, 'w-6 h-6', 'text-base')}
+            <span class="truncate">${plant.name}</span>
+          </span>
+          ${isSelected ? '<span class="shrink-0 text-xs font-extrabold text-stone-950 bg-emerald-200 px-1.5 py-0.5 rounded-md">✓</span>' : ''}
+        `;
         btn.addEventListener('click', () => {
           state.selectedPlant = plant.id;
           syncUI();
@@ -2669,7 +2602,7 @@
 
           if (isLargeFootprintZone && !isAnchor) {
             cellBtn.title = `Emprise de ${plantSpec.name} (9 cases 30×30 cm) — (${c + 1}, ${r + 1})`;
-            cellBtn.className = 'rounded-lg border border-stone-700/40 bg-stone-800/20 text-stone-700 flex items-center justify-center text-[11px] font-bold transition hover:bg-red-500/20';
+            cellBtn.className = 'rounded-lg border border-stone-700/40 bg-stone-800/20 text-stone-900 flex items-center justify-center text-[11px] font-bold transition hover:bg-red-500/20';
             cellBtn.innerHTML = '•';
           } else {
             cellBtn.title = plantSpec
@@ -2692,12 +2625,14 @@
               delete targetItem.plants[anchorKey];
               rebuildItemMesh(targetItem);
               renderItemCellGrid();
+              updateGardenCountBadge();
               return;
             }
             if (occupant && isLargeFootprintZone) {
               delete targetItem.plants[anchorKey];
               rebuildItemMesh(targetItem);
               renderItemCellGrid();
+              updateGardenCountBadge();
               return;
             }
             if (canPlacePlantAt(targetItem.plants, r, c, state.selectedPlant, rows, cols, anchorKey)) {
@@ -2707,6 +2642,7 @@
               targetItem.plants[key] = state.selectedPlant;
               rebuildItemMesh(targetItem);
               renderItemCellGrid();
+              updateGardenCountBadge();
             } else {
               const selSpec = PLANTS[state.selectedPlant];
               const fp = getPlantFootprint(state.selectedPlant);
@@ -2749,6 +2685,7 @@
               : `VERGER · ${(TREE_SPECIES[activeItem.species] || TREE_SPECIES[DEFAULT_TREE_KEY]).label.toUpperCase()}`;
 
         document.getElementById('activeItemBadge').textContent = `${activeItem.name} (${badgeSuffix})`;
+        updateCoordsLabel(activeItem);
 
         const nameInput = document.getElementById('editItemName');
         if (document.activeElement !== nameInput) {
@@ -2804,20 +2741,21 @@
 
         document.getElementById('subtabVegetables').className =
           state.activePlantCategory === 'vegetables'
-            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold transition'
-            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition';
+            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold text-stone-950 transition'
+            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-950 hover:bg-stone-50 transition';
 
         document.getElementById('subtabFruits').className =
           state.activePlantCategory === 'fruits'
-            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold transition'
-            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-800 hover:bg-stone-50 transition';
+            ? 'subtab-btn active py-2.5 px-3 rounded-xl border text-sm font-semibold text-stone-950 transition'
+            : 'subtab-btn py-2.5 px-3 rounded-xl border border-stone-300 bg-white text-sm font-semibold text-stone-950 hover:bg-stone-50 transition';
 
         renderPlantPalette();
         renderItemCellGrid();
       }
+      updateGardenCountBadge();
     }
 
-    // Onglets principaux
+    // Onglets principaux de Création de mon jardin
     const tabs = [
       { btn: document.getElementById('tabAdd'), panel: document.getElementById('panelAdd') },
       { btn: document.getElementById('tabActive'), panel: document.getElementById('panelActive') },
@@ -2873,9 +2811,24 @@
           size: document.getElementById('newTreeSize').value
         });
       }
+      updateGardenCountBadge();
     });
 
-    // Actions Élément Actif
+    // Actions Élément Actif : déplacement 10 cm, rotation et suppression
+    function moveActiveItem(dx, dz) {
+      const item = getActiveItem();
+      if (!item) return;
+      item.x = Math.round(((item.x || 0) + dx) / SNAP_STEP) * SNAP_STEP;
+      item.z = Math.round(((item.z || 0) + dz) / SNAP_STEP) * SNAP_STEP;
+      updateItemTransform(item);
+      updateCoordsLabel(item);
+    }
+
+    document.getElementById('btnMoveLeft').addEventListener('click', () => moveActiveItem(-SNAP_STEP, 0));
+    document.getElementById('btnMoveRight').addEventListener('click', () => moveActiveItem(SNAP_STEP, 0));
+    document.getElementById('btnMoveUp').addEventListener('click', () => moveActiveItem(0, -SNAP_STEP));
+    document.getElementById('btnMoveDown').addEventListener('click', () => moveActiveItem(0, SNAP_STEP));
+
     document.getElementById('editItemName').addEventListener('input', (e) => {
       const item = getActiveItem();
       if (!item) return;
@@ -2965,12 +2918,12 @@
       stopDragging();
       if (top) {
         btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
-        btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
+        btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-900 hover:bg-stone-100 transition';
         camera.position.set(0, 10.5, 0.001);
         controls.target.set(0, 0, 0);
       } else {
         btnView3D.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-green-700 text-white transition';
-        btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-700 hover:bg-stone-100 transition';
+        btnViewTop.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-stone-900 hover:bg-stone-100 transition';
         camera.position.set(4.8, 5.4, 5.8);
         controls.target.set(0, 0, 0);
       }
@@ -2986,26 +2939,143 @@
       state.showGrid = !state.showGrid;
       gridHelper.visible = state.showGrid;
       const dot = document.querySelector('#btnToggleGrid span:first-child');
-      dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
+      dot.className = state.showGrid ? 'w-2.5 h-2.5 rounded-full bg-emerald-600' : 'w-2.5 h-2.5 rounded-full bg-stone-400';
     });
 
-    // Export / Import / Reset JSON
+    // =====================================================================
+    // SECTIONS 2 & 3 : GESTION DE MON JARDIN & PLANNING DE MON JARDIN
+    // =====================================================================
+    const TASK_CATEGORY_LABELS = {
+      semis: '🌱 Semis',
+      plantation: '🪴 Plantation',
+      taille: '✂️ Taille',
+      arrosage: '💧 Arrosage',
+      recolte: '🧺 Récolte'
+    };
+
+    function defaultSecondaryData() {
+      return {
+        activeView: 'creation',
+        taskFilter: 'all',
+        nextZoneId: 4,
+        nextTaskId: 5,
+        zones: [
+          {
+            id: 1,
+            name: 'Carré #1',
+            waterFreq: 'Tous les 2 jours',
+            lastWatered: "Aujourd'hui",
+            notes: 'Surveiller l’humidité du terreau et pailler légèrement.'
+          },
+          {
+            id: 2,
+            name: 'Parcelle labourée #2',
+            waterFreq: '2 fois / semaine',
+            lastWatered: 'Il y a 2 jours',
+            notes: 'Biner les allées et vérifier les jeunes pousses.'
+          },
+          {
+            id: 3,
+            name: 'Pommier #3',
+            waterFreq: '1 fois / semaine',
+            lastWatered: 'Il y a 4 jours',
+            notes: 'Arroser au pied du pommier en période sèche.'
+          }
+        ],
+        tasks: [
+          { id: 1, title: 'Arroser Carré #1', category: 'arrosage', period: 'Cette semaine', done: false },
+          { id: 2, title: 'Semer des radis sur Parcelle labourée #2', category: 'semis', period: 'Printemps', done: false },
+          { id: 3, title: 'Tailler les rameaux de Pommier #3', category: 'taille', period: 'Hiver', done: true },
+          { id: 4, title: 'Récolter les petits fruits mûrs', category: 'recolte', period: 'Été', done: false }
+        ]
+      };
+    }
+
+    function loadSecondaryData() {
+      try {
+        const raw = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+        if (!raw) return defaultSecondaryData();
+        const parsed = JSON.parse(raw);
+        const base = defaultSecondaryData();
+        return {
+          ...base,
+          ...parsed,
+          zones: Array.isArray(parsed.zones) ? parsed.zones : base.zones,
+          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : base.tasks
+        };
+      } catch (err) {
+        return defaultSecondaryData();
+      }
+    }
+
+    const secondaryData = loadSecondaryData();
+
+    function saveSecondaryData() {
+      try {
+        localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(secondaryData));
+      } catch (err) {
+        // Ignorer si quota dépassé
+      }
+    }
+
+    function escapeText(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    const viewCreationEl = document.getElementById('viewCreation');
+    const viewGestionEl = document.getElementById('viewGestion');
+    const viewPlanningEl = document.getElementById('viewPlanning');
+
+    function setActiveAzaleeView(viewName) {
+      const normalized = viewName === 'potager3d' ? 'creation' : viewName;
+      secondaryData.activeView = normalized;
+      viewCreationEl.classList.toggle('hidden', normalized !== 'creation');
+      viewGestionEl.classList.toggle('hidden', normalized !== 'gestion');
+      viewPlanningEl.classList.toggle('hidden', normalized !== 'planning');
+
+      document.getElementById('navCreation').classList.toggle('active', normalized === 'creation');
+      document.getElementById('navGestion').classList.toggle('active', normalized === 'gestion');
+      document.getElementById('navPlanning').classList.toggle('active', normalized === 'planning');
+
+      if (normalized === 'creation') {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (w > 0 && h > 0) {
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        }
+      }
+      saveSecondaryData();
+    }
+
+    document.getElementById('navCreation').addEventListener('click', () => setActiveAzaleeView('creation'));
+    document.getElementById('navGestion').addEventListener('click', () => setActiveAzaleeView('gestion'));
+    document.getElementById('navPlanning').addEventListener('click', () => setActiveAzaleeView('planning'));
+
+    // Export / Import / Reset JSON (inclut jardin 3D + gestion + planning)
     document.getElementById('btnExportJson').addEventListener('click', () => {
       try {
         const customPlants = Object.values(PLANTS).filter((p) => p.custom);
         const customTrees = Object.values(TREE_SPECIES).filter((t) => t.custom);
         const payload = {
-          version: 3,
+          version: 4,
           exportedAt: new Date().toISOString(),
           items: state.items,
           customPlants,
-          customTrees
+          customTrees,
+          zones: secondaryData.zones,
+          tasks: secondaryData.tasks
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'potager-3d.json';
+        a.download = 'azalee-potager-3d.json';
         a.click();
         URL.revokeObjectURL(url);
         showNotice('Export JSON téléchargé.', 'info');
@@ -3081,6 +3151,16 @@
           } else {
             state.activeItemId = null;
           }
+
+          if (Array.isArray(data.zones)) {
+            secondaryData.zones = data.zones;
+          }
+          if (Array.isArray(data.tasks)) {
+            secondaryData.tasks = data.tasks;
+          }
+          saveSecondaryData();
+          renderZones();
+          renderTasks();
           syncUI();
           showNotice('Configuration JSON importée.', 'info');
         } catch (err) {
@@ -3094,8 +3174,240 @@
     document.getElementById('btnClearAll').addEventListener('click', () => {
       clearAllItemsAndMeshes();
       syncUI();
-      showNotice('Tous les éléments du jardin ont été effacés.', 'info');
+      showNotice('Tous les éléments 3D du jardin ont été effacés.', 'info');
     });
+
+    // Gestion de mon jardin
+    const newZoneForm = document.getElementById('newZoneForm');
+    document.getElementById('btnToggleNewZone').addEventListener('click', () => {
+      const isHidden = newZoneForm.classList.contains('hidden');
+      newZoneForm.classList.toggle('hidden', !isHidden);
+      newZoneForm.classList.toggle('grid', isHidden);
+      if (isHidden) {
+        document.getElementById('newZoneName').focus();
+      }
+    });
+
+    newZoneForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newZoneName');
+      const name = input.value.trim();
+      if (!name) {
+        showNotice('Veuillez saisir un nom de zone.', 'warn');
+        input.focus();
+        return;
+      }
+      secondaryData.zones.push({
+        id: secondaryData.nextZoneId++,
+        name,
+        waterFreq: document.getElementById('newZoneFreq').value,
+        lastWatered: 'Jamais',
+        notes: ''
+      });
+      input.value = '';
+      newZoneForm.classList.add('hidden');
+      newZoneForm.classList.remove('grid');
+      saveSecondaryData();
+      renderZones();
+      showNotice(`Zone "${name}" ajoutée.`, 'info');
+    });
+
+    function renderZones() {
+      const listEl = document.getElementById('zonesList');
+      listEl.innerHTML = '';
+
+      if (secondaryData.zones.length === 0) {
+        listEl.innerHTML =
+          '<div class="md:col-span-2 text-center py-8 text-sm text-stone-600 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune zone enregistrée.</div>';
+        return;
+      }
+
+      secondaryData.zones.forEach((zone) => {
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-stone-200 bg-stone-50/80 p-4 space-y-3';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-2';
+        header.innerHTML = `
+          <div class="min-w-0">
+            <h3 class="text-sm font-bold text-stone-950 truncate">${escapeText(zone.name)}</h3>
+            <p class="text-xs text-stone-600 mt-0.5">${escapeText(zone.waterFreq)} · Dernier arrosage : ${escapeText(zone.lastWatered)}</p>
+          </div>
+        `;
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.title = 'Supprimer la zone';
+        delBtn.className = 'p-1.5 rounded-lg text-stone-500 hover:text-red-700 hover:bg-red-50 transition shrink-0';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          secondaryData.zones = secondaryData.zones.filter((z) => z.id !== zone.id);
+          saveSecondaryData();
+          renderZones();
+        });
+        header.appendChild(delBtn);
+
+        const textarea = document.createElement('textarea');
+        textarea.rows = 2;
+        textarea.placeholder = "Notes d'entretien...";
+        textarea.className = 'w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs sm:text-sm text-stone-950 focus:outline-none focus:ring-2 focus:ring-emerald-600';
+        textarea.value = zone.notes || '';
+        textarea.addEventListener('input', () => {
+          zone.notes = textarea.value;
+          saveSecondaryData();
+        });
+
+        const footer = document.createElement('div');
+        footer.className = 'flex flex-wrap items-center justify-between gap-2';
+
+        const waterBtn = document.createElement('button');
+        waterBtn.type = 'button';
+        waterBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition';
+        waterBtn.textContent = "💧 Arrosé aujourd'hui";
+        waterBtn.addEventListener('click', () => {
+          const hm = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+          zone.lastWatered = `Aujourd'hui (${hm})`;
+          saveSecondaryData();
+          renderZones();
+          showNotice(`Arrosage enregistré pour "${zone.name}".`, 'info');
+        });
+
+        const addTaskBtn = document.createElement('button');
+        addTaskBtn.type = 'button';
+        addTaskBtn.className = 'px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-xs font-semibold text-stone-950 transition';
+        addTaskBtn.textContent = '+ Planifier tâche';
+        addTaskBtn.addEventListener('click', () => {
+          secondaryData.tasks.unshift({
+            id: secondaryData.nextTaskId++,
+            title: `Entretien — ${zone.name}`,
+            category: 'arrosage',
+            period: 'Cette semaine',
+            done: false
+          });
+          saveSecondaryData();
+          setActiveAzaleeView('planning');
+          renderTasks();
+          showNotice(`Tâche ajoutée au planning pour "${zone.name}".`, 'info');
+        });
+
+        footer.append(waterBtn, addTaskBtn);
+        card.append(header, textarea, footer);
+        listEl.appendChild(card);
+      });
+    }
+
+    // Planning de mon jardin
+    document.getElementById('planningForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('planningTitle');
+      const title = titleInput.value.trim();
+      if (!title) {
+        showNotice('Veuillez saisir une tâche.', 'warn');
+        titleInput.focus();
+        return;
+      }
+      secondaryData.tasks.unshift({
+        id: secondaryData.nextTaskId++,
+        title,
+        category: document.getElementById('planningCategory').value,
+        period: document.getElementById('planningPeriod').value,
+        done: false
+      });
+      titleInput.value = '';
+      saveSecondaryData();
+      renderTasks();
+      showNotice('Tâche ajoutée au planning.', 'info');
+    });
+
+    function syncTaskFilterButtons() {
+      document.querySelectorAll('.task-filter-btn').forEach((b) => {
+        const active = b.getAttribute('data-filter') === secondaryData.taskFilter;
+        b.className = active
+          ? 'task-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-stone-950 border-2 border-emerald-800 ring-2 ring-emerald-700/25 transition'
+          : 'task-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-900 border border-stone-200 hover:bg-stone-200 transition';
+      });
+    }
+
+    document.querySelectorAll('.task-filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        secondaryData.taskFilter = btn.getAttribute('data-filter') || 'all';
+        syncTaskFilterButtons();
+        saveSecondaryData();
+        renderTasks();
+      });
+    });
+
+    document.getElementById('btnClearDoneTasks').addEventListener('click', () => {
+      secondaryData.tasks = secondaryData.tasks.filter((t) => !t.done);
+      saveSecondaryData();
+      renderTasks();
+      showNotice('Tâches terminées supprimées.', 'info');
+    });
+
+    function renderTasks() {
+      const listEl = document.getElementById('planningList');
+      const total = secondaryData.tasks.length;
+      const doneCount = secondaryData.tasks.filter((t) => t.done).length;
+      document.getElementById('planningBadge').textContent = `${doneCount} / ${total} terminées`;
+
+      const visible =
+        secondaryData.taskFilter === 'all'
+          ? secondaryData.tasks
+          : secondaryData.tasks.filter((t) => t.category === secondaryData.taskFilter);
+
+      listEl.innerHTML = '';
+      if (visible.length === 0) {
+        listEl.innerHTML =
+          '<div class="text-center py-8 text-sm text-stone-600 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune tâche dans ce filtre.</div>';
+        return;
+      }
+
+      visible.forEach((task) => {
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between gap-3 p-3 rounded-xl border transition ${
+          task.done ? 'bg-stone-50 border-stone-200/70 opacity-75' : 'bg-white border-stone-200'
+        }`;
+
+        const left = document.createElement('label');
+        left.className = 'flex items-center gap-3 min-w-0 cursor-pointer flex-1';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = Boolean(task.done);
+        cb.className = 'w-4 h-4 accent-emerald-700 rounded cursor-pointer shrink-0';
+        cb.addEventListener('change', () => {
+          task.done = cb.checked;
+          saveSecondaryData();
+          renderTasks();
+        });
+
+        const info = document.createElement('div');
+        info.className = 'min-w-0';
+        info.innerHTML = `
+          <div class="text-sm font-semibold text-stone-950 truncate ${task.done ? 'line-through text-stone-500' : ''}">${escapeText(task.title)}</div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-1">
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-stone-950 border border-emerald-700/40">${TASK_CATEGORY_LABELS[task.category] || task.category}</span>
+            <span class="text-xs text-stone-600">· ${escapeText(task.period)}</span>
+          </div>
+        `;
+
+        left.append(cb, info);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.title = 'Supprimer la tâche';
+        delBtn.className = 'p-2 rounded-lg text-stone-500 hover:text-red-700 hover:bg-red-50 transition shrink-0';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => {
+          secondaryData.tasks = secondaryData.tasks.filter((t) => t.id !== task.id);
+          saveSecondaryData();
+          renderTasks();
+        });
+
+        row.append(left, delBtn);
+        listEl.appendChild(row);
+      });
+    }
 
     // Redimensionnement réactif du rendu 3D
     const resizeObserver = new ResizeObserver(() => {
@@ -3109,7 +3421,7 @@
     });
     resizeObserver.observe(container);
 
-    // Scène initiale avec bac potager, sol labouré et arbre fruitier
+    // Scène initiale avec bac potager ("Carré #1"), sol labouré ("Parcelle labourée #2") et arbre fruitier ("Pommier #3")
     addItem({
       type: 'bed',
       name: 'Carré #1',
@@ -3149,6 +3461,12 @@
     rebuildAllItems();
     setActiveItem(1);
 
+    renderZones();
+    syncTaskFilterButtons();
+    renderTasks();
+    setActiveAzaleeView(secondaryData.activeView || 'creation');
+
+    // Boucle d'animation 3D
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
@@ -3158,454 +3476,3 @@
   </script>
 </body>
 </html>
-  </script>
-
-  <script>
-    (function () {
-      const STORAGE_KEY = 'azalee_workspace_v1';
-
-      const TYPE_LABELS = {
-        semis: '🌱 Semis',
-        plantation: '🪴 Plantation',
-        taille: '✂️ Taille',
-        arrosage: '💧 Arrosage',
-        recolte: '🧺 Récolte'
-      };
-
-      function getPotagerExactHtml() {
-        const rawEl = document.getElementById('potager3DSourceCode');
-        return rawEl ? rawEl.textContent.trim() : '';
-      }
-
-      function createDefaultWorkspace() {
-        return {
-          activePart: 'part1',
-          taskFilter: 'all',
-          nextZoneId: 4,
-          nextTaskId: 5,
-          zones: [
-            {
-              id: 1,
-              name: 'Carré Aromatiques & Salades',
-              waterFreq: 'Tous les 2 jours',
-              lastWatered: "Aujourd'hui",
-              notes: 'Arroser de préférence le matin, maintenir un léger paillage.'
-            },
-            {
-              id: 2,
-              name: 'Parcelle Pleine Terre Sud',
-              waterFreq: '2 fois / semaine',
-              lastWatered: 'Il y a 2 jours',
-              notes: 'Biner superficiellement après arrosage et surveiller les adventices.'
-            },
-            {
-              id: 3,
-              name: 'Verger Fruitier',
-              waterFreq: '1 fois / semaine',
-              lastWatered: 'Il y a 4 jours',
-              notes: 'Vérifier le paillage au pied des jeunes arbres.'
-            }
-          ],
-          tasks: [
-            {
-              id: 1,
-              title: 'Arroser les carrés potagers',
-              category: 'arrosage',
-              period: 'Cette semaine',
-              done: false
-            },
-            {
-              id: 2,
-              title: 'Semer des radis et laitues de printemps',
-              category: 'semis',
-              period: 'Printemps',
-              done: false
-            },
-            {
-              id: 3,
-              title: 'Tailler le bois mort des fruitiers',
-              category: 'taille',
-              period: 'Hiver',
-              done: true
-            },
-            {
-              id: 4,
-              title: 'Récolter les herbes aromatiques',
-              category: 'recolte',
-              period: 'Cette semaine',
-              done: false
-            }
-          ]
-        };
-      }
-
-      let workspace = loadWorkspace();
-
-      function loadWorkspace() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return createDefaultWorkspace();
-          const parsed = JSON.parse(raw);
-          const def = createDefaultWorkspace();
-          return {
-            ...def,
-            ...parsed,
-            zones: Array.isArray(parsed.zones) ? parsed.zones : def.zones,
-            tasks: Array.isArray(parsed.tasks) ? parsed.tasks : def.tasks
-          };
-        } catch (err) {
-          return createDefaultWorkspace();
-        }
-      }
-
-      function saveWorkspace() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
-        } catch (err) {
-          showAzaleeNotice("Impossible d'enregistrer dans le stockage local.", 'warn');
-        }
-      }
-
-      let noticeTimer = null;
-      function showAzaleeNotice(message, tone = 'info') {
-        const banner = document.getElementById('azaleeNotice');
-        const text = document.getElementById('azaleeNoticeText');
-        if (!banner || !text) return;
-        if (noticeTimer) clearTimeout(noticeTimer);
-        const styles = {
-          info: 'bg-emerald-50 border-emerald-200 text-emerald-900',
-          warn: 'bg-amber-50 border-amber-300 text-amber-950',
-          error: 'bg-red-50 border-red-200 text-red-900'
-        };
-        banner.className = `rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between gap-2 transition ${styles[tone] || styles.info}`;
-        text.textContent = message;
-        banner.classList.remove('hidden');
-        noticeTimer = setTimeout(() => {
-          banner.classList.add('hidden');
-        }, 3600);
-      }
-
-      document.getElementById('btnCloseNotice').addEventListener('click', () => {
-        document.getElementById('azaleeNotice').classList.add('hidden');
-      });
-
-      function escapeHtml(value) {
-        return String(value || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
-      // Navigation entre les 3 parties du menu Azalée
-      function switchPart(partKey) {
-        workspace.activePart = partKey;
-        const defs = [
-          { key: 'part1', btn: document.getElementById('tabPart1'), sec: document.getElementById('part1Section') },
-          { key: 'part2', btn: document.getElementById('tabPart2'), sec: document.getElementById('part2Section') },
-          { key: 'part3', btn: document.getElementById('tabPart3'), sec: document.getElementById('part3Section') }
-        ];
-        defs.forEach(({ key, btn, sec }) => {
-          const active = key === partKey;
-          btn.classList.toggle('active', active);
-          sec.classList.toggle('hidden', !active);
-        });
-        saveWorkspace();
-      }
-
-      document.getElementById('tabPart1').addEventListener('click', () => switchPart('part1'));
-      document.getElementById('tabPart2').addEventListener('click', () => switchPart('part2'));
-      document.getElementById('tabPart3').addEventListener('click', () => switchPart('part3'));
-
-      // Ouverture du code Potager 3D dans une nouvelle page via Blob URL
-      function openPotager3DInNewPage() {
-        const htmlSource = getPotagerExactHtml();
-        if (!htmlSource) {
-          showAzaleeNotice('Code Potager 3D introuvable.', 'error');
-          return;
-        }
-        try {
-          const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' });
-          const blobUrl = URL.createObjectURL(blob);
-          const openedWin = window.open(blobUrl, '_blank', 'noopener,noreferrer');
-          if (!openedWin) {
-            showAzaleeNotice(
-              'Le navigateur a bloqué la nouvelle page : autorisez les fenêtres pop-up pour ouvrir Potager 3D.',
-              'warn'
-            );
-          } else {
-            showAzaleeNotice('Potager 3D ouvert dans une nouvelle page.', 'info');
-          }
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-        } catch (err) {
-          showAzaleeNotice("Erreur lors de l'ouverture de la nouvelle page.", 'error');
-        }
-      }
-
-      document.getElementById('btnOpenPotager3DPage').addEventListener('click', openPotager3DInNewPage);
-      document.getElementById('btnQuickOpenPotager3D').addEventListener('click', openPotager3DInNewPage);
-
-      // Affichage et copie du code Potager 3D intégré
-      const codePre = document.getElementById('potagerCodePre');
-      const codeBox = document.getElementById('potagerCodeBox');
-      codePre.textContent = getPotagerExactHtml();
-
-      document.getElementById('btnToggleCodePreview').addEventListener('click', () => {
-        codeBox.classList.toggle('hidden');
-      });
-
-      document.getElementById('btnCopyPotagerCode').addEventListener('click', () => {
-        const text = getPotagerExactHtml();
-        const helper = document.createElement('textarea');
-        helper.value = text;
-        helper.setAttribute('readonly', '');
-        helper.style.position = 'fixed';
-        helper.style.left = '-9999px';
-        document.body.appendChild(helper);
-        helper.select();
-        let copied = false;
-        try {
-          copied = document.execCommand('copy');
-        } catch (err) {
-          copied = false;
-        }
-        document.body.removeChild(helper);
-        if (copied) {
-          showAzaleeNotice('Code Potager 3D copié dans le presse-papiers.', 'info');
-        } else {
-          showAzaleeNotice('Sélectionnez le code dans l’aperçu pour le copier.', 'warn');
-        }
-      });
-
-      // Partie 2 : Gestion de mon jardin
-      const newZoneForm = document.getElementById('newZoneForm');
-      document.getElementById('btnAddZoneFormToggle').addEventListener('click', () => {
-        newZoneForm.classList.toggle('hidden');
-        if (!newZoneForm.classList.contains('hidden')) {
-          document.getElementById('newZoneName').focus();
-        }
-      });
-
-      newZoneForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nameInput = document.getElementById('newZoneName');
-        const name = nameInput.value.trim();
-        if (!name) {
-          showAzaleeNotice('Veuillez saisir un nom de zone.', 'warn');
-          nameInput.focus();
-          return;
-        }
-        workspace.zones.push({
-          id: workspace.nextZoneId++,
-          name,
-          waterFreq: document.getElementById('newZoneFreq').value,
-          lastWatered: 'Jamais',
-          notes: ''
-        });
-        nameInput.value = '';
-        newZoneForm.classList.add('hidden');
-        saveWorkspace();
-        renderZones();
-        showAzaleeNotice(`Zone "${name}" ajoutée à la gestion.`, 'info');
-      });
-
-      function renderZones() {
-        const container = document.getElementById('zonesListContainer');
-        container.innerHTML = '';
-
-        if (workspace.zones.length === 0) {
-          container.innerHTML =
-            '<div class="md:col-span-2 text-center py-8 text-sm text-stone-500 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune zone enregistrée. Cliquez sur <strong>+ Nouvelle zone</strong> pour commencer.</div>';
-          return;
-        }
-
-        workspace.zones.forEach((zone) => {
-          const card = document.createElement('div');
-          card.className = 'rounded-2xl border border-stone-200 bg-stone-50/80 p-4 space-y-3';
-
-          const topRow = document.createElement('div');
-          topRow.className = 'flex items-start justify-between gap-2';
-          topRow.innerHTML = `
-            <div class="min-w-0">
-              <h3 class="text-sm sm:text-base font-bold text-stone-900 truncate">${escapeHtml(zone.name)}</h3>
-              <p class="text-xs text-stone-500 mt-0.5">Arrosage : ${escapeHtml(zone.waterFreq)} · Dernier : ${escapeHtml(zone.lastWatered)}</p>
-            </div>
-          `;
-
-          const delBtn = document.createElement('button');
-          delBtn.type = 'button';
-          delBtn.title = 'Supprimer cette zone';
-          delBtn.className = 'p-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition shrink-0';
-          delBtn.textContent = '✕';
-          delBtn.addEventListener('click', () => {
-            workspace.zones = workspace.zones.filter((z) => z.id !== zone.id);
-            saveWorkspace();
-            renderZones();
-          });
-          topRow.appendChild(delBtn);
-
-          const notesArea = document.createElement('textarea');
-          notesArea.rows = 2;
-          notesArea.placeholder = "Notes d'entretien, paillage, engrais...";
-          notesArea.className = 'w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-600';
-          notesArea.value = zone.notes || '';
-          notesArea.addEventListener('input', () => {
-            zone.notes = notesArea.value;
-            saveWorkspace();
-          });
-
-          const actionsRow = document.createElement('div');
-          actionsRow.className = 'flex flex-wrap items-center justify-between gap-2';
-
-          const waterBtn = document.createElement('button');
-          waterBtn.type = 'button';
-          waterBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition';
-          waterBtn.textContent = "💧 Marquer arrosé aujourd'hui";
-          waterBtn.addEventListener('click', () => {
-            const hm = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            zone.lastWatered = `Aujourd'hui (${hm})`;
-            saveWorkspace();
-            renderZones();
-            showAzaleeNotice(`Arrosage noté pour "${zone.name}".`, 'info');
-          });
-
-          const planTaskBtn = document.createElement('button');
-          planTaskBtn.type = 'button';
-          planTaskBtn.className = 'px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-xs font-semibold text-stone-700 transition';
-          planTaskBtn.textContent = '+ Tâche au planning';
-          planTaskBtn.addEventListener('click', () => {
-            workspace.tasks.unshift({
-              id: workspace.nextTaskId++,
-              title: `Entretien — ${zone.name}`,
-              category: 'arrosage',
-              period: 'Cette semaine',
-              done: false
-            });
-            saveWorkspace();
-            switchPart('part3');
-            renderTasks();
-            showAzaleeNotice(`Tâche ajoutée pour "${zone.name}".`, 'info');
-          });
-
-          actionsRow.append(waterBtn, planTaskBtn);
-          card.append(topRow, notesArea, actionsRow);
-          container.appendChild(card);
-        });
-      }
-
-      // Partie 3 : Planning de mon jardin
-      document.getElementById('planningTaskForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const titleInput = document.getElementById('planningTaskTitle');
-        const title = titleInput.value.trim();
-        if (!title) {
-          showAzaleeNotice('Veuillez saisir une tâche pour le planning.', 'warn');
-          titleInput.focus();
-          return;
-        }
-        workspace.tasks.unshift({
-          id: workspace.nextTaskId++,
-          title,
-          category: document.getElementById('planningTaskType').value,
-          period: document.getElementById('planningTaskPeriod').value,
-          done: false
-        });
-        titleInput.value = '';
-        saveWorkspace();
-        renderTasks();
-        showAzaleeNotice('Tâche ajoutée au planning.', 'info');
-      });
-
-      document.querySelectorAll('.pfilter-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          workspace.taskFilter = btn.getAttribute('data-cat') || 'all';
-          document.querySelectorAll('.pfilter-btn').forEach((b) => {
-            const active = b.getAttribute('data-cat') === workspace.taskFilter;
-            b.className = active
-              ? 'pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-700 text-white transition'
-              : 'pfilter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition';
-          });
-          saveWorkspace();
-          renderTasks();
-        });
-      });
-
-      document.getElementById('btnPruneDoneTasks').addEventListener('click', () => {
-        workspace.tasks = workspace.tasks.filter((t) => !t.done);
-        saveWorkspace();
-        renderTasks();
-        showAzaleeNotice('Tâches terminées supprimées.', 'info');
-      });
-
-      function renderTasks() {
-        const listEl = document.getElementById('planningTasksList');
-        const total = workspace.tasks.length;
-        const doneCount = workspace.tasks.filter((t) => t.done).length;
-        document.getElementById('planningCounterBadge').textContent = `${doneCount} / ${total} terminées`;
-
-        const visibleTasks =
-          workspace.taskFilter === 'all'
-            ? workspace.tasks
-            : workspace.tasks.filter((t) => t.category === workspace.taskFilter);
-
-        listEl.innerHTML = '';
-        if (visibleTasks.length === 0) {
-          listEl.innerHTML =
-            '<div class="text-center py-8 text-sm text-stone-500 bg-stone-50 rounded-2xl border border-dashed border-stone-300">Aucune tâche dans ce filtre.</div>';
-          return;
-        }
-
-        visibleTasks.forEach((task) => {
-          const row = document.createElement('div');
-          row.className = `flex items-center justify-between gap-3 p-3 rounded-xl border transition ${
-            task.done ? 'bg-stone-50 border-stone-200/70 opacity-75' : 'bg-white border-stone-200'
-          }`;
-
-          const left = document.createElement('label');
-          left.className = 'flex items-center gap-3 min-w-0 cursor-pointer flex-1';
-
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.checked = Boolean(task.done);
-          checkbox.className = 'w-4 h-4 accent-emerald-700 rounded cursor-pointer shrink-0';
-          checkbox.addEventListener('change', () => {
-            task.done = checkbox.checked;
-            saveWorkspace();
-            renderTasks();
-          });
-
-          const info = document.createElement('div');
-          info.className = 'min-w-0';
-          info.innerHTML = `
-            <div class="text-sm font-semibold text-stone-900 truncate ${task.done ? 'line-through text-stone-500' : ''}">${escapeHtml(task.title)}</div>
-            <div class="flex flex-wrap items-center gap-1.5 mt-1">
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">${TYPE_LABELS[task.category] || task.category}</span>
-              <span class="text-xs text-stone-500">· ${escapeHtml(task.period)}</span>
-            </div>
-          `;
-
-          left.append(checkbox, info);
-
-          const delBtn = document.createElement('button');
-          delBtn.type = 'button';
-          delBtn.title = 'Supprimer la tâche';
-          delBtn.className = 'p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition shrink-0';
-          delBtn.textContent = '✕';
-          delBtn.addEventListener('click', () => {
-            workspace.tasks = workspace.tasks.filter((t) => t.id !== task.id);
-            saveWorkspace();
-            renderTasks();
-          });
-
-          row.append(left, delBtn);
-          listEl.appendChild(row);
-        });
-      }
-
-      renderZones();
-      renderTasks();
-      switchPart(workspace.activePart || 'part1');
-    })();
-  </script>
-</body>
-  </html>
