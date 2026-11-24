@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mon Jardin — Modélisation, Plantation & Suivi</title>
+  <title>Mon Jardin — Modélisation, Plantation &amp; Suivi</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Inter & Fraunces pour les titres chaleureux -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -50,7 +50,7 @@
           }
         }
       }
-    }
+    };
   </script>
 
   <style>
@@ -63,7 +63,7 @@
     /* Motif subtil de pelouse/grille pour le terrain */
     .garden-canvas-bg {
       background-color: #EBF2EC;
-      background-image: 
+      background-image:
         linear-gradient(to right, rgba(82, 121, 111, 0.12) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(82, 121, 111, 0.12) 1px, transparent 1px);
       background-size: 24px 24px;
@@ -98,7 +98,6 @@
     }
 
     .zone-selected {
-      ring: 3px solid #C86D51;
       outline: 3px solid #C86D51;
       outline-offset: 2px;
       z-index: 20 !important;
@@ -129,7 +128,7 @@
   <header class="bg-white border-b border-sage-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
-        
+
         <!-- Logo & Titre -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -138,45 +137,48 @@
             </div>
             <div>
               <h1 class="font-serif text-xl font-bold text-sage-700 leading-tight">Mon Jardin</h1>
-              <p class="text-xs text-sage-500 flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                Sauvegarde automatique active
+              <p id="autosave-status" class="text-xs text-sage-500 flex items-center gap-1">
+                <span id="autosave-dot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span id="autosave-label">Sauvegarde automatique active</span>
               </p>
             </div>
           </div>
 
           <!-- Boutons Actions rapides (Mobile) -->
           <div class="flex md:hidden items-center gap-1.5">
-            <button onclick="exportData()" title="Exporter JSON" class="p-2 rounded-lg bg-sage-50 text-sage-600 hover:bg-sage-100">
+            <button type="button" onclick="exportData()" title="Exporter JSON" class="p-2 rounded-lg bg-sage-50 text-sage-600 hover:bg-sage-100 cursor-pointer">
               <i data-lucide="download" class="w-4 h-4"></i>
             </button>
             <label title="Importer JSON" class="p-2 rounded-lg bg-sage-50 text-sage-600 hover:bg-sage-100 cursor-pointer">
               <i data-lucide="upload" class="w-4 h-4"></i>
               <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
             </label>
+            <button type="button" onclick="openConfirmModal('Réinitialiser le jardin ?', 'Toutes vos zones, plantations et suivis seront effacés ou remplacés par l’exemple par défaut.', resetToDemo)" title="Réinitialiser" class="p-2 rounded-lg bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white cursor-pointer">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
           </div>
         </div>
 
         <!-- Navigation en 3 parties -->
         <nav class="flex bg-sage-50 p-1 rounded-xl border border-sage-200 overflow-x-auto" aria-label="Étapes du jardin">
-          <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap bg-sage-600 text-white shadow-sm">
+          <button type="button" id="tab-btn-1" onclick="switchTab(1)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap bg-sage-600 text-white shadow-sm cursor-pointer">
             <span class="w-5 h-5 rounded-full bg-white/20 text-xs flex items-center justify-center">1</span>
             <span>Modéliser mon jardin</span>
           </button>
-          <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-sage-600 hover:bg-sage-100">
+          <button type="button" id="tab-btn-2" onclick="switchTab(2)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-sage-600 hover:bg-sage-100 cursor-pointer">
             <span class="w-5 h-5 rounded-full bg-sage-200/70 text-xs flex items-center justify-center">2</span>
             <span>Planter</span>
           </button>
-          <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-sage-600 hover:bg-sage-100">
+          <button type="button" id="tab-btn-3" onclick="switchTab(3)" class="tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-sage-600 hover:bg-sage-100 cursor-pointer">
             <span class="w-5 h-5 rounded-full bg-sage-200/70 text-xs flex items-center justify-center">3</span>
-            <span>Planning & Suivi</span>
+            <span>Planning &amp; Suivi</span>
             <span id="badge-tasks" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-terracotta-500 text-white rounded-full">0</span>
           </button>
         </nav>
 
         <!-- Actions de sauvegarde / réinitialisation (Desktop) -->
         <div class="hidden md:flex items-center gap-2">
-          <button onclick="exportData()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-sage-50 text-sage-700 border border-sage-200 hover:bg-sage-100 transition">
+          <button type="button" onclick="exportData()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-sage-50 text-sage-700 border border-sage-200 hover:bg-sage-100 transition cursor-pointer">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Exporter</span>
           </button>
@@ -185,7 +187,7 @@
             <span>Importer</span>
             <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
           </label>
-          <button onclick="openConfirmModal('Réinitialiser le jardin ?', 'Toutes vos zones, plantations et suivis seront effacés ou remplacés par l’exemple par défaut.', resetToDemo)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white transition" title="Réinitialiser">
+          <button type="button" onclick="openConfirmModal('Réinitialiser le jardin ?', 'Toutes vos zones, plantations et suivis seront effacés ou remplacés par l’exemple par défaut.', resetToDemo)" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white transition cursor-pointer" title="Réinitialiser">
             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -197,7 +199,7 @@
   <!-- ===================================================================== -->
   <!-- NOTIFICATION TOAST (Remplace alert())                                 -->
   <!-- ===================================================================== -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
   <!-- ===================================================================== -->
   <!-- CONTENU PRINCIPAL                                                     -->
@@ -217,15 +219,15 @@
 
         <!-- Boutons d'ajout rapide de zones -->
         <div class="flex flex-wrap items-center gap-2.5">
-          <button onclick="addZone('carre')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-wood-100 hover:bg-wood-300/40 text-wood-700 border border-wood-300 font-semibold text-sm transition shadow-sm">
+          <button type="button" onclick="addZone('carre')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-wood-100 hover:bg-wood-300/40 text-wood-700 border border-wood-300 font-semibold text-sm transition shadow-sm cursor-pointer">
             <i data-lucide="grid" class="w-4 h-4"></i>
             <span>+ Carré potager</span>
           </button>
-          <button onclick="addZone('parcelle')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-soil-200/50 hover:bg-soil-200 text-soil-700 border border-soil-500/40 font-semibold text-sm transition shadow-sm">
+          <button type="button" onclick="addZone('parcelle')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-soil-200/50 hover:bg-soil-200 text-soil-700 border border-soil-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
             <i data-lucide="rows-3" class="w-4 h-4"></i>
             <span>+ Parcelle de terre</span>
           </button>
-          <button onclick="addZone('verger')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-100 hover:bg-sage-200 text-sage-700 border border-sage-500/40 font-semibold text-sm transition shadow-sm">
+          <button type="button" onclick="addZone('verger')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-100 hover:bg-sage-200 text-sage-700 border border-sage-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
             <i data-lucide="trees" class="w-4 h-4"></i>
             <span>+ Verger</span>
           </button>
@@ -234,11 +236,11 @@
 
       <!-- Espace de travail : Plan interactif + Inspecteur de propriétés -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
+
         <!-- Canevas du jardin (8 colonnes) -->
         <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
-            <div class="flex items-center gap-4 text-xs font-medium text-sage-600">
+            <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-sage-600">
               <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-wood-100 border-2 border-wood-500 inline-block"></span> Carré potager</span>
               <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-soil-200 border border-dashed border-soil-500 inline-block"></span> Parcelle</span>
               <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-sage-100 border border-sage-500 inline-block"></span> Verger</span>
@@ -247,7 +249,7 @@
             <!-- Réglage hauteur terrain -->
             <div class="flex items-center gap-2 text-xs text-sage-500">
               <span>Terrain :</span>
-              <select id="terrain-size-select" onchange="changeTerrainHeight(this.value)" class="bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-medium focus:outline-none">
+              <select id="terrain-size-select" onchange="changeTerrainHeight(this.value)" class="bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-medium focus:outline-none cursor-pointer">
                 <option value="460">Petit (460px)</option>
                 <option value="580" selected>Moyen (580px)</option>
                 <option value="720">Grand (720px)</option>
@@ -260,13 +262,13 @@
             <!-- Les zones sont injectées ici par JS -->
           </div>
           <p class="text-xs text-sage-500 flex items-center gap-1.5">
-            <i data-lucide="move" class="w-3.5 h-3.5 text-sage-600"></i>
+            <i data-lucide="move" class="w-3.5 h-3.5 text-sage-600 shrink-0"></i>
             <span>Astuce : Cliquez et glissez une zone pour la déplacer. Cliquez dessus pour modifier ses dimensions et subdivisions à droite.</span>
           </p>
         </div>
 
         <!-- Panneau de configuration de la zone sélectionnée (4 colonnes) -->
-        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm sticky top-24">
+        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm lg:sticky lg:top-24">
           <div id="zone-inspector-empty" class="text-center py-10 space-y-3">
             <div class="w-12 h-12 rounded-2xl bg-sage-50 text-sage-500 mx-auto flex items-center justify-center">
               <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
@@ -281,38 +283,38 @@
                 <span id="insp-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">Type</span>
                 <h3 class="font-serif text-lg font-bold text-sage-700">Propriétés</h3>
               </div>
-              <button onclick="deleteSelectedZone()" class="p-2 rounded-lg text-terracotta-600 hover:bg-terracotta-100 transition" title="Supprimer cette zone">
+              <button type="button" onclick="deleteSelectedZone()" class="p-2 rounded-lg text-terracotta-600 hover:bg-terracotta-100 transition cursor-pointer" title="Supprimer cette zone">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
 
             <!-- Nom -->
             <div>
-              <label class="block text-xs font-semibold text-sage-600 mb-1">Nom de la zone</label>
+              <label for="insp-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la zone</label>
               <input type="text" id="insp-name" oninput="updateSelectedZone('name', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
             </div>
 
             <!-- Dimensions réelles affichées (cm) -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-sage-600 mb-1">Largeur (cm)</label>
-                <input type="number" id="insp-real-w" min="40" max="2000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
+                <label for="insp-real-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur (cm)</label>
+                <input type="number" id="insp-real-w" min="40" max="2000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-sage-600 mb-1">Longueur (cm)</label>
-                <input type="number" id="insp-real-h" min="40" max="2000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
+                <label for="insp-real-h" class="block text-xs font-semibold text-sage-600 mb-1">Longueur (cm)</label>
+                <input type="number" id="insp-real-h" min="40" max="2000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
               </div>
             </div>
 
             <!-- Taille visuelle sur le plan -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (px)</label>
-                <input type="range" id="insp-w" min="90" max="420" step="10" oninput="updateSelectedZone('w', parseInt(this.value))" class="w-full accent-sage-600" />
+                <label for="insp-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (<span id="insp-w-val">160</span>px)</label>
+                <input type="range" id="insp-w" min="110" max="420" step="10" oninput="updateSelectedZone('w', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-sage-600 mb-1">Hauteur plan (px)</label>
-                <input type="range" id="insp-h" min="90" max="420" step="10" oninput="updateSelectedZone('h', parseInt(this.value))" class="w-full accent-sage-600" />
+                <label for="insp-h" class="block text-xs font-semibold text-sage-600 mb-1">Hauteur plan (<span id="insp-h-val">160</span>px)</label>
+                <input type="range" id="insp-h" min="110" max="420" step="10" oninput="updateSelectedZone('h', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
               </div>
             </div>
 
@@ -324,24 +326,24 @@
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-[11px] text-sage-600 mb-1">Colonnes</label>
-                  <input type="number" id="insp-cols" min="1" max="8" oninput="updateSelectedZoneGrid('cols', parseInt(this.value)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+                  <label for="insp-cols" class="block text-[11px] text-sage-600 mb-1">Colonnes</label>
+                  <input type="number" id="insp-cols" min="1" max="8" oninput="updateSelectedZoneGrid('cols', parseInt(this.value, 10)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
                 </div>
                 <div>
-                  <label class="block text-[11px] text-sage-600 mb-1">Lignes / Rangs</label>
-                  <input type="number" id="insp-rows" min="1" max="8" oninput="updateSelectedZoneGrid('rows', parseInt(this.value)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+                  <label for="insp-rows" class="block text-[11px] text-sage-600 mb-1">Lignes / Rangs</label>
+                  <input type="number" id="insp-rows" min="1" max="8" oninput="updateSelectedZoneGrid('rows', parseInt(this.value, 10)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
                 </div>
               </div>
             </div>
 
             <!-- Notes sur le sol / exposition -->
             <div>
-              <label class="block text-xs font-semibold text-sage-600 mb-1">Exposition & Qualité du sol</label>
+              <label for="insp-notes" class="block text-xs font-semibold text-sage-600 mb-1">Exposition &amp; Qualité du sol</label>
               <textarea id="insp-notes" rows="2" placeholder="Ex: Plein soleil, terre enrichie au compost..." oninput="updateSelectedZone('notes', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500"></textarea>
             </div>
 
             <div class="pt-2">
-              <button onclick="switchTab(2)" class="w-full py-2.5 px-4 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm">
+              <button type="button" onclick="switchTab(2)" class="w-full py-2.5 px-4 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
                 <span>Passer aux plantations</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
               </button>
@@ -361,14 +363,14 @@
           <h2 class="font-serif text-2xl font-bold text-sage-700">2. Planter mes cultures</h2>
           <p class="text-sm text-sage-500 mt-0.5">Sélectionnez une plante dans la bibliothèque puis cliquez sur une case de votre jardin pour l'installer.</p>
         </div>
-        <button onclick="openCustomPlantModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold text-sm transition shadow-sm self-start md:self-auto">
+        <button type="button" onclick="openCustomPlantModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold text-sm transition shadow-sm self-start md:self-auto cursor-pointer">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span>Créer une plante personnalisée</span>
         </button>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
+
         <!-- Bibliothèque de plantes (5 colonnes) -->
         <div class="lg:col-span-5 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between">
@@ -382,11 +384,11 @@
               <i data-lucide="search" class="w-4 h-4 text-sage-400 absolute left-3 top-2.5"></i>
               <input type="text" id="plant-search" oninput="renderPlantLibrary()" placeholder="Rechercher une plante..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500" />
             </div>
-            <select id="plant-category-filter" onchange="renderPlantLibrary()" class="px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700 focus:outline-none">
+            <select id="plant-category-filter" onchange="renderPlantLibrary()" class="px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700 focus:outline-none cursor-pointer">
               <option value="all">Toutes catégories</option>
               <option value="legume">Légumes</option>
               <option value="aromate">Aromates</option>
-              <option value="fruit">Fruits & Verger</option>
+              <option value="fruit">Fruits &amp; Verger</option>
             </select>
           </div>
 
@@ -427,7 +429,7 @@
     <!-- PARTIE 3 : PLANNING ET SUIVI DES PLANTATIONS                        -->
     <!-- =================================================================== -->
     <section id="view-3" class="hidden space-y-6">
-      
+
       <!-- Résumé & KPIs -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm flex items-center gap-3.5">
@@ -475,7 +477,7 @@
       <div class="bg-white p-5 rounded-2xl border border-sage-200 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 class="font-serif text-lg font-bold text-sage-700">Calendrier & Frise chronologique des cultures</h3>
+            <h3 class="font-serif text-lg font-bold text-sage-700">Calendrier &amp; Frise chronologique des cultures</h3>
             <p class="text-xs text-sage-500">Visualisez la période de croissance et l'estimation de récolte sur l'année.</p>
           </div>
           <div class="flex items-center gap-3 text-xs">
@@ -493,13 +495,13 @@
 
       <!-- Grille inférieure : Rappels automatiques (4 col) + Tableau de bord des cultures (8 col) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
+
         <!-- Tâches & Rappels intelligents (4 colonnes) -->
         <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b border-sage-100 pb-3">
             <div class="flex items-center gap-2">
               <i data-lucide="bell-ring" class="w-5 h-5 text-terracotta-500"></i>
-              <h3 class="font-serif text-lg font-bold text-sage-700">Tâches & Rappels</h3>
+              <h3 class="font-serif text-lg font-bold text-sage-700">Tâches &amp; Rappels</h3>
             </div>
             <span class="text-xs font-semibold text-sage-500">Auto-générés</span>
           </div>
@@ -514,7 +516,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sage-100 pb-3">
             <h3 class="font-serif text-lg font-bold text-sage-700">Suivi détaillé des plantations</h3>
             <div class="flex items-center gap-2">
-              <select id="tracking-filter" onchange="renderTrackingDashboard()" class="px-3 py-1.5 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700">
+              <select id="tracking-filter" onchange="renderTrackingDashboard()" class="px-3 py-1.5 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700 cursor-pointer">
                 <option value="active">Cultures actives</option>
                 <option value="all">Toutes (inclus récoltées)</option>
                 <option value="recolte">Récoltées uniquement</option>
@@ -542,7 +544,7 @@
           <h3 id="modal-planting-title" class="font-serif text-xl font-bold text-sage-700">Installer une culture</h3>
           <p id="modal-planting-subtitle" class="text-xs text-sage-500">Zone : Carré Potager • Case #1</p>
         </div>
-        <button onclick="closeModal('modal-planting')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700">
+        <button type="button" onclick="closeModal('modal-planting')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -552,17 +554,17 @@
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-sage-600 mb-1">Plante choisie</label>
+          <label for="modal-plant-select" class="block text-xs font-semibold text-sage-600 mb-1">Plante choisie</label>
           <select id="modal-plant-select" onchange="checkCompanionPreview()" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500"></select>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Date de plantation</label>
+            <label for="modal-plant-date" class="block text-xs font-semibold text-sage-600 mb-1">Date de plantation</label>
             <input type="date" id="modal-plant-date" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Statut actuel</label>
+            <label for="modal-plant-status" class="block text-xs font-semibold text-sage-600 mb-1">Statut actuel</label>
             <select id="modal-plant-status" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
               <option value="semis">🌱 Semis</option>
               <option value="croissance">🌿 En croissance</option>
@@ -574,363 +576,1330 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-sage-600 mb-1">Notes / Variété précise</label>
+          <label for="modal-plant-notes" class="block text-xs font-semibold text-sage-600 mb-1">Notes / Variété précise</label>
           <input type="text" id="modal-plant-notes" placeholder="Ex: Cœur de Bœuf, tuteurage installé..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
         </div>
       </div>
 
       <div class="flex items-center justify-between pt-3 border-t border-sage-100 gap-2">
-        <button id="btn-remove-planting" onclick="removeCurrentPlanting()" class="hidden px-3 py-2 rounded-xl bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white text-xs font-semibold transition">
-          Retirer la plante
+        <button type="button" id="btn-remove-planting" onclick="removeCurrentPlanting()" class="hidden px-3 py-2 rounded-xl bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white text-xs font-semibold transition cursor-pointer">
+          Retirer
         </button>
         <div class="flex items-center gap-2 ml-auto">
-          <button onclick="closeModal('modal-planting')" class="px-4 py-2 rounded-xl border border-sage-200 text-sage-600 hover:bg-sage-50 text-xs font-semibold">Annuler</button>
-          <button onclick="savePlantingFromModal()" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold shadow-sm">Enregistrer</button>
+          <button type="button" onclick="closeModal('modal-planting')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
+            Annuler
+          </button>
+          <button type="button" onclick="savePlantingModal()" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
+            Enregistrer
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODALE 2 : CRÉER UNE PLANTE PERSONNALISÉE                             -->
+  <!-- MODALE 2 : CRÉER UNE PLANTE PERSONNALISÉE                              -->
   <!-- ===================================================================== -->
   <div id="modal-custom-plant" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sage-200 space-y-4">
       <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-        <h3 class="font-serif text-xl font-bold text-sage-700">Nouvelle plante personnalisée</h3>
-        <button onclick="closeModal('modal-custom-plant')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100">
+        <div>
+          <h3 class="font-serif text-xl font-bold text-sage-700">Nouvelle plante personnalisée</h3>
+          <p class="text-xs text-sage-500">Ajoutez votre propre variété à la bibliothèque du jardin.</p>
+        </div>
+        <button type="button" onclick="closeModal('modal-custom-plant')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-3">
+      <form id="custom-plant-form" onsubmit="saveCustomPlant(event)" class="space-y-3">
         <div class="grid grid-cols-4 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Icône</label>
-            <input type="text" id="cp-emoji" value="🌻" maxlength="2" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-center text-lg" />
+            <label for="custom-plant-emoji" class="block text-xs font-semibold text-sage-600 mb-1">Emoji</label>
+            <input type="text" id="custom-plant-emoji" value="🌿" maxlength="4" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-center text-lg focus:outline-none focus:border-sage-500" />
           </div>
           <div class="col-span-3">
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Nom de la plante</label>
-            <input type="text" id="cp-name" placeholder="Ex: Tournesol, Framboisier..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm" />
+            <label for="custom-plant-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la plante</label>
+            <input type="text" id="custom-plant-name" required placeholder="Ex: Courge Butternut, Pommier Gala..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Catégorie</label>
-            <select id="cp-category" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm">
+            <label for="custom-plant-category" class="block text-xs font-semibold text-sage-600 mb-1">Catégorie</label>
+            <select id="custom-plant-category" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
               <option value="legume">Légume</option>
               <option value="aromate">Aromate</option>
-              <option value="fruit">Fruit / Verger</option>
+              <option value="fruit">Fruit &amp; Verger</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Jours avant récolte</label>
-            <input type="number" id="cp-days" value="65" min="10" max="365" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Besoin en eau</label>
-            <select id="cp-water" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm">
-              <option value="Faible">Faible (1x/sem)</option>
-              <option value="Modéré" selected>Modéré (2-3x/sem)</option>
-              <option value="Élevé">Élevé (Tous les 2j)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-sage-600 mb-1">Période semis/plantation</label>
-            <input type="text" id="cp-season" value="Mars - Mai" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm" />
+            <label for="custom-plant-days" class="block text-xs font-semibold text-sage-600 mb-1">Durée récolte (jours)</label>
+            <input type="number" id="custom-plant-days" min="15" max="730" value="75" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-sage-600 mb-1">Conseil d'entretien</label>
-          <input type="text" id="cp-care" placeholder="Ex: Pailler le pied et tailler en fin d'hiver" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm" />
+          <label for="custom-plant-water" class="block text-xs font-semibold text-sage-600 mb-1">Fréquence d'arrosage (jours)</label>
+          <input type="number" id="custom-plant-water" min="1" max="30" value="4" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
         </div>
-      </div>
 
-      <div class="flex justify-end gap-2 pt-3 border-t border-sage-100">
-        <button onclick="closeModal('modal-custom-plant')" class="px-4 py-2 rounded-xl border border-sage-200 text-sage-600 text-xs font-semibold">Annuler</button>
-        <button onclick="createCustomPlant()" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold">Ajouter à la bibliothèque</button>
-      </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-sage-100">
+          <button type="button" onclick="closeModal('modal-custom-plant')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
+            Annuler
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
+            Ajouter à la bibliothèque
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODALE 3 : JOURNAL D'ENTRETIEN D'UNE PLANTATION                       -->
+  <!-- MODALE 3 : AJOUTER UNE NOTE D'ENTRETIEN                               -->
   <!-- ===================================================================== -->
-  <div id="modal-log" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+  <div id="modal-care-note" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sage-200 space-y-4">
       <div class="flex items-center justify-between border-b border-sage-100 pb-3">
         <div>
-          <h3 class="font-serif text-xl font-bold text-sage-700">Journal d'entretien</h3>
-          <p id="log-modal-subtitle" class="text-xs text-sage-500">Suivi des soins apportés</p>
+          <h3 class="font-serif text-xl font-bold text-sage-700">Note d'entretien</h3>
+          <p id="care-note-subtitle" class="text-xs text-sage-500">Culture sélectionnée</p>
         </div>
-        <button onclick="closeModal('modal-log')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100">
+        <button type="button" onclick="closeModal('modal-care-note')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Ajout rapide d'une entrée -->
-      <div class="flex gap-2">
-        <select id="log-action-type" class="px-2.5 py-2 rounded-xl border border-sage-200 bg-cream text-xs font-medium">
-          <option value="💧 Arrosage effectué">💧 Arrosage</option>
-          <option value="🌱 Ajout de compost / engrais">🌱 Compost</option>
-          <option value="✂️ Taille / Tuteurage">✂️ Taille</option>
-          <option value="🐞 Observation / Soin naturel">🐞 Observation</option>
-        </select>
-        <input type="text" id="log-action-note" placeholder="Remarque optionnelle..." class="flex-1 px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs" />
-        <button onclick="addLogEntry()" class="px-3 py-2 rounded-xl bg-sage-600 text-white text-xs font-semibold hover:bg-sage-700">Ajouter</button>
-      </div>
-
-      <!-- Historique -->
-      <div id="log-entries-list" class="max-h-56 overflow-y-auto space-y-2 pr-1">
-        <!-- Entrées injectées par JS -->
-      </div>
+      <form onsubmit="saveCareNote(event)" class="space-y-3">
+        <div>
+          <label for="care-note-type" class="block text-xs font-semibold text-sage-600 mb-1">Type d'intervention</label>
+          <select id="care-note-type" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
+            <option value="Arrosage">💧 Arrosage</option>
+            <option value="Paillage / Compost">🍂 Paillage / Compost</option>
+            <option value="Taille / Tuteurage">✂️ Taille / Tuteurage</option>
+            <option value="Observation">🔍 Observation</option>
+          </select>
+        </div>
+        <div>
+          <label for="care-note-text" class="block text-xs font-semibold text-sage-600 mb-1">Détails</label>
+          <textarea id="care-note-text" rows="3" required placeholder="Ex: Arrosage abondant au pied, ajout de paillis..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500"></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-sage-100">
+          <button type="button" onclick="closeModal('modal-care-note')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
+            Annuler
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
+            Ajouter au journal
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODALE 4 : CONFIRMATION PERSONNALISÉE (Remplace confirm())            -->
+  <!-- MODALE 4 : CONFIRMATION (Remplace confirm())                          -->
   <!-- ===================================================================== -->
   <div id="modal-confirm" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-sage-200 space-y-4">
-      <h3 id="confirm-title" class="font-serif text-lg font-bold text-sage-700">Confirmation</h3>
-      <p id="confirm-message" class="text-sm text-sage-600">Êtes-vous sûr ?</p>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeModal('modal-confirm')" class="px-4 py-2 rounded-xl border border-sage-200 text-sage-600 text-xs font-semibold">Annuler</button>
-        <button id="confirm-yes-btn" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold">Confirmer</button>
+      <h3 id="confirm-title" class="font-serif text-lg font-bold text-sage-700">Confirmer l'action</h3>
+      <p id="confirm-message" class="text-xs text-sage-600 leading-relaxed">Êtes-vous sûr ?</p>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-sage-100">
+        <button type="button" onclick="closeModal('modal-confirm')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
+          Annuler
+        </button>
+        <button type="button" id="confirm-ok-btn" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition cursor-pointer">
+          Confirmer
+        </button>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION                                   -->
+  <!-- SCRIPT APPLICATIF                                                     -->
   <!-- ===================================================================== -->
   <script>
-    // =========================================================================
-    // 1. DONNÉES INITIALES & BIBLIOTHÈQUE DE PLANTES
-    // =========================================================================
     const STORAGE_KEY = 'mon_jardin_app_v1';
 
+    // Bibliothèque initiale de variétés (légumes, aromates, fruits & verger)
     const DEFAULT_PLANTS = [
-      { id: 'tomate', name: 'Tomate', emoji: '🍅', category: 'legume', season: 'Avril - Mai', daysToHarvest: 75, water: 'Élevé', waterDays: 2, goodWith: ['basilic', 'carotte', 'oeillet'], badWith: ['pomme_terre', 'fenouil'], care: 'Arroser au pied sans mouiller les feuilles. Tuteurer et pincer les gourmands.' },
-      { id: 'basilic', name: 'Basilic', emoji: '🌿', category: 'aromate', season: 'Avril - Juin', daysToHarvest: 40, water: 'Élevé', waterDays: 2, goodWith: ['tomate', 'courgette'], badWith: ['sauge'], care: 'Pincer les sommités fleuries pour favoriser le feuillage.' },
-      { id: 'carotte', name: 'Carotte', emoji: '🥕', category: 'legume', season: 'Mars - Juillet', daysToHarvest: 80, water: 'Modéré', waterDays: 4, goodWith: ['tomate', 'salade', 'poireau'], badWith: ['aneth'], care: 'Éclaircir les rangs à 3 cm et maintenir le sol frais pendant la levée.' },
-      { id: 'salade', name: 'Laitue / Salade', emoji: '🥬', category: 'legume', season: 'Février - Sept.', daysToHarvest: 45, water: 'Élevé', waterDays: 2, goodWith: ['carotte', 'fraisier', 'radis'], badWith: ['persil'], care: 'Protéger des limaces et arroser régulièrement pour éviter qu’elle ne monte en graine.' },
-      { id: 'courgette', name: 'Courgette', emoji: '🥒', category: 'legume', season: 'Avril - Juin', daysToHarvest: 55, water: 'Élevé', waterDays: 3, goodWith: ['basilic', 'haricot'], badWith: ['pomme_terre'], care: 'Pailler généreusement le pied et récolter jeune pour stimuler la production.' },
-      { id: 'fraisier', name: 'Fraisier', emoji: '🍓', category: 'fruit', season: 'Mars - Avril / Sept.', daysToHarvest: 60, water: 'Modéré', waterDays: 3, goodWith: ['salade', 'ail', 'thym'], badWith: ['chou'], care: 'Pailler avec de la paille propre pour garder les fruits au sec et couper les stolons.' },
-      { id: 'radis', name: 'Radis', emoji: '🌱', category: 'legume', season: 'Mars - Sept.', daysToHarvest: 25, water: 'Élevé', waterDays: 2, goodWith: ['carotte', 'salade'], badWith: ['cerfeuil'], care: 'Arrosage régulier indispensable pour éviter le goût piquant.' },
-      { id: 'haricot', name: 'Haricot vert', emoji: '🫛', category: 'legume', season: 'Mai - Juillet', daysToHarvest: 60, water: 'Modéré', waterDays: 4, goodWith: ['courgette', 'fraisier', 'carotte'], badWith: ['ail', 'oignon'], care: 'Butter les pieds lorsqu’ils atteignent 15 cm.' },
-      { id: 'menthe', name: 'Menthe', emoji: '🍃', category: 'aromate', season: 'Mars - Mai', daysToHarvest: 35, water: 'Modéré', waterDays: 3, goodWith: ['chou', 'tomate'], badWith: ['camomille'], care: 'Plante envahissante : idéalement en bordure ou en pot enterré.' },
-      { id: 'pommier', name: 'Pommier', emoji: '🍎', category: 'fruit', season: 'Novembre - Mars', daysToHarvest: 150, water: 'Faible', waterDays: 7, goodWith: ['fraisier', 'ciboulette'], badWith: ['pomme_terre'], care: 'Taille de fructification en hiver et éclaircissage des jeunes fruits en juin.' },
-      { id: 'cerisier', name: 'Cerisier', emoji: '🍒', category: 'fruit', season: 'Novembre - Mars', daysToHarvest: 110, water: 'Faible', waterDays: 7, goodWith: ['ail', 'fraisier'], badWith: [], care: 'Éviter les tailles sévères ; surveiller les oiseaux à maturité.' },
-      { id: 'poirier', name: 'Poirier', emoji: '🍐', category: 'fruit', season: 'Novembre - Mars', daysToHarvest: 160, water: 'Faible', waterDays: 7, goodWith: ['fraisier', 'melisse'], badWith: [], care: 'Arroser les deux premières années suivant la plantation.' }
+      { id: 'tomate', name: 'Tomate', emoji: '🍅', category: 'legume', harvestDays: 80, waterDays: 3, goodWith: ['Basilic', 'Carotte', 'Persil'], badWith: ['Pomme de terre'] },
+      { id: 'carotte', name: 'Carotte', emoji: '🥕', category: 'legume', harvestDays: 75, waterDays: 4, goodWith: ['Tomate', 'Oignon', 'Radis'], badWith: [] },
+      { id: 'laitue', name: 'Laitue', emoji: '🥬', category: 'legume', harvestDays: 45, waterDays: 2, goodWith: ['Fraise', 'Radis', 'Carotte'], badWith: [] },
+      { id: 'courgette', name: 'Courgette', emoji: '🥒', category: 'legume', harvestDays: 60, waterDays: 3, goodWith: ['Haricot vert', 'Capucine'], badWith: ['Pomme de terre'] },
+      { id: 'radis', name: 'Radis', emoji: '🔴', category: 'legume', harvestDays: 28, waterDays: 2, goodWith: ['Carotte', 'Laitue'], badWith: [] },
+      { id: 'haricot', name: 'Haricot vert', emoji: '🫛', category: 'legume', harvestDays: 60, waterDays: 4, goodWith: ['Courgette', 'Fraise'], badWith: ['Oignon'] },
+      { id: 'pdt', name: 'Pomme de terre', emoji: '🥔', category: 'legume', harvestDays: 95, waterDays: 5, goodWith: ['Haricot vert'], badWith: ['Tomate', 'Courgette'] },
+      { id: 'oignon', name: 'Oignon', emoji: '🧅', category: 'legume', harvestDays: 100, waterDays: 5, goodWith: ['Carotte', 'Fraise'], badWith: ['Haricot vert'] },
+      { id: 'basilic', name: 'Basilic', emoji: '🌿', category: 'aromate', harvestDays: 40, waterDays: 2, goodWith: ['Tomate'], badWith: [] },
+      { id: 'persil', name: 'Persil', emoji: '🌱', category: 'aromate', harvestDays: 50, waterDays: 3, goodWith: ['Tomate', 'Carotte'], badWith: [] },
+      { id: 'fraise', name: 'Fraise', emoji: '🍓', category: 'fruit', harvestDays: 65, waterDays: 3, goodWith: ['Laitue', 'Oignon', 'Haricot vert'], badWith: [] },
+      { id: 'pommier', name: 'Pommier', emoji: '🍎', category: 'fruit', harvestDays: 160, waterDays: 7, goodWith: ['Fraise'], badWith: [] },
+      { id: 'poirier', name: 'Poirier', emoji: '🍐', category: 'fruit', harvestDays: 165, waterDays: 7, goodWith: [], badWith: [] },
+      { id: 'cerisier', name: 'Cerisier', emoji: '🍒', category: 'fruit', harvestDays: 130, waterDays: 7, goodWith: [], badWith: [] }
     ];
 
-    // Helper date relative pour des données de démo réalistes
-    function getRelativeDateISO(daysOffset) {
+    const STATUS_LABELS = {
+      semis: { label: '🌱 Semis', cls: 'bg-amber-100 text-amber-800' },
+      croissance: { label: '🌿 En croissance', cls: 'bg-sage-100 text-sage-700' },
+      floraison: { label: '🌼 Floraison', cls: 'bg-yellow-100 text-yellow-800' },
+      pret: { label: '🧺 Prêt à récolter', cls: 'bg-terracotta-100 text-terracotta-600' },
+      recolte: { label: '✅ Récolté', cls: 'bg-emerald-100 text-emerald-800' }
+    };
+
+    function todayStr() {
       const d = new Date();
-      d.setDate(d.getDate() + daysOffset);
-      return d.toISOString().split('T')[0];
+      const tz = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return tz.toISOString().slice(0, 10);
     }
 
-    // État global de l'application
-    let appState = {
-      currentTab: 1,
-      terrainHeight: 580,
-      selectedZoneId: null,
-      selectedPlantIdForPlacement: 'tomate',
-      plants: [...DEFAULT_PLANTS],
-      zones: [
-        {
-          id: 'zone-1',
-          type: 'carre',
-          name: 'Carré Potager Sud',
-          x: 32,
-          y: 32,
-          w: 240,
-          h: 240,
-          realW: 120,
-          realH: 120,
-          cols: 3,
-          rows: 3,
-          notes: 'Plein soleil, terreau potager + compost mûr.'
-        },
-        {
-          id: 'zone-2',
-          type: 'parcelle',
-          name: 'Grande Parcelle Légumes',
-          x: 300,
-          y: 32,
-          w: 320,
-          h: 190,
-          realW: 300,
-          realH: 150,
-          cols: 4,
-          rows: 2,
-          notes: 'Pleine terre amendée à l’automne.'
-        },
-        {
-          id: 'zone-3',
-          type: 'verger',
-          name: 'Petit Verger Familial',
-          x: 32,
-          y: 300,
-          w: 380,
-          h: 180,
-          realW: 600,
-          realH: 300,
-          cols: 3,
-          rows: 1,
-          notes: 'Enherbé, exposition Est-Sud-Est.'
-        }
-      ],
-      plantings: [
-        {
-          id: 'pl-101',
-          zoneId: 'zone-1',
-          slotIndex: 0,
-          plantId: 'tomate',
-          plantedDate: getRelativeDateISO(-45),
-          status: 'floraison',
-          notes: 'Variété Cœur de Bœuf',
-          logs: [
-            { date: getRelativeDateISO(-45), text: '🌱 Plantation et pose du tuteur' },
-            { date: getRelativeDateISO(-12), text: '🌱 Ajout de compost au pied' },
-            { date: getRelativeDateISO(-3), text: '💧 Arrosage effectué' }
-          ]
-        },
-        {
-          id: 'pl-102',
-          zoneId: 'zone-1',
-          slotIndex: 1,
-          plantId: 'basilic',
-          plantedDate: getRelativeDateISO(-30),
-          status: 'pret',
-          notes: 'Grand Vert - Protège les tomates',
-          logs: [
-            { date: getRelativeDateISO(-30), text: '🌱 Mise en place à côté des tomates' }
-          ]
-        },
-        {
-          id: 'pl-103',
-          zoneId: 'zone-1',
-          slotIndex: 4,
-          plantId: 'radis',
-          plantedDate: getRelativeDateISO(-23),
-          status: 'pret',
-          notes: 'Radis de 18 jours',
-          logs: []
-        },
-        {
-          id: 'pl-104',
-          zoneId: 'zone-2',
-          slotIndex: 0,
-          plantId: 'carotte',
-          plantedDate: getRelativeDateISO(-35),
-          status: 'croissance',
-          notes: 'Nantaise améliorée',
-          logs: []
-        },
-        {
-          id: 'pl-105',
-          zoneId: 'zone-2',
-          slotIndex: 2,
-          plantId: 'courgette',
-          plantedDate: getRelativeDateISO(-20),
-          status: 'croissance',
-          notes: 'Courgette verte non coureuse',
-          logs: []
-        },
-        {
-          id: 'pl-106',
-          zoneId: 'zone-3',
-          slotIndex: 0,
-          plantId: 'pommier',
-          plantedDate: getRelativeDateISO(-90),
-          status: 'croissance',
-          notes: 'Reine des Reinettes',
-          logs: []
-        },
-        {
-          id: 'pl-107',
-          zoneId: 'zone-3',
-          slotIndex: 1,
-          plantId: 'cerisier',
-          plantedDate: getRelativeDateISO(-95),
-          status: 'floraison',
-          notes: 'Burlat',
-          logs: []
-        }
-      ]
-    };
+    function daysAgoStr(days) {
+      const d = new Date();
+      d.setDate(d.getDate() - days);
+      const tz = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return tz.toISOString().slice(0, 10);
+    }
 
-    // Variables temporaires pour les modales
-    let modalContext = {
-      zoneId: null,
-      slotIndex: null,
-      existingPlantingId: null,
-      logPlantingId: null
-    };
+    function addDaysToDateStr(dateStr, days) {
+      const base = new Date(`${dateStr}T12:00:00`);
+      if (Number.isNaN(base.getTime())) return todayStr();
+      base.setDate(base.getDate() + Number(days || 0));
+      const tz = new Date(base.getTime() - base.getTimezoneOffset() * 60000);
+      return tz.toISOString().slice(0, 10);
+    }
 
-    // =========================================================================
-    // 2. PERSISTANCE LOCALSTORAGE & IMPORT / EXPORT
-    // =========================================================================
+    function daysBetween(startStr, endStr) {
+      const s = new Date(`${startStr}T12:00:00`).getTime();
+      const e = new Date(`${endStr}T12:00:00`).getTime();
+      if (Number.isNaN(s) || Number.isNaN(e)) return 0;
+      return Math.max(0, Math.round((e - s) / 86400000));
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function createDemoState() {
+      const z1 = {
+        id: 'zone-1',
+        type: 'carre',
+        name: 'Carré Potager Nord',
+        x: 24,
+        y: 24,
+        w: 210,
+        h: 210,
+        realW: 120,
+        realH: 120,
+        cols: 3,
+        rows: 3,
+        notes: 'Plein soleil, terreau et compost maison'
+      };
+      const z2 = {
+        id: 'zone-2',
+        type: 'parcelle',
+        name: 'Parcelle Légumes',
+        x: 265,
+        y: 36,
+        w: 230,
+        h: 160,
+        realW: 300,
+        realH: 200,
+        cols: 4,
+        rows: 2,
+        notes: 'Terre franche amendée à l’automne'
+      };
+      const z3 = {
+        id: 'zone-3',
+        type: 'verger',
+        name: 'Verger Fruitier',
+        x: 265,
+        y: 235,
+        w: 240,
+        h: 180,
+        realW: 450,
+        realH: 340,
+        cols: 3,
+        rows: 2,
+        notes: 'Espace fruitiers abrité du vent'
+      };
+
+      return {
+        activeTab: 1,
+        terrainHeight: 580,
+        selectedZoneId: z1.id,
+        selectedPlantId: 'tomate',
+        customPlants: [],
+        zones: [z1, z2, z3],
+        plantings: [
+          {
+            id: 'pl-1',
+            zoneId: z1.id,
+            cellIndex: 0,
+            plantId: 'tomate',
+            plantedDate: daysAgoStr(18),
+            status: 'croissance',
+            notes: 'Cœur de Bœuf',
+            lastWatered: daysAgoStr(4),
+            careLogs: [
+              { id: 'log-1', date: daysAgoStr(5), type: 'Taille / Tuteurage', text: 'Pose des tuteurs bambou' }
+            ]
+          },
+          {
+            id: 'pl-2',
+            zoneId: z1.id,
+            cellIndex: 1,
+            plantId: 'basilic',
+            plantedDate: daysAgoStr(12),
+            status: 'croissance',
+            notes: 'Grand vert',
+            lastWatered: daysAgoStr(2),
+            careLogs: []
+          },
+          {
+            id: 'pl-3',
+            zoneId: z2.id,
+            cellIndex: 0,
+            plantId: 'carotte',
+            plantedDate: daysAgoStr(65),
+            status: 'pret',
+            notes: 'Nantaise améliorée',
+            lastWatered: daysAgoStr(2),
+            careLogs: []
+          },
+          {
+            id: 'pl-4',
+            zoneId: z3.id,
+            cellIndex: 0,
+            plantId: 'pommier',
+            plantedDate: daysAgoStr(140),
+            status: 'floraison',
+            notes: 'Golden / Reinette',
+            lastWatered: daysAgoStr(8),
+            careLogs: []
+          }
+        ],
+        dismissedTasks: []
+      };
+    }
+
+    let state = loadState();
+    let saveTimer = null;
+    let activeCellContext = null; // { zoneId, cellIndex, existingPlanting }
+    let activeCarePlantingId = null;
+    let confirmCallback = null;
+
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          appState = { ...appState, ...parsed };
-        }
-      } catch (e) {
-        console.error('Erreur chargement localStorage:', e);
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createDemoState();
+        const parsed = JSON.parse(raw);
+        const demo = createDemoState();
+        return {
+          ...demo,
+          ...parsed,
+          customPlants: Array.isArray(parsed.customPlants) ? parsed.customPlants : [],
+          zones: Array.isArray(parsed.zones) ? parsed.zones : demo.zones,
+          plantings: Array.isArray(parsed.plantings) ? parsed.plantings : demo.plantings,
+          dismissedTasks: Array.isArray(parsed.dismissedTasks) ? parsed.dismissedTasks : []
+        };
+      } catch (err) {
+        console.error('Erreur chargement localStorage :', err);
+        return createDemoState();
+      }
+    }
+
+    function setAutosaveIndicator(saving) {
+      const dot = document.getElementById('autosave-dot');
+      const label = document.getElementById('autosave-label');
+      if (!dot || !label) return;
+      if (saving) {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 inline-block';
+        label.textContent = 'Enregistrement...';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500 inline-block';
+        label.textContent = 'Sauvegarde automatique active';
       }
     }
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-        updateTasksBadge();
-      } catch (e) {
-        console.error('Erreur sauvegarde localStorage:', e);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        setAutosaveIndicator(false);
+      } catch (err) {
+        console.error('Erreur sauvegarde localStorage :', err);
+        showToast('Impossible de sauvegarder localement.', 'error');
       }
     }
 
+    function scheduleSave() {
+      setAutosaveIndicator(true);
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveState, 120);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      const palette = type === 'error'
+        ? 'bg-terracotta-600 text-white'
+        : type === 'success'
+          ? 'bg-sage-600 text-white'
+          : 'bg-sage-700 text-white';
+      el.className = `px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium transition-all duration-300 ${palette}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 250);
+      }, 2600);
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    // --- CATALOGUE DES PLANTES ---
+    function getAllPlants() {
+      return [...DEFAULT_PLANTS, ...(state.customPlants || [])];
+    }
+
+    function getPlantById(id) {
+      return getAllPlants().find((p) => p.id === id) || getAllPlants()[0];
+    }
+
+    // --- NAVIGATION PAR ONGLETS ---
+    function switchTab(tabNum) {
+      state.activeTab = tabNum;
+      [1, 2, 3].forEach((n) => {
+        const view = document.getElementById(`view-${n}`);
+        const btn = document.getElementById(`tab-btn-${n}`);
+        if (view) view.classList.toggle('hidden', n !== tabNum);
+        if (btn) {
+          if (n === tabNum) {
+            btn.className = 'tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap bg-sage-600 text-white shadow-sm cursor-pointer';
+          } else {
+            btn.className = 'tab-btn flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap text-sage-600 hover:bg-sage-100 cursor-pointer';
+          }
+        }
+      });
+
+      if (tabNum === 1) {
+        renderCanvas1();
+        renderZoneInspector();
+      } else if (tabNum === 2) {
+        renderPlantLibrary();
+        renderCanvas2();
+      } else if (tabNum === 3) {
+        renderPlanningAndTracking();
+      }
+      scheduleSave();
+      refreshIcons();
+    }
+
+    // --- PARTIE 1 : MODÉLISATION DES ZONES ---
+    function changeTerrainHeight(val) {
+      const h = Math.max(360, Math.min(900, parseInt(val, 10) || 580));
+      state.terrainHeight = h;
+      const c1 = document.getElementById('garden-canvas-1');
+      const c2 = document.getElementById('garden-canvas-2');
+      if (c1) c1.style.height = `${h}px`;
+      if (c2) c2.style.height = `${h}px`;
+      state.zones.forEach((z) => {
+        if (z.y + z.h > h) {
+          z.y = Math.max(8, h - z.h - 8);
+        }
+      });
+      renderCanvas1();
+      if (state.activeTab === 2) renderCanvas2();
+      scheduleSave();
+    }
+
+    function addZone(type) {
+      const count = state.zones.filter((z) => z.type === type).length + 1;
+      const labels = {
+        carre: `Carré Potager #${count}`,
+        parcelle: `Parcelle de Terre #${count}`,
+        verger: `Verger #${count}`
+      };
+      const dims = {
+        carre: { w: 180, h: 180, realW: 120, realH: 120, cols: 3, rows: 3 },
+        parcelle: { w: 220, h: 150, realW: 280, realH: 180, cols: 4, rows: 2 },
+        verger: { w: 230, h: 170, realW: 400, realH: 300, cols: 3, rows: 2 }
+      };
+      const cfg = dims[type] || dims.carre;
+      const offset = (state.zones.length * 24) % 120;
+
+      const zone = {
+        id: `zone-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        type,
+        name: labels[type] || `Zone #${count}`,
+        x: 24 + offset,
+        y: 24 + offset,
+        w: cfg.w,
+        h: cfg.h,
+        realW: cfg.realW,
+        realH: cfg.realH,
+        cols: cfg.cols,
+        rows: cfg.rows,
+        notes: ''
+      };
+
+      state.zones.push(zone);
+      state.selectedZoneId = zone.id;
+      renderCanvas1();
+      renderZoneInspector();
+      scheduleSave();
+      showToast(`"${zone.name}" ajouté au plan.`, 'success');
+    }
+
+    function getSelectedZone() {
+      return state.zones.find((z) => z.id === state.selectedZoneId) || null;
+    }
+
+    function renderZoneInspector() {
+      const emptyBox = document.getElementById('zone-inspector-empty');
+      const formBox = document.getElementById('zone-inspector-form');
+      const zone = getSelectedZone();
+
+      if (!zone) {
+        emptyBox?.classList.remove('hidden');
+        formBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyBox?.classList.add('hidden');
+      formBox?.classList.remove('hidden');
+
+      const badge = document.getElementById('insp-badge');
+      if (badge) {
+        if (zone.type === 'carre') {
+          badge.textContent = 'Carré potager';
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-wood-100 text-wood-700';
+        } else if (zone.type === 'parcelle') {
+          badge.textContent = 'Parcelle';
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-soil-200 text-soil-700';
+        } else {
+          badge.textContent = 'Verger';
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-sage-100 text-sage-700';
+        }
+      }
+
+      const nameEl = document.getElementById('insp-name');
+      const realWEl = document.getElementById('insp-real-w');
+      const realHEl = document.getElementById('insp-real-h');
+      const wEl = document.getElementById('insp-w');
+      const hEl = document.getElementById('insp-h');
+      const wValEl = document.getElementById('insp-w-val');
+      const hValEl = document.getElementById('insp-h-val');
+      const colsEl = document.getElementById('insp-cols');
+      const rowsEl = document.getElementById('insp-rows');
+      const notesEl = document.getElementById('insp-notes');
+      const gridSummaryEl = document.getElementById('insp-grid-summary');
+
+      if (nameEl) nameEl.value = zone.name;
+      if (realWEl) realWEl.value = zone.realW;
+      if (realHEl) realHEl.value = zone.realH;
+      if (wEl) wEl.value = zone.w;
+      if (hEl) hEl.value = zone.h;
+      if (wValEl) wValEl.textContent = zone.w;
+      if (hValEl) hValEl.textContent = zone.h;
+      if (colsEl) colsEl.value = zone.cols;
+      if (rowsEl) rowsEl.value = zone.rows;
+      if (notesEl) notesEl.value = zone.notes || '';
+      if (gridSummaryEl) {
+        const total = (zone.cols || 1) * (zone.rows || 1);
+        gridSummaryEl.textContent = `${zone.cols} × ${zone.rows} (${total} cases)`;
+      }
+    }
+
+    function updateSelectedZone(field, value) {
+      const zone = getSelectedZone();
+      if (!zone) return;
+      zone[field] = value;
+      if (field === 'w') {
+        const lbl = document.getElementById('insp-w-val');
+        if (lbl) lbl.textContent = value;
+      }
+      if (field === 'h') {
+        const lbl = document.getElementById('insp-h-val');
+        if (lbl) lbl.textContent = value;
+      }
+      renderCanvas1();
+      scheduleSave();
+    }
+
+    function updateSelectedZoneGrid(field, value) {
+      const zone = getSelectedZone();
+      if (!zone) return;
+      const clamped = Math.max(1, Math.min(8, parseInt(value, 10) || 1));
+      zone[field] = clamped;
+      // Supprime les plantations qui dépasseraient le nouveau nombre de cases
+      const maxCells = (zone.cols || 1) * (zone.rows || 1);
+      state.plantings = state.plantings.filter((p) => !(p.zoneId === zone.id && p.cellIndex >= maxCells));
+      renderZoneInspector();
+      renderCanvas1();
+      scheduleSave();
+    }
+
+    function deleteSelectedZone() {
+      const zone = getSelectedZone();
+      if (!zone) return;
+      openConfirmModal(
+        `Supprimer "${zone.name}" ?`,
+        'Cette zone et les plantations qui y sont associées seront retirées du plan.',
+        () => {
+          state.zones = state.zones.filter((z) => z.id !== zone.id);
+          state.plantings = state.plantings.filter((p) => p.zoneId !== zone.id);
+          state.selectedZoneId = state.zones[0]?.id || null;
+          renderCanvas1();
+          renderZoneInspector();
+          scheduleSave();
+          showToast('Zone supprimée.', 'info');
+        }
+      );
+    }
+
+    function renderCanvas1() {
+      const canvas = document.getElementById('garden-canvas-1');
+      if (!canvas) return;
+      canvas.style.height = `${state.terrainHeight || 580}px`;
+      canvas.innerHTML = '';
+
+      if (state.zones.length === 0) {
+        canvas.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-sage-600 p-6 text-center">
+            <p class="font-serif text-lg font-semibold">Votre terrain est vide</p>
+            <p class="text-xs text-sage-500 mt-1">Utilisez les boutons « + Carré potager », « + Parcelle de terre » ou « + Verger » ci-dessus.</p>
+          </div>`;
+        return;
+      }
+
+      state.zones.forEach((zone) => {
+        const el = document.createElement('div');
+        const typeClass = zone.type === 'carre'
+          ? 'zone-carre'
+          : zone.type === 'parcelle'
+            ? 'zone-parcelle'
+            : 'zone-verger';
+        const selectedClass = zone.id === state.selectedZoneId ? 'zone-selected' : '';
+
+        el.className = `rounded-xl p-2.5 flex flex-col justify-between cursor-grab active:cursor-grabbing transition-shadow ${typeClass} ${selectedClass}`;
+        el.style.position = 'absolute';
+        el.style.left = `${zone.x}px`;
+        el.style.top = `${zone.y}px`;
+        el.style.width = `${zone.w}px`;
+        el.style.height = `${zone.h}px`;
+
+        const cols = Math.max(1, zone.cols || 1);
+        const rows = Math.max(1, zone.rows || 1);
+        const zonePlantings = state.plantings.filter((p) => p.zoneId === zone.id);
+
+        let cellsHtml = `<div class="grid flex-1 gap-1 mt-1.5" style="grid-template-columns: repeat(${cols}, minmax(0, 1fr)); grid-template-rows: repeat(${rows}, minmax(0, 1fr));">`;
+        const totalCells = cols * rows;
+        for (let idx = 0; idx < totalCells; idx++) {
+          const pl = zonePlantings.find((p) => p.cellIndex === idx);
+          const plantObj = pl ? getPlantById(pl.plantId) : null;
+          cellsHtml += `
+            <div class="rounded-md bg-white/60 border border-black/10 flex items-center justify-center text-sm leading-none overflow-hidden" title="${plantObj ? escapeHtml(plantObj.name) : `Case #${idx + 1}`}">
+              ${plantObj ? `<span>${plantObj.emoji}</span>` : `<span class="text-[9px] text-sage-500/70">${idx + 1}</span>`}
+            </div>`;
+        }
+        cellsHtml += '</div>';
+
+        el.innerHTML = `
+          <div class="flex items-center justify-between gap-1 pointer-events-none">
+            <span class="text-[11px] font-bold text-sage-700 truncate">${escapeHtml(zone.name)}</span>
+            <span class="text-[10px] font-medium text-sage-600 bg-white/75 px-1.5 py-0.5 rounded shrink-0">${zone.realW}×${zone.realH}cm</span>
+          </div>
+          ${cellsHtml}
+        `;
+
+        el.addEventListener('pointerdown', (e) => startZoneDrag(e, zone));
+        canvas.appendChild(el);
+      });
+    }
+
+    function startZoneDrag(e, zone) {
+      if (e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      state.selectedZoneId = zone.id;
+      renderZoneInspector();
+      renderCanvas1();
+
+      const canvas = document.getElementById('garden-canvas-1');
+      if (!canvas) return;
+      const canvasRect = canvas.getBoundingClientRect();
+      const startPointerX = e.clientX;
+      const startPointerY = e.clientY;
+      const origX = zone.x;
+      const origY = zone.y;
+      let moved = false;
+
+      const onPointerMove = (moveEvent) => {
+        const dx = moveEvent.clientX - startPointerX;
+        const dy = moveEvent.clientY - startPointerY;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+
+        const maxX = Math.max(0, canvasRect.width - zone.w);
+        const maxY = Math.max(0, canvas.clientHeight - zone.h);
+        zone.x = Math.round(Math.max(0, Math.min(maxX, origX + dx)));
+        zone.y = Math.round(Math.max(0, Math.min(maxY, origY + dy)));
+        renderCanvas1();
+      };
+
+      const onPointerUp = () => {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        if (moved) {
+          scheduleSave();
+        }
+      };
+
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    }
+
+    // --- PARTIE 2 : BIBLIOTHÈQUE DE PLANTES & PLANTATION SUR LE PLAN ---
+    function selectPlantForPlacement(plantId) {
+      state.selectedPlantId = plantId;
+      const p = getPlantById(plantId);
+      const emojiEl = document.getElementById('active-plant-emoji');
+      const nameEl = document.getElementById('active-plant-name');
+      if (emojiEl && p) emojiEl.textContent = p.emoji;
+      if (nameEl && p) nameEl.textContent = p.name;
+      renderPlantLibrary();
+      scheduleSave();
+    }
+
+    function renderPlantLibrary() {
+      const listEl = document.getElementById('plant-library-list');
+      const countEl = document.getElementById('plant-count-label');
+      if (!listEl) return;
+
+      const query = (document.getElementById('plant-search')?.value || '').trim().toLowerCase();
+      const category = document.getElementById('plant-category-filter')?.value || 'all';
+
+      const all = getAllPlants();
+      if (countEl) countEl.textContent = `${all.length} variétés`;
+
+      const filtered = all.filter((p) => {
+        const matchCat = category === 'all' || p.category === category;
+        const matchQuery = !query || p.name.toLowerCase().includes(query);
+        return matchCat && matchQuery;
+      });
+
+      const activePlant = getPlantById(state.selectedPlantId);
+      const emojiEl = document.getElementById('active-plant-emoji');
+      const nameEl = document.getElementById('active-plant-name');
+      if (emojiEl && activePlant) emojiEl.textContent = activePlant.emoji;
+      if (nameEl && activePlant) nameEl.textContent = activePlant.name;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div class="p-4 rounded-xl bg-cream border border-sage-200 text-xs text-sage-500 text-center">Aucune plante trouvée.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((p) => {
+        const isSelected = p.id === state.selectedPlantId;
+        const activeCls = isSelected
+          ? 'border-sage-600 bg-sage-50 ring-2 ring-sage-600/20'
+          : 'border-sage-200 bg-white hover:bg-cream';
+        const catLabel = p.category === 'legume' ? 'Légume' : p.category === 'aromate' ? 'Aromate' : 'Fruit / Verger';
+
+        return `
+          <button type="button" onclick="selectPlantForPlacement('${p.id}')" class="w-full text-left p-3 rounded-xl border transition flex items-center justify-between gap-3 cursor-pointer ${activeCls}">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl w-10 h-10 rounded-xl bg-cream border border-sage-100 flex items-center justify-center shrink-0">${p.emoji}</span>
+              <div class="min-w-0">
+                <div class="font-semibold text-sm text-sage-700 truncate">${escapeHtml(p.name)}</div>
+                <div class="text-[11px] text-sage-500">${catLabel} • Récolte ~${p.harvestDays}j • Arrosage /${p.waterDays}j</div>
+              </div>
+            </div>
+            ${isSelected ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-sage-600 text-white shrink-0">Active</span>' : ''}
+          </button>`;
+      }).join('');
+    }
+
+    function renderCanvas2() {
+      const canvas = document.getElementById('garden-canvas-2');
+      if (!canvas) return;
+      canvas.style.height = `${state.terrainHeight || 580}px`;
+      canvas.innerHTML = '';
+
+      if (state.zones.length === 0) {
+        canvas.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-sage-600 p-6 text-center">
+            <p class="font-serif text-lg font-semibold">Aucune zone créée</p>
+            <button type="button" onclick="switchTab(1)" class="mt-3 px-4 py-2 rounded-xl bg-sage-600 text-white text-xs font-semibold cursor-pointer">
+              Retourner à la modélisation
+            </button>
+          </div>`;
+        return;
+      }
+
+      state.zones.forEach((zone) => {
+        const el = document.createElement('div');
+        const typeClass = zone.type === 'carre'
+          ? 'zone-carre'
+          : zone.type === 'parcelle'
+            ? 'zone-parcelle'
+            : 'zone-verger';
+
+        el.className = `rounded-xl p-2.5 flex flex-col justify-between ${typeClass}`;
+        el.style.position = 'absolute';
+        el.style.left = `${zone.x}px`;
+        el.style.top = `${zone.y}px`;
+        el.style.width = `${zone.w}px`;
+        el.style.height = `${zone.h}px`;
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between gap-1 mb-1';
+        header.innerHTML = `
+          <span class="text-[11px] font-bold text-sage-700 truncate">${escapeHtml(zone.name)}</span>
+          <span class="text-[10px] text-sage-600 bg-white/75 px-1.5 py-0.5 rounded shrink-0">${zone.cols}×${zone.rows}</span>
+        `;
+        el.appendChild(header);
+
+        const cols = Math.max(1, zone.cols || 1);
+        const rows = Math.max(1, zone.rows || 1);
+        const grid = document.createElement('div');
+        grid.className = 'grid flex-1 gap-1';
+        grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+        grid.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+
+        const zonePlantings = state.plantings.filter((p) => p.zoneId === zone.id);
+        const totalCells = cols * rows;
+
+        for (let idx = 0; idx < totalCells; idx++) {
+          const existing = zonePlantings.find((p) => p.cellIndex === idx) || null;
+          const plantObj = existing ? getPlantById(existing.plantId) : null;
+          const cellBtn = document.createElement('button');
+          cellBtn.type = 'button';
+          cellBtn.className = existing
+            ? 'rounded-md bg-sage-600/15 hover:bg-sage-600/25 border border-sage-600/40 flex flex-col items-center justify-center transition cursor-pointer p-0.5 overflow-hidden'
+            : 'rounded-md bg-white/65 hover:bg-white border border-dashed border-sage-400/60 flex items-center justify-center text-[10px] text-sage-500 transition cursor-pointer';
+          cellBtn.title = plantObj
+            ? `${plantObj.name} (${STATUS_LABELS[existing.status]?.label || existing.status})`
+            : `Planter dans ${zone.name} (Case #${idx + 1})`;
+          cellBtn.innerHTML = plantObj
+            ? `<span class="text-sm leading-none">${plantObj.emoji}</span><span class="text-[9px] font-semibold text-sage-700 truncate max-w-full">${escapeHtml(plantObj.name)}</span>`
+            : `<span>+</span>`;
+
+          cellBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            openPlantingModal(zone, idx, existing);
+          });
+
+          grid.appendChild(cellBtn);
+        }
+
+        el.appendChild(grid);
+        canvas.appendChild(el);
+      });
+    }
+
+    function openPlantingModal(zone, cellIndex, existingPlanting) {
+      activeCellContext = { zoneId: zone.id, cellIndex, existingPlanting };
+      const titleEl = document.getElementById('modal-planting-title');
+      const subEl = document.getElementById('modal-planting-subtitle');
+      const selectEl = document.getElementById('modal-plant-select');
+      const dateEl = document.getElementById('modal-plant-date');
+      const statusEl = document.getElementById('modal-plant-status');
+      const notesEl = document.getElementById('modal-plant-notes');
+      const removeBtn = document.getElementById('btn-remove-planting');
+
+      if (titleEl) titleEl.textContent = existingPlanting ? 'Modifier la culture' : 'Installer une culture';
+      if (subEl) subEl.textContent = `Zone : ${zone.name} • Case #${cellIndex + 1}`;
+
+      const plants = getAllPlants();
+      if (selectEl) {
+        selectEl.innerHTML = plants.map((p) => `<option value="${p.id}">${p.emoji} ${escapeHtml(p.name)} (~${p.harvestDays}j)</option>`).join('');
+        selectEl.value = existingPlanting ? existingPlanting.plantId : state.selectedPlantId;
+      }
+
+      if (dateEl) dateEl.value = existingPlanting ? existingPlanting.plantedDate : todayStr();
+      if (statusEl) statusEl.value = existingPlanting ? existingPlanting.status : 'croissance';
+      if (notesEl) notesEl.value = existingPlanting ? (existingPlanting.notes || '') : '';
+      if (removeBtn) removeBtn.classList.toggle('hidden', !existingPlanting);
+
+      checkCompanionPreview();
+      openModal('modal-planting');
+    }
+
+    function checkCompanionPreview() {
+      const box = document.getElementById('companion-alert');
+      if (!box || !activeCellContext) return;
+      const chosenId = document.getElementById('modal-plant-select')?.value;
+      const chosen = getPlantById(chosenId);
+      if (!chosen) return;
+
+      const neighbors = state.plantings
+        .filter((p) => p.zoneId === activeCellContext.zoneId && p.cellIndex !== activeCellContext.cellIndex && p.status !== 'recolte')
+        .map((p) => getPlantById(p.plantId));
+
+      const badMatches = neighbors.filter((n) => (chosen.badWith || []).includes(n.name) || (n.badWith || []).includes(chosen.name));
+      const goodMatches = neighbors.filter((n) => (chosen.goodWith || []).includes(n.name) || (n.goodWith || []).includes(chosen.name));
+
+      if (badMatches.length > 0) {
+        box.className = 'p-3 rounded-xl text-xs bg-terracotta-100 text-terracotta-600 border border-terracotta-500/30 space-y-1';
+        box.innerHTML = `<strong>Attention compagnonnage :</strong> ${escapeHtml(chosen.name)} déteste la proximité de ${badMatches.map((m) => escapeHtml(m.name)).join(', ')}.`;
+        box.classList.remove('hidden');
+      } else if (goodMatches.length > 0) {
+        box.className = 'p-3 rounded-xl text-xs bg-sage-100 text-sage-700 border border-sage-500/30 space-y-1';
+        box.innerHTML = `<strong>Bonne association :</strong> ${escapeHtml(chosen.name)} s'entend bien avec ${goodMatches.map((m) => escapeHtml(m.name)).join(', ')}.`;
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function savePlantingModal() {
+      if (!activeCellContext) return;
+      const plantId = document.getElementById('modal-plant-select')?.value || state.selectedPlantId;
+      const plantedDate = document.getElementById('modal-plant-date')?.value || todayStr();
+      const status = document.getElementById('modal-plant-status')?.value || 'croissance';
+      const notes = (document.getElementById('modal-plant-notes')?.value || '').trim();
+
+      if (activeCellContext.existingPlanting) {
+        const target = state.plantings.find((p) => p.id === activeCellContext.existingPlanting.id);
+        if (target) {
+          target.plantId = plantId;
+          target.plantedDate = plantedDate;
+          target.status = status;
+          target.notes = notes;
+        }
+      } else {
+        state.plantings.push({
+          id: `pl-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          zoneId: activeCellContext.zoneId,
+          cellIndex: activeCellContext.cellIndex,
+          plantId,
+          plantedDate,
+          status,
+          notes,
+          lastWatered: plantedDate,
+          careLogs: []
+        });
+      }
+
+      closeModal('modal-planting');
+      renderCanvas2();
+      scheduleSave();
+      showToast('Plantation enregistrée.', 'success');
+    }
+
+    function removeCurrentPlanting() {
+      if (!activeCellContext || !activeCellContext.existingPlanting) return;
+      const targetId = activeCellContext.existingPlanting.id;
+      state.plantings = state.plantings.filter((p) => p.id !== targetId);
+      closeModal('modal-planting');
+      renderCanvas2();
+      scheduleSave();
+      showToast('Culture retirée de la case.', 'info');
+    }
+
+    function openCustomPlantModal() {
+      const form = document.getElementById('custom-plant-form');
+      if (form) form.reset();
+      openModal('modal-custom-plant');
+    }
+
+    function saveCustomPlant(e) {
+      e.preventDefault();
+      const emoji = (document.getElementById('custom-plant-emoji')?.value || '🌿').trim();
+      const name = (document.getElementById('custom-plant-name')?.value || '').trim();
+      const category = document.getElementById('custom-plant-category')?.value || 'legume';
+      const harvestDays = Math.max(15, parseInt(document.getElementById('custom-plant-days')?.value, 10) || 75);
+      const waterDays = Math.max(1, parseInt(document.getElementById('custom-plant-water')?.value, 10) || 4);
+
+      if (!name) return;
+      const newPlant = {
+        id: `custom-${Date.now()}`,
+        name,
+        emoji: emoji || '🌿',
+        category,
+        harvestDays,
+        waterDays,
+        goodWith: [],
+        badWith: []
+      };
+
+      state.customPlants.push(newPlant);
+      state.selectedPlantId = newPlant.id;
+      closeModal('modal-custom-plant');
+      renderPlantLibrary();
+      scheduleSave();
+      showToast(`"${newPlant.name}" ajouté à la bibliothèque.`, 'success');
+    }
+
+    // --- PARTIE 3 : PLANNING, RAPPELS & SUIVI ---
+    function computeTasks() {
+      const tasks = [];
+      const today = todayStr();
+
+      state.plantings.forEach((pl) => {
+        if (pl.status === 'recolte') return;
+        const plant = getPlantById(pl.plantId);
+        const zone = state.zones.find((z) => z.id === pl.zoneId);
+        const zoneName = zone ? zone.name : 'Jardin';
+
+        const sinceWater = daysBetween(pl.lastWatered || pl.plantedDate, today);
+        if (sinceWater >= (plant.waterDays || 3)) {
+          const taskId = `water-${pl.id}-${today}`;
+          if (!state.dismissedTasks.includes(taskId)) {
+            tasks.push({
+              id: taskId,
+              plantingId: pl.id,
+              type: 'water',
+              title: `Arroser ${plant.emoji} ${plant.name}`,
+              detail: `${zoneName} • Case #${pl.cellIndex + 1} (${sinceWater}j sans arrosage)`,
+              badge: 'Arrosage'
+            });
+          }
+        }
+
+        const estHarvest = addDaysToDateStr(pl.plantedDate, plant.harvestDays || 70);
+        const daysLeft = daysBetween(today, estHarvest);
+        const isPastHarvest = estHarvest <= today;
+        if (pl.status === 'pret' || isPastHarvest || daysLeft <= 5) {
+          const taskId = `harvest-${pl.id}`;
+          if (!state.dismissedTasks.includes(taskId)) {
+            tasks.push({
+              id: taskId,
+              plantingId: pl.id,
+              type: 'harvest',
+              title: `Récolter ${plant.emoji} ${plant.name}`,
+              detail: `${zoneName} • Estimation : ${estHarvest}`,
+              badge: 'Récolte'
+            });
+          }
+        }
+      });
+
+      return tasks;
+    }
+
+    function renderPlanningAndTracking() {
+      const activePlantings = state.plantings.filter((p) => p.status !== 'recolte');
+      const readyPlantings = state.plantings.filter((p) => p.status === 'pret');
+      const harvestedPlantings = state.plantings.filter((p) => p.status === 'recolte');
+      const tasks = computeTasks();
+
+      const kpiActive = document.getElementById('kpi-active-count');
+      const kpiTasks = document.getElementById('kpi-tasks-count');
+      const kpiReady = document.getElementById('kpi-ready-count');
+      const kpiHarvested = document.getElementById('kpi-harvested-count');
+      const badgeTasks = document.getElementById('badge-tasks');
+
+      if (kpiActive) kpiActive.textContent = String(activePlantings.length);
+      if (kpiTasks) kpiTasks.textContent = String(tasks.length);
+      if (kpiReady) kpiReady.textContent = String(readyPlantings.length);
+      if (kpiHarvested) kpiHarvested.textContent = String(harvestedPlantings.length);
+
+      if (badgeTasks) {
+        if (tasks.length > 0) {
+          badgeTasks.textContent = String(tasks.length);
+          badgeTasks.classList.remove('hidden');
+        } else {
+          badgeTasks.classList.add('hidden');
+        }
+      }
+
+      renderTimeline();
+      renderTasks(tasks);
+      renderTrackingDashboard();
+      refreshIcons();
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      if (!container) return;
+
+      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+      const year = new Date().getFullYear();
+
+      const headerHtml = `
+        <div class="grid grid-cols-12 text-[11px] font-semibold text-sage-500 pb-2 border-b border-sage-100">
+          ${months.map((m) => `<div class="text-center">${m}</div>`).join('')}
+        </div>`;
+
+      if (state.plantings.length === 0) {
+        container.innerHTML = `${headerHtml}<p class="text-xs text-sage-500 py-6 text-center">Aucune culture planifiée pour le moment.</p>`;
+        return;
+      }
+
+      const rowsHtml = state.plantings.map((pl) => {
+        const plant = getPlantById(pl.plantId);
+        const zone = state.zones.find((z) => z.id === pl.zoneId);
+        const startD = new Date(`${pl.plantedDate}T12:00:00`);
+        const startMonth = Number.isNaN(startD.getTime()) ? 3 : startD.getMonth();
+        const growthMonths = Math.max(1, Math.min(6, Math.round((plant.harvestDays || 75) / 30)));
+        const harvestMonths = 1;
+
+        const startPct = Math.min(92, (startMonth / 12) * 100);
+        const growthPct = Math.min(100 - startPct, (growthMonths / 12) * 100);
+        const harvestPct = Math.min(100 - startPct - growthPct, (harvestMonths / 12) * 100);
+
+        return `
+          <div class="py-2.5 border-b border-sage-100 last:border-b-0 space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-sage-700">${plant.emoji} ${escapeHtml(plant.name)} <span class="font-normal text-sage-500">(${escapeHtml(zone?.name || 'Jardin')} • ${year})</span></span>
+              <span class="text-[11px] text-sage-500">Récolte estimée : ${addDaysToDateStr(pl.plantedDate, plant.harvestDays || 75)}</span>
+            </div>
+            <div class="relative h-5 rounded-full bg-cream border border-sage-200 overflow-hidden">
+              <div style="left:${startPct}%; width:${growthPct}%;" class="absolute top-0 bottom-0 bg-sage-500/80 flex items-center justify-center text-[10px] text-white font-medium">
+                ${growthPct >= 10 ? 'Pousse' : ''}
+              </div>
+              <div style="left:${startPct + growthPct}%; width:${Math.max(4, harvestPct)}%;" class="absolute top-0 bottom-0 bg-terracotta-500 flex items-center justify-center text-[10px] text-white font-semibold">
+                🧺
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = headerHtml + rowsHtml;
+    }
+
+    function renderTasks(tasks) {
+      const list = document.getElementById('tasks-list');
+      if (!list) return;
+
+      if (!tasks || tasks.length === 0) {
+        list.innerHTML = `
+          <div class="p-4 rounded-xl bg-sage-50 border border-sage-200 text-xs text-sage-600 text-center">
+            Tout est à jour ! Aucune tâche urgente détectée.
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = tasks.map((t) => `
+        <div class="p-3 rounded-xl bg-cream border border-sage-200 flex items-start justify-between gap-2">
+          <div class="space-y-0.5">
+            <span class="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${t.type === 'water' ? 'bg-sky-100 text-sky-800' : 'bg-terracotta-100 text-terracotta-600'}">
+              ${escapeHtml(t.badge)}
+            </span>
+            <div class="text-xs font-bold text-sage-700">${escapeHtml(t.title)}</div>
+            <div class="text-[11px] text-sage-500">${escapeHtml(t.detail)}</div>
+          </div>
+          <div class="flex flex-col gap-1 shrink-0">
+            ${t.type === 'water'
+              ? `<button type="button" onclick="markWatered('${t.plantingId}')" class="px-2.5 py-1 rounded-lg bg-sage-600 hover:bg-sage-700 text-white text-[11px] font-semibold cursor-pointer">Arrosé</button>`
+              : `<button type="button" onclick="markHarvested('${t.plantingId}')" class="px-2.5 py-1 rounded-lg bg-terracotta-500 hover:bg-terracotta-600 text-white text-[11px] font-semibold cursor-pointer">Récolté</button>`
+            }
+            <button type="button" onclick="dismissTask('${t.id}')" class="text-[10px] text-sage-400 hover:text-sage-700 cursor-pointer">Ignorer</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function markWatered(plantingId) {
+      const pl = state.plantings.find((p) => p.id === plantingId);
+      if (!pl) return;
+      pl.lastWatered = todayStr();
+      pl.careLogs = pl.careLogs || [];
+      pl.careLogs.unshift({ id: `log-${Date.now()}`, date: todayStr(), type: 'Arrosage', text: 'Arrosage effectué' });
+      renderPlanningAndTracking();
+      scheduleSave();
+      showToast('Arrosage enregistré.', 'success');
+    }
+
+    function markHarvested(plantingId) {
+      const pl = state.plantings.find((p) => p.id === plantingId);
+      if (!pl) return;
+      pl.status = 'recolte';
+      renderPlanningAndTracking();
+      scheduleSave();
+      showToast('Culture marquée comme récoltée !', 'success');
+    }
+
+    function dismissTask(taskId) {
+      if (!state.dismissedTasks.includes(taskId)) {
+        state.dismissedTasks.push(taskId);
+        renderPlanningAndTracking();
+        scheduleSave();
+      }
+    }
+
+    function renderTrackingDashboard() {
+      const container = document.getElementById('plantings-tracking-list');
+      if (!container) return;
+
+      const filter = document.getElementById('tracking-filter')?.value || 'active';
+      const filtered = state.plantings.filter((p) => {
+        if (filter === 'active') return p.status !== 'recolte';
+        if (filter === 'recolte') return p.status === 'recolte';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-6 rounded-xl bg-cream border border-sage-200 text-xs text-sage-500 text-center">Aucune culture à afficher pour ce filtre.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map((pl) => {
+        const plant = getPlantById(pl.plantId);
+        const zone = state.zones.find((z) => z.id === pl.zoneId);
+        const st = STATUS_LABELS[pl.status] || STATUS_LABELS.croissance;
+        const estHarvest = addDaysToDateStr(pl.plantedDate, plant.harvestDays || 75);
+        const logs = pl.careLogs || [];
+
+        return `
+          <div class="p-4 rounded-xl bg-cream border border-sage-200 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl w-10 h-10 rounded-xl bg-white border border-sage-100 flex items-center justify-center">${plant.emoji}</span>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h4 class="font-bold text-sm text-sage-700">${escapeHtml(plant.name)}</h4>
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${st.cls}">${st.label}</span>
+                  </div>
+                  <p class="text-xs text-sage-500">
+                    ${escapeHtml(zone?.name || 'Jardin')} • Case #${pl.cellIndex + 1} • Planté le ${escapeHtml(pl.plantedDate)} • Récolte ~${estHarvest}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select onchange="updatePlantingStatus('${pl.id}', this.value)" class="px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-xs font-medium text-sage-700 cursor-pointer">
+                  <option value="semis" ${pl.status === 'semis' ? 'selected' : ''}>🌱 Semis</option>
+                  <option value="croissance" ${pl.status === 'croissance' ? 'selected' : ''}>🌿 En croissance</option>
+                  <option value="floraison" ${pl.status === 'floraison' ? 'selected' : ''}>🌼 Floraison</option>
+                  <option value="pret" ${pl.status === 'pret' ? 'selected' : ''}>🧺 Prêt</option>
+                  <option value="recolte" ${pl.status === 'recolte' ? 'selected' : ''}>✅ Récolté</option>
+                </select>
+                <button type="button" onclick="openCareNoteModal('${pl.id}')" class="px-3 py-1.5 rounded-lg bg-sage-100 hover:bg-sage-200 text-sage-700 text-xs font-semibold transition cursor-pointer">
+                  + Note
+                </button>
+              </div>
+            </div>
+
+            ${pl.notes ? `<p class="text-xs text-sage-600 bg-white/80 px-3 py-2 rounded-lg border border-sage-100">📝 ${escapeHtml(pl.notes)}</p>` : ''}
+
+            ${logs.length > 0 ? `
+              <div class="space-y-1 pt-1 border-t border-sage-100">
+                ${logs.slice(0, 3).map((lg) => `
+                  <div class="text-[11px] text-sage-600 flex items-center justify-between">
+                    <span><strong>${escapeHtml(lg.type)} :</strong> ${escapeHtml(lg.text)}</span>
+                    <span class="text-sage-400">${escapeHtml(lg.date)}</span>
+                  </div>`).join('')}
+              </div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    function updatePlantingStatus(plantingId, newStatus) {
+      const pl = state.plantings.find((p) => p.id === plantingId);
+      if (!pl) return;
+      pl.status = newStatus;
+      renderPlanningAndTracking();
+      scheduleSave();
+      showToast('Statut mis à jour.', 'success');
+    }
+
+    function openCareNoteModal(plantingId) {
+      activeCarePlantingId = plantingId;
+      const pl = state.plantings.find((p) => p.id === plantingId);
+      const plant = pl ? getPlantById(pl.plantId) : null;
+      const subEl = document.getElementById('care-note-subtitle');
+      const txtEl = document.getElementById('care-note-text');
+      if (subEl && plant) subEl.textContent = `${plant.emoji} ${plant.name} • Case #${(pl.cellIndex || 0) + 1}`;
+      if (txtEl) txtEl.value = '';
+      openModal('modal-care-note');
+    }
+
+    function saveCareNote(e) {
+      e.preventDefault();
+      if (!activeCarePlantingId) return;
+      const pl = state.plantings.find((p) => p.id === activeCarePlantingId);
+      const type = document.getElementById('care-note-type')?.value || 'Observation';
+      const text = (document.getElementById('care-note-text')?.value || '').trim();
+      if (!pl || !text) return;
+
+      pl.careLogs = pl.careLogs || [];
+      pl.careLogs.unshift({ id: `log-${Date.now()}`, date: todayStr(), type, text });
+      if (type === 'Arrosage') pl.lastWatered = todayStr();
+
+      closeModal('modal-care-note');
+      renderPlanningAndTracking();
+      scheduleSave();
+      showToast('Note ajoutée au journal.', 'success');
+    }
+
+    // --- MODALES GÉNÉRIQUES & EXPORT / IMPORT / RÉINITIALISATION ---
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      refreshIcons();
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function openConfirmModal(title, message, onConfirm) {
+      confirmCallback = onConfirm;
+      const titleEl = document.getElementById('confirm-title');
+      const msgEl = document.getElementById('confirm-message');
+      const okBtn = document.getElementById('confirm-ok-btn');
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.textContent = message;
+      if (okBtn) {
+        okBtn.onclick = () => {
+          closeModal('modal-confirm');
+          if (typeof confirmCallback === 'function') confirmCallback();
+        };
+      }
+      openModal('modal-confirm');
+    }
+
     function exportData() {
-      const dataStr = JSON.stringify(appState, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mon-jardin-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `mon-jardin-${todayStr()}.json`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      a.remove();
       URL.revokeObjectURL(url);
-      showToast('Sauvegarde JSON téléchargée avec succès !', 'success');
+      showToast('Plan exporté au format JSON.', 'success');
     }
 
     function importData(event) {
-      const file = event.target.files[0];
+      const file = event.target?.files?.[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = (ev) => {
         try {
-          const imported = JSON.parse(e.target.result);
-          if (imported.zones && imported.plantings) {
-            appState = { ...appState, ...imported };
-            saveState();
-            renderAll();
-            showToast('Jardin importé et restauré !', 'success');
-          } else {
-            showToast('Fichier JSON invalide.', 'error');
-          }
+          const parsed = JSON.parse(String(ev.target?.result || '{}'));
+          if (!Array.isArray(parsed.zones)) throw new Error('Format invalide');
+          state = {
+            ...createDemoState(),
+            ...parsed,
+            customPlants: Array.isArray(parsed.customPlants) ? parsed.customPlants : [],
+            zones: parsed.zones,
+            plantings: Array.isArray(parsed.plantings) ? parsed.plantings : [],
+            dismissedTasks: Array.isArray(parsed.dismissedTasks) ? parsed.dismissedTasks : []
+          };
+          saveState();
+          switchTab(state.activeTab || 1);
+          showToast('Données importées avec succès.', 'success');
         } catch (err) {
-          showToast('Impossible de lire le fichier.', 'error');
+          console.error('Erreur import JSON :', err);
+          showToast('Fichier JSON invalide.', 'error');
         }
       };
       reader.readAsText(file);
@@ -938,986 +1907,25 @@
     }
 
     function resetToDemo() {
-      localStorage.removeItem(STORAGE_KEY);
-      location.reload();
-    }
-
-    // =========================================================================
-    // 3. NAVIGATION & UI UTILITAIRES
-    // =========================================================================
-    function switchTab(tabNum) {
-      appState.currentTab = tabNum;
+      state = createDemoState();
       saveState();
-
-      [1, 2, 3].forEach(n => {
-        const view = document.getElementById(`view-${n}`);
-        const btn = document.getElementById(`tab-btn-${n}`);
-        if (n === tabNum) {
-          view.classList.remove('hidden');
-          btn.classList.add('bg-sage-600', 'text-white', 'shadow-sm');
-          btn.classList.remove('text-sage-600', 'hover:bg-sage-100');
-          btn.querySelector('span:first-child').classList.add('bg-white/20');
-          btn.querySelector('span:first-child').classList.remove('bg-sage-200/70');
-        } else {
-          view.classList.add('hidden');
-          btn.classList.remove('bg-sage-600', 'text-white', 'shadow-sm');
-          btn.classList.add('text-sage-600', 'hover:bg-sage-100');
-          btn.querySelector('span:first-child').classList.remove('bg-white/20');
-          btn.querySelector('span:first-child').classList.add('bg-sage-200/70');
-        }
-      });
-
-      renderAll();
+      switchTab(1);
+      showToast('Jardin réinitialisé avec l’exemple par défaut.', 'info');
     }
 
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const bgClass = type === 'success' ? 'bg-sage-700 text-white' : type === 'error' ? 'bg-terracotta-600 text-white' : 'bg-sage-600 text-white';
-      toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0`;
-      toast.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i><span>${message}</span>`;
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    function openConfirmModal(title, message, onConfirm) {
-      document.getElementById('confirm-title').textContent = title;
-      document.getElementById('confirm-message').textContent = message;
-      const yesBtn = document.getElementById('confirm-yes-btn');
-      yesBtn.onclick = () => {
-        closeModal('modal-confirm');
-        onConfirm();
-      };
-      const modal = document.getElementById('modal-confirm');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    // =========================================================================
-    // 4. PARTIE 1 : MODÉLISATION DU JARDIN (DRAG & DROP + INSPECTEUR)
-    // =========================================================================
-    function changeTerrainHeight(val) {
-      appState.terrainHeight = parseInt(val) || 580;
-      document.getElementById('garden-canvas-1').style.height = appState.terrainHeight + 'px';
-      document.getElementById('garden-canvas-2').style.height = appState.terrainHeight + 'px';
-      saveState();
-    }
-
-    function addZone(type) {
-      const count = appState.zones.filter(z => z.type === type).length + 1;
-      const presets = {
-        carre: { name: `Carré Potager #${count}`, w: 210, h: 210, realW: 120, realH: 120, cols: 3, rows: 3 },
-        parcelle: { name: `Parcelle Terre #${count}`, w: 280, h: 160, realW: 250, realH: 120, cols: 4, rows: 2 },
-        verger: { name: `Verger #${count}`, w: 320, h: 160, realW: 500, realH: 250, cols: 3, rows: 1 }
-      };
-      const p = presets[type];
-      const offset = (appState.zones.length * 24) % 140;
-
-      const newZone = {
-        id: 'zone-' + Date.now(),
-        type,
-        name: p.name,
-        x: 40 + offset,
-        y: 40 + offset,
-        w: p.w,
-        h: p.h,
-        realW: p.realW,
-        realH: p.realH,
-        cols: p.cols,
-        rows: p.rows,
-        notes: ''
-      };
-
-      appState.zones.push(newZone);
-      appState.selectedZoneId = newZone.id;
-      saveState();
-      renderCanvas1();
-      renderZoneInspector();
-      showToast(`${p.name} ajouté au plan !`, 'success');
-    }
-
-    function selectZone(zoneId) {
-      appState.selectedZoneId = zoneId;
-      renderCanvas1();
-      renderZoneInspector();
-    }
-
-    function updateSelectedZone(field, value) {
-      const zone = appState.zones.find(z => z.id === appState.selectedZoneId);
-      if (!zone) return;
-      zone[field] = value;
-      saveState();
-      renderCanvas1();
-    }
-
-    function updateSelectedZoneGrid(dim, value) {
-      const zone = appState.zones.find(z => z.id === appState.selectedZoneId);
-      if (!zone) return;
-      const clamped = Math.max(1, Math.min(8, value));
-      zone[dim] = clamped;
-      // Nettoyer les plantations hors limites si réduction
-      const maxSlots = zone.cols * zone.rows;
-      appState.plantings = appState.plantings.filter(p => !(p.zoneId === zone.id && p.slotIndex >= maxSlots));
-      saveState();
-      renderCanvas1();
-      renderZoneInspector();
-    }
-
-    function deleteSelectedZone() {
-      const zone = appState.zones.find(z => z.id === appState.selectedZoneId);
-      if (!zone) return;
-      openConfirmModal(
-        `Supprimer "${zone.name}" ?`,
-        'Les plantations installées dans cette zone seront également retirées.',
-        () => {
-          appState.zones = appState.zones.filter(z => z.id !== zone.id);
-          appState.plantings = appState.plantings.filter(p => p.zoneId !== zone.id);
-          appState.selectedZoneId = null;
-          saveState();
-          renderCanvas1();
-          renderZoneInspector();
-          showToast('Zone supprimée.', 'info');
-        }
-      );
-    }
-
-    function renderZoneInspector() {
-      const emptyEl = document.getElementById('zone-inspector-empty');
-      const formEl = document.getElementById('zone-inspector-form');
-      const zone = appState.zones.find(z => z.id === appState.selectedZoneId);
-
-      if (!zone) {
-        emptyEl.classList.remove('hidden');
-        formEl.classList.add('hidden');
-        return;
-      }
-
-      emptyEl.classList.add('hidden');
-      formEl.classList.remove('hidden');
-
-      const badge = document.getElementById('insp-badge');
-      const typeInfo = {
-        carre: { label: 'Carré potager', cls: 'bg-wood-100 text-wood-700 border border-wood-300', gridLabel: 'Découpage en cases', unit: 'cases' },
-        parcelle: { label: 'Parcelle terre', cls: 'bg-soil-200 text-soil-700', gridLabel: 'Rangs / Sous-parcelles', unit: 'emplacements' },
-        verger: { label: 'Verger', cls: 'bg-sage-100 text-sage-700', gridLabel: 'Emplacements arbres', unit: 'arbres' }
-      }[zone.type];
-
-      badge.textContent = typeInfo.label;
-      badge.className = `px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${typeInfo.cls}`;
-
-      document.getElementById('insp-name').value = zone.name;
-      document.getElementById('insp-real-w').value = zone.realW;
-      document.getElementById('insp-real-h').value = zone.realH;
-      document.getElementById('insp-w').value = zone.w;
-      document.getElementById('insp-h').value = zone.h;
-      document.getElementById('insp-cols').value = zone.cols;
-      document.getElementById('insp-rows').value = zone.rows;
-      document.getElementById('insp-notes').value = zone.notes || '';
-      document.getElementById('insp-grid-label').textContent = typeInfo.gridLabel;
-      document.getElementById('insp-grid-summary').textContent = `${zone.cols} × ${zone.rows} (${zone.cols * zone.rows} ${typeInfo.unit})`;
-    }
-
-    function renderCanvas1() {
-      const canvas = document.getElementById('garden-canvas-1');
-      canvas.style.height = appState.terrainHeight + 'px';
-      document.getElementById('terrain-size-select').value = appState.terrainHeight;
-      canvas.innerHTML = '';
-
-      if (appState.zones.length === 0) {
-        canvas.innerHTML = `
-          <div class="h-full flex flex-col items-center justify-center text-sage-500 p-6 text-center">
-            <i data-lucide="map" class="w-10 h-10 mb-2 opacity-60"></i>
-            <p class="font-semibold text-sm">Votre terrain est vide</p>
-            <p class="text-xs mt-1">Utilisez les boutons en haut à droite pour ajouter un carré potager, une parcelle ou un verger.</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      appState.zones.forEach(zone => {
-        const el = document.createElement('div');
-        const isSelected = zone.id === appState.selectedZoneId;
-        el.className = `zone-${zone.type} absolute rounded-xl p-2 flex flex-col cursor-grab active:cursor-grabbing transition-shadow ${isSelected ? 'zone-selected' : ''}`;
-        el.style.left = zone.x + 'px';
-        el.style.top = zone.y + 'px';
-        el.style.width = zone.w + 'px';
-        el.style.height = zone.h + 'px';
-
-        // En-tête de la zone
-        const header = document.createElement('div');
-        header.className = 'flex items-center justify-between gap-1 mb-1.5 pointer-events-none';
-        header.innerHTML = `
-          <span class="text-[11px] font-bold truncate px-1.5 py-0.5 rounded bg-white/80 text-sage-700 shadow-2xs">${zone.name}</span>
-          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/70 text-sage-600 shrink-0">${zone.realW}×${zone.realH}cm</span>
-        `;
-        el.appendChild(header);
-
-        // Aperçu de la grille interne
-        const grid = document.createElement('div');
-        grid.className = 'flex-1 grid gap-1 pointer-events-none';
-        grid.style.gridTemplateColumns = `repeat(${zone.cols}, minmax(0, 1fr))`;
-        grid.style.gridTemplateRows = `repeat(${zone.rows}, minmax(0, 1fr))`;
-
-        const totalSlots = zone.cols * zone.rows;
-        for (let i = 0; i < totalSlots; i++) {
-          const planting = appState.plantings.find(p => p.zoneId === zone.id && p.slotIndex === i);
-          const plant = planting ? appState.plants.find(pl => pl.id === planting.plantId) : null;
-          const cell = document.createElement('div');
-          cell.className = `rounded-md border border-black/10 bg-white/40 flex items-center justify-center text-sm overflow-hidden`;
-          if (plant) {
-            cell.innerHTML = `<span title="${plant.name}">${plant.emoji}</span>`;
-          } else if (zone.type === 'verger') {
-            cell.innerHTML = `<span class="opacity-30 text-xs">🌳</span>`;
-          }
-          grid.appendChild(cell);
-        }
-        el.appendChild(grid);
-
-        // Gestion Drag & Drop souris et tactile
-        setupDraggable(el, zone, canvas);
-
-        canvas.appendChild(el);
-      });
-
-      lucide.createIcons();
-    }
-
-    function setupDraggable(el, zone, container) {
-      let isDragging = false;
-      let startX, startY, origX, origY;
-
-      const onStart = (clientX, clientY) => {
-        isDragging = true;
-        selectZone(zone.id);
-        startX = clientX;
-        startY = clientY;
-        origX = zone.x;
-        origY = zone.y;
-      };
-
-      const onMove = (clientX, clientY) => {
-        if (!isDragging) return;
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-        const maxX = Math.max(0, container.clientWidth - zone.w);
-        const maxY = Math.max(0, container.clientHeight - zone.h);
-        zone.x = Math.max(0, Math.min(maxX, Math.round((origX + dx) / 8) * 8));
-        zone.y = Math.max(0, Math.min(maxY, Math.round((origY + dy) / 8) * 8));
-        el.style.left = zone.x + 'px';
-        el.style.top = zone.y + 'px';
-      };
-
-      const onEnd = () => {
-        if (isDragging) {
-          isDragging = false;
-          saveState();
-        }
-      };
-
-      el.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        onStart(e.clientX, e.clientY);
-      });
-      window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
-      window.addEventListener('mouseup', onEnd);
-
-      el.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          onStart(e.touches[0].clientX, e.touches[0].clientY);
-        }
-      }, { passive: true });
-      window.addEventListener('touchmove', (e) => {
-        if (isDragging && e.touches.length === 1) {
-          onMove(e.touches[0].clientX, e.touches[0].clientY);
-        }
-      }, { passive: true });
-      window.addEventListener('touchend', onEnd);
-    }
-
-    // =========================================================================
-    // 5. PARTIE 2 : BIBLIOTHÈQUE & PLANTATIONS SUR LE PLAN
-    // =========================================================================
-    function renderPlantLibrary() {
-      const listEl = document.getElementById('plant-library-list');
-      const query = document.getElementById('plant-search').value.toLowerCase().trim();
-      const cat = document.getElementById('plant-category-filter').value;
-
-      const filtered = appState.plants.filter(p => {
-        const matchQuery = p.name.toLowerCase().includes(query) || p.season.toLowerCase().includes(query);
-        const matchCat = cat === 'all' || p.category === cat;
-        return matchQuery && matchCat;
-      });
-
-      document.getElementById('plant-count-label').textContent = `${filtered.length} variété(s)`;
-
-      const activePlant = appState.plants.find(p => p.id === appState.selectedPlantIdForPlacement) || appState.plants[0];
-      if (activePlant) {
-        document.getElementById('active-plant-emoji').textContent = activePlant.emoji;
-        document.getElementById('active-plant-name').textContent = activePlant.name;
-      }
-
-      listEl.innerHTML = '';
-      filtered.forEach(plant => {
-        const isSelected = plant.id === appState.selectedPlantIdForPlacement;
-        const card = document.createElement('div');
-        card.onclick = () => {
-          appState.selectedPlantIdForPlacement = plant.id;
-          renderPlantLibrary();
-        };
-
-        const goodNames = (plant.goodWith || [])
-          .map(id => appState.plants.find(x => x.id === id)?.name)
-          .filter(Boolean)
-          .join(', ');
-
-        card.className = `p-3 rounded-xl border cursor-pointer transition-all ${
-          isSelected
-            ? 'bg-sage-50 border-sage-600 ring-2 ring-sage-500/30 shadow-xs'
-            : 'bg-cream/60 border-sage-200 hover:border-sage-400 hover:bg-white'
-        }`;
-
-        card.innerHTML = `
-          <div class="flex items-start gap-3">
-            <div class="text-2xl w-10 h-10 rounded-xl bg-white border border-sage-100 flex items-center justify-center shrink-0 shadow-2xs">
-              ${plant.emoji}
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between gap-1">
-                <h4 class="font-bold text-sm text-sage-700 truncate">${plant.name}</h4>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sage-100 text-sage-600 shrink-0">${plant.daysToHarvest}j</span>
-              </div>
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-sage-500 mt-1">
-                <span>🗓️ ${plant.season}</span>
-                <span>💧 ${plant.water}</span>
-              </div>
-              ${goodNames ? `<div class="text-[11px] text-emerald-700 mt-1 truncate">🤝 Amis : ${goodNames}</div>` : ''}
-            </div>
-          </div>
-        `;
-        listEl.appendChild(card);
-      });
-    }
-
-    function renderCanvas2() {
-      const canvas = document.getElementById('garden-canvas-2');
-      canvas.style.height = appState.terrainHeight + 'px';
-      canvas.innerHTML = '';
-
-      if (appState.zones.length === 0) {
-        canvas.innerHTML = `
-          <div class="h-full flex flex-col items-center justify-center text-sage-500 p-6 text-center">
-            <p class="font-semibold text-sm">Aucune zone modélisée pour le moment.</p>
-            <button onclick="switchTab(1)" class="mt-3 px-4 py-2 rounded-xl bg-sage-600 text-white text-xs font-semibold">Retourner à l'étape 1</button>
-          </div>
-        `;
-        return;
-      }
-
-      appState.zones.forEach(zone => {
-        const el = document.createElement('div');
-        el.className = `zone-${zone.type} absolute rounded-xl p-2.5 flex flex-col`;
-        el.style.left = zone.x + 'px';
-        el.style.top = zone.y + 'px';
-        el.style.width = zone.w + 'px';
-        el.style.height = zone.h + 'px';
-
-        const header = document.createElement('div');
-        header.className = 'flex items-center justify-between mb-1.5';
-        header.innerHTML = `
-          <span class="text-[11px] font-bold truncate px-2 py-0.5 rounded bg-white/90 text-sage-700 shadow-2xs">${zone.name}</span>
-          <span class="text-[10px] text-sage-600 font-medium">${zone.cols}×${zone.rows}</span>
-        `;
-        el.appendChild(header);
-
-        const grid = document.createElement('div');
-        grid.className = 'flex-1 grid gap-1.5';
-        grid.style.gridTemplateColumns = `repeat(${zone.cols}, minmax(0, 1fr))`;
-        grid.style.gridTemplateRows = `repeat(${zone.rows}, minmax(0, 1fr))`;
-
-        const totalSlots = zone.cols * zone.rows;
-        for (let i = 0; i < totalSlots; i++) {
-          const planting = appState.plantings.find(p => p.zoneId === zone.id && p.slotIndex === i);
-          const plant = planting ? appState.plants.find(pl => pl.id === planting.plantId) : null;
-
-          const cell = document.createElement('button');
-          cell.type = 'button';
-          cell.onclick = () => openPlantingModal(zone.id, i);
-
-          if (plant) {
-            cell.className = 'rounded-lg bg-white/95 hover:bg-white border border-sage-300 shadow-2xs flex flex-col items-center justify-center p-1 transition transform hover:scale-105 cursor-pointer overflow-hidden';
-            cell.innerHTML = `
-              <span class="text-base sm:text-lg leading-none">${plant.emoji}</span>
-              <span class="text-[9px] font-bold text-sage-700 truncate max-w-full mt-0.5">${plant.name}</span>
-            `;
-            cell.title = `${plant.name} (Planté le ${formatDateFR(planting.plantedDate)}) - Cliquer pour modifier`;
-          } else {
-            cell.className = 'rounded-lg bg-white/45 hover:bg-sage-100/90 border border-dashed border-sage-500/40 flex flex-col items-center justify-center p-1 transition cursor-pointer group';
-            cell.innerHTML = `
-              <span class="text-xs text-sage-500 group-hover:text-sage-700 font-bold">+</span>
-            `;
-            cell.title = `Cliquer pour planter ici (Emplacement #${i + 1})`;
-          }
-
-          grid.appendChild(cell);
-        }
-
-        el.appendChild(grid);
-        canvas.appendChild(el);
-      });
-    }
-
-    function openPlantingModal(zoneId, slotIndex) {
-      const zone = appState.zones.find(z => z.id === zoneId);
-      if (!zone) return;
-
-      const existing = appState.plantings.find(p => p.zoneId === zoneId && p.slotIndex === slotIndex);
-      modalContext = {
-        zoneId,
-        slotIndex,
-        existingPlantingId: existing ? existing.id : null
-      };
-
-      document.getElementById('modal-planting-title').textContent = existing ? 'Modifier la plantation' : 'Installer une plante';
-      document.getElementById('modal-planting-subtitle').textContent = `${zone.name} • Emplacement #${slotIndex + 1}`;
-
-      const select = document.getElementById('modal-plant-select');
-      select.innerHTML = appState.plants.map(p => `<option value="${p.id}">${p.emoji} ${p.name} (${p.daysToHarvest}j)</option>`).join('');
-
-      if (existing) {
-        select.value = existing.plantId;
-        document.getElementById('modal-plant-date').value = existing.plantedDate;
-        document.getElementById('modal-plant-status').value = existing.status;
-        document.getElementById('modal-plant-notes').value = existing.notes || '';
-        document.getElementById('btn-remove-planting').classList.remove('hidden');
-      } else {
-        select.value = appState.selectedPlantIdForPlacement || appState.plants[0].id;
-        document.getElementById('modal-plant-date').value = getRelativeDateISO(0);
-        document.getElementById('modal-plant-status').value = 'semis';
-        document.getElementById('modal-plant-notes').value = '';
-        document.getElementById('btn-remove-planting').classList.add('hidden');
-      }
-
-      checkCompanionPreview();
-
-      const modal = document.getElementById('modal-planting');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function checkCompanionPreview() {
-      const chosenPlantId = document.getElementById('modal-plant-select').value;
-      const chosenPlant = appState.plants.find(p => p.id === chosenPlantId);
-      const alertBox = document.getElementById('companion-alert');
-      if (!chosenPlant) {
-        alertBox.classList.add('hidden');
-        return;
-      }
-
-      // Vérifier les autres plantes présentes dans la même zone
-      const neighbors = appState.plantings
-        .filter(p => p.zoneId === modalContext.zoneId && p.slotIndex !== modalContext.slotIndex)
-        .map(p => appState.plants.find(pl => pl.id === p.plantId))
-        .filter(Boolean);
-
-      const goodMatches = neighbors.filter(n => (chosenPlant.goodWith || []).includes(n.id));
-      const badMatches = neighbors.filter(n => (chosenPlant.badWith || []).includes(n.id));
-
-      if (badMatches.length > 0) {
-        alertBox.className = 'p-3 rounded-xl text-xs bg-terracotta-100 text-terracotta-600 border border-terracotta-500/30';
-        alertBox.innerHTML = `⚠️ <strong>Attention compagnonnage :</strong> ${chosenPlant.name} n'apprécie pas la proximité avec <strong>${badMatches.map(b => b.name).join(', ')}</strong> dans cette zone.`;
-        alertBox.classList.remove('hidden');
-      } else if (goodMatches.length > 0) {
-        alertBox.className = 'p-3 rounded-xl text-xs bg-emerald-50 text-emerald-700 border border-emerald-200';
-        alertBox.innerHTML = `🤝 <strong>Excellente association !</strong> ${chosenPlant.name} s'entend très bien avec <strong>${goodMatches.map(g => g.name).join(', ')}</strong> déjà en place.`;
-        alertBox.classList.remove('hidden');
-      } else {
-        alertBox.classList.add('hidden');
-      }
-    }
-
-    function savePlantingFromModal() {
-      const plantId = document.getElementById('modal-plant-select').value;
-      const plantedDate = document.getElementById('modal-plant-date').value || getRelativeDateISO(0);
-      const status = document.getElementById('modal-plant-status').value;
-      const notes = document.getElementById('modal-plant-notes').value.trim();
-
-      if (modalContext.existingPlantingId) {
-        const item = appState.plantings.find(p => p.id === modalContext.existingPlantingId);
-        if (item) {
-          item.plantId = plantId;
-          item.plantedDate = plantedDate;
-          item.status = status;
-          item.notes = notes;
-        }
-        showToast('Plantation mise à jour !', 'success');
-      } else {
-        appState.plantings.push({
-          id: 'pl-' + Date.now(),
-          zoneId: modalContext.zoneId,
-          slotIndex: modalContext.slotIndex,
-          plantId,
-          plantedDate,
-          status,
-          notes,
-          logs: [{ date: plantedDate, text: '🌱 Plantation installée au jardin' }]
-        });
-        showToast('Nouvelle culture plantée !', 'success');
-      }
-
-      saveState();
-      closeModal('modal-planting');
-      renderCanvas2();
-      renderCanvas1();
-    }
-
-    function removeCurrentPlanting() {
-      if (!modalContext.existingPlantingId) return;
-      appState.plantings = appState.plantings.filter(p => p.id !== modalContext.existingPlantingId);
-      saveState();
-      closeModal('modal-planting');
-      renderCanvas2();
-      renderCanvas1();
-      showToast('Emplacement libéré.', 'info');
-    }
-
-    function openCustomPlantModal() {
-      const modal = document.getElementById('modal-custom-plant');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function createCustomPlant() {
-      const name = document.getElementById('cp-name').value.trim();
-      if (!name) {
-        showToast('Veuillez saisir un nom de plante.', 'error');
-        return;
-      }
-      const newPlant = {
-        id: 'custom-' + Date.now(),
-        name,
-        emoji: document.getElementById('cp-emoji').value.trim() || '🌱',
-        category: document.getElementById('cp-category').value,
-        season: document.getElementById('cp-season').value.trim() || 'Printemps',
-        daysToHarvest: parseInt(document.getElementById('cp-days').value) || 60,
-        water: document.getElementById('cp-water').value,
-        waterDays: 3,
-        goodWith: [],
-        badWith: [],
-        care: document.getElementById('cp-care').value.trim() || 'Surveiller l’humidité du sol.'
-      };
-
-      appState.plants.unshift(newPlant);
-      appState.selectedPlantIdForPlacement = newPlant.id;
-      saveState();
-      closeModal('modal-custom-plant');
-      renderPlantLibrary();
-      showToast(`${newPlant.emoji} ${newPlant.name} ajouté à votre bibliothèque !`, 'success');
-    }
-
-    // =========================================================================
-    // 6. PARTIE 3 : PLANNING, FRISE CHRONOLOGIQUE & SUIVI
-    // =========================================================================
-    function formatDateFR(isoStr) {
-      if (!isoStr) return '';
-      const [y, m, d] = isoStr.split('-');
-      return `${d}/${m}/${y}`;
-    }
-
-    function getHarvestInfo(planting, plant) {
-      const start = new Date(planting.plantedDate);
-      const harvestDate = new Date(start);
-      harvestDate.setDate(harvestDate.getDate() + (plant?.daysToHarvest || 60));
-
-      const today = new Date();
-      const totalMs = harvestDate - start;
-      const elapsedMs = today - start;
-      let progress = Math.round((elapsedMs / totalMs) * 100);
-      progress = Math.max(5, Math.min(100, progress));
-
-      if (planting.status === 'recolte' || planting.status === 'pret') {
-        progress = 100;
-      }
-
-      const daysRemaining = Math.ceil((harvestDate - today) / (1000 * 60 * 60 * 24));
-      return {
-        start,
-        harvestDate,
-        harvestISO: harvestDate.toISOString().split('T')[0],
-        progress,
-        daysRemaining
-      };
-    }
-
-    function generateSmartTasks() {
-      const tasks = [];
-      appState.plantings.forEach(planting => {
-        if (planting.status === 'recolte') return;
-        const plant = appState.plants.find(p => p.id === planting.plantId);
-        const zone = appState.zones.find(z => z.id === planting.zoneId);
-        if (!plant || !zone) return;
-
-        const info = getHarvestInfo(planting, plant);
-
-        if (planting.status === 'pret' || info.daysRemaining <= 0) {
-          tasks.push({
-            id: planting.id,
-            priority: 'high',
-            icon: '🧺',
-            title: `Récolter : ${plant.name}`,
-            desc: `${zone.name} (Case #${planting.slotIndex + 1}) — Maturité atteinte !`,
-            actionLabel: 'Marquer récolté',
-            actionType: 'harvest'
-          });
-        } else if (info.daysRemaining <= 10) {
-          tasks.push({
-            id: planting.id,
-            priority: 'medium',
-            icon: '⏳',
-            title: `Récolte imminente : ${plant.name}`,
-            desc: `Dans environ ${info.daysRemaining} jour(s) (${zone.name}).`,
-            actionLabel: 'Voir',
-            actionType: 'log'
-          });
-        }
-
-        if (plant.water === 'Élevé') {
-          tasks.push({
-            id: planting.id,
-            priority: 'normal',
-            icon: '💧',
-            title: `Arroser ${plant.name}`,
-            desc: `${zone.name} • Besoin en eau élevé (tous les ${plant.waterDays || 2}j).`,
-            actionLabel: 'Noter arrosage',
-            actionType: 'water'
-          });
-        }
-      });
-
-      return tasks;
-    }
-
-    function updateTasksBadge() {
-      const tasks = generateSmartTasks();
-      const badge = document.getElementById('badge-tasks');
-      if (tasks.length > 0) {
-        badge.textContent = tasks.length;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-    }
-
-    function renderPlanningView() {
-      const activePlantings = appState.plantings.filter(p => p.status !== 'recolte');
-      const harvestedPlantings = appState.plantings.filter(p => p.status === 'recolte');
-      const tasks = generateSmartTasks();
-
-      const readyCount = activePlantings.filter(p => {
-        const plant = appState.plants.find(pl => pl.id === p.plantId);
-        const info = getHarvestInfo(p, plant);
-        return p.status === 'pret' || info.daysRemaining <= 0;
-      }).length;
-
-      document.getElementById('kpi-active-count').textContent = activePlantings.length;
-      document.getElementById('kpi-tasks-count').textContent = tasks.length;
-      document.getElementById('kpi-ready-count').textContent = readyCount;
-      document.getElementById('kpi-harvested-count').textContent = harvestedPlantings.length;
-
-      renderTimeline();
-      renderTasksList(tasks);
-      renderTrackingDashboard();
-    }
-
-    function renderTimeline() {
-      const container = document.getElementById('timeline-container');
-      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-      const currentMonth = new Date().getMonth();
-
-      let html = `
-        <div class="grid grid-cols-12 border-b border-sage-200 pb-2 text-center text-xs font-bold text-sage-600">
-          <div class="col-span-3 text-left pl-2">Culture & Zone</div>
-          <div class="col-span-9 grid grid-cols-12">
-            ${months.map((m, idx) => `<div class="${idx === currentMonth ? 'text-terracotta-600 underline decoration-2' : ''}">${m}</div>`).join('')}
-          </div>
-        </div>
-        <div class="divide-y divide-sage-100 mt-1">
-      `;
-
-      const items = appState.plantings.filter(p => p.status !== 'recolte');
-      if (items.length === 0) {
-        html += `<div class="py-6 text-center text-xs text-sage-500">Aucune culture active à afficher sur le calendrier.</div>`;
-      } else {
-        items.forEach(p => {
-          const plant = appState.plants.find(pl => pl.id === p.plantId);
-          const zone = appState.zones.find(z => z.id === p.zoneId);
-          if (!plant || !zone) return;
-
-          const info = getHarvestInfo(p, plant);
-          const startM = info.start.getMonth();
-          const endM = info.harvestDate.getMonth();
-          const span = endM >= startM ? (endM - startM + 1) : (12 - startM);
-
-          html += `
-            <div class="grid grid-cols-12 items-center py-2.5 text-xs hover:bg-sage-50/60 rounded-lg">
-              <div class="col-span-3 pr-2 pl-2 flex items-center gap-2 truncate">
-                <span class="text-base">${plant.emoji}</span>
-                <div class="truncate">
-                  <div class="font-bold text-sage-700 truncate">${plant.name}</div>
-                  <div class="text-[10px] text-sage-500 truncate">${zone.name}</div>
-                </div>
-              </div>
-              <div class="col-span-9 grid grid-cols-12 gap-0.5 items-center px-1">
-                ${months.map((_, mIdx) => {
-                  const isGrowth = mIdx >= startM && mIdx < startM + span - 1;
-                  const isHarvest = mIdx === Math.min(11, startM + span - 1);
-                  if (isHarvest) {
-                    return `<div class="h-5 rounded-r-full ${span === 1 ? 'rounded-l-full' : ''} bg-terracotta-500 text-white text-[9px] font-bold flex items-center justify-center" title="Récolte estimée : ${formatDateFR(info.harvestISO)}">🧺</div>`;
-                  } else if (isGrowth) {
-                    return `<div class="h-5 ${mIdx === startM ? 'rounded-l-full' : ''} bg-sage-500/80" title="Croissance"></div>`;
-                  } else {
-                    return `<div class="h-5 bg-sage-100/40 rounded-xs"></div>`;
-                  }
-                }).join('')}
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      html += `</div>`;
-      container.innerHTML = html;
-    }
-
-    function renderTasksList(tasks) {
-      const listEl = document.getElementById('tasks-list');
-      if (tasks.length === 0) {
-        listEl.innerHTML = `
-          <div class="text-center py-8 text-sage-500 space-y-2">
-            <div class="text-2xl">🌿</div>
-            <p class="text-xs font-medium">Tout est à jour au jardin !</p>
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = tasks.map(t => {
-        const cardStyle = t.priority === 'high'
-          ? 'bg-terracotta-100/70 border-terracotta-500/40'
-          : 'bg-sage-50 border-sage-200';
-
-        return `
-          <div class="p-3 rounded-xl border ${cardStyle} flex items-start justify-between gap-2.5">
-            <div class="flex items-start gap-2.5 min-w-0">
-              <span class="text-lg shrink-0">${t.icon}</span>
-              <div class="min-w-0">
-                <div class="text-xs font-bold text-sage-700 truncate">${t.title}</div>
-                <div class="text-[11px] text-sage-600 mt-0.5 leading-snug">${t.desc}</div>
-              </div>
-            </div>
-            <button onclick="handleTaskQuickAction('${t.id}', '${t.actionType}')" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-white hover:bg-sage-600 hover:text-white text-sage-700 border border-sage-200 text-[11px] font-semibold transition shadow-2xs">
-              ${t.actionLabel}
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function handleTaskQuickAction(plantingId, actionType) {
-      const planting = appState.plantings.find(p => p.id === plantingId);
-      if (!planting) return;
-
-      if (actionType === 'harvest') {
-        planting.status = 'recolte';
-        planting.logs.unshift({ date: getRelativeDateISO(0), text: '🧺 Récolte effectuée !' });
-        saveState();
-        renderPlanningView();
-        showToast('Bravo pour cette récolte !', 'success');
-      } else if (actionType === 'water') {
-        planting.logs.unshift({ date: getRelativeDateISO(0), text: '💧 Arrosage effectué' });
-        saveState();
-        renderPlanningView();
-        showToast('Arrosage enregistré dans le journal.', 'success');
-      } else {
-        openLogModal(plantingId);
-      }
-    }
-
-    function renderTrackingDashboard() {
-      const listEl = document.getElementById('plantings-tracking-list');
-      const filter = document.getElementById('tracking-filter').value;
-
-      const filtered = appState.plantings.filter(p => {
-        if (filter === 'active') return p.status !== 'recolte';
-        if (filter === 'recolte') return p.status === 'recolte';
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = `
-          <div class="text-center py-10 text-sage-500 space-y-2">
-            <p class="text-sm font-medium">Aucune plantation dans cette catégorie.</p>
-            <button onclick="switchTab(2)" class="px-4 py-2 rounded-xl bg-sage-600 text-white text-xs font-semibold">Aller planter des cultures</button>
-          </div>
-        `;
-        return;
-      }
-
-      const statusLabels = {
-        semis: { text: '🌱 Semis', cls: 'bg-amber-100 text-amber-800' },
-        croissance: { text: '🌿 Croissance', cls: 'bg-sage-100 text-sage-700' },
-        floraison: { text: '🌼 Floraison', cls: 'bg-purple-100 text-purple-800' },
-        pret: { text: '🧺 Prêt à récolter', cls: 'bg-terracotta-100 text-terracotta-600' },
-        recolte: { text: '✅ Récolté', cls: 'bg-emerald-100 text-emerald-800' }
-      };
-
-      listEl.innerHTML = filtered.map(p => {
-        const plant = appState.plants.find(pl => pl.id === p.plantId);
-        const zone = appState.zones.find(z => z.id === p.zoneId);
-        if (!plant || !zone) return '';
-
-        const info = getHarvestInfo(p, plant);
-        const st = statusLabels[p.status] || statusLabels.croissance;
-        const lastLog = p.logs && p.logs.length > 0 ? `${formatDateFR(p.logs[0].date)} : ${p.logs[0].text}` : 'Aucun soin enregistré';
-
-        return `
-          <div class="p-4 rounded-2xl border border-sage-200 bg-cream/50 hover:bg-white transition space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="flex items-center gap-3">
-                <span class="text-2xl w-11 h-11 rounded-xl bg-white border border-sage-200 flex items-center justify-center shrink-0">${plant.emoji}</span>
-                <div>
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="font-bold text-sm text-sage-700">${plant.name}</h4>
-                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${st.cls}">${st.text}</span>
-                  </div>
-                  <p class="text-xs text-sage-500 mt-0.5">
-                    📍 <strong>${zone.name}</strong> (Case #${p.slotIndex + 1}) • Planté le ${formatDateFR(p.plantedDate)}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Actions rapides -->
-              <div class="flex items-center gap-1.5 self-end sm:self-center">
-                <button onclick="openLogModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-sage-50 hover:bg-sage-100 text-sage-700 border border-sage-200 text-xs font-semibold flex items-center gap-1" title="Journal d'entretien">
-                  <i data-lucide="notebook-pen" class="w-3.5 h-3.5"></i>
-                  <span>Journal (${(p.logs || []).length})</span>
-                </button>
-                ${p.status !== 'recolte' ? `
-                  <button onclick="handleTaskQuickAction('${p.id}', 'harvest')" class="px-2.5 py-1.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition">
-                    Récolter
-                  </button>
-                ` : ''}
-                <button onclick="openPlantingModal('${p.zoneId}', ${p.slotIndex})" class="p-1.5 rounded-xl text-sage-500 hover:bg-sage-100" title="Modifier">
-                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Barre de progression vers récolte -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-[11px] font-medium text-sage-600">
-                <span>Progression vers maturité (${info.progress}%)</span>
-                <span>${p.status === 'recolte' ? 'Culture terminée' : info.daysRemaining > 0 ? `Récolte estimée le ${formatDateFR(info.harvestISO)} (J-${info.daysRemaining})` : 'Prêt pour la récolte !'}</span>
-              </div>
-              <div class="w-full h-2 bg-sage-200/70 rounded-full overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-500 ${p.status === 'recolte' ? 'bg-emerald-500' : info.progress >= 90 ? 'bg-terracotta-500' : 'bg-sage-600'}" style="width: ${info.progress}%"></div>
-              </div>
-            </div>
-
-            <!-- Conseil & Dernier soin -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-sage-200/60 text-[11px] text-sage-600">
-              <span>💡 <em>${plant.care}</em></span>
-              <span class="text-sage-500 shrink-0">Dernier soin : ${lastLog}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    function openLogModal(plantingId) {
-      const planting = appState.plantings.find(p => p.id === plantingId);
-      if (!planting) return;
-      const plant = appState.plants.find(pl => pl.id === planting.plantId);
-      modalContext.logPlantingId = plantingId;
-
-      document.getElementById('log-modal-subtitle').textContent = `${plant?.emoji || ''} ${plant?.name || 'Culture'} — Planté le ${formatDateFR(planting.plantedDate)}`;
-      document.getElementById('log-action-note').value = '';
-      renderLogEntries();
-
-      const modal = document.getElementById('modal-log');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function renderLogEntries() {
-      const planting = appState.plantings.find(p => p.id === modalContext.logPlantingId);
-      const listEl = document.getElementById('log-entries-list');
-      if (!planting || !planting.logs || planting.logs.length === 0) {
-        listEl.innerHTML = `<p class="text-xs text-sage-500 text-center py-4">Aucune entrée dans le journal pour le moment.</p>`;
-        return;
-      }
-
-      listEl.innerHTML = planting.logs.map(entry => `
-        <div class="p-2.5 rounded-xl bg-sage-50 border border-sage-200 flex items-center justify-between text-xs">
-          <span class="font-medium text-sage-700">${entry.text}</span>
-          <span class="text-[11px] text-sage-500 shrink-0 ml-2">${formatDateFR(entry.date)}</span>
-        </div>
-      `).join('');
-    }
-
-    function addLogEntry() {
-      const planting = appState.plantings.find(p => p.id === modalContext.logPlantingId);
-      if (!planting) return;
-      const type = document.getElementById('log-action-type').value;
-      const note = document.getElementById('log-action-note').value.trim();
-      const text = note ? `${type} — ${note}` : type;
-
-      if (!planting.logs) planting.logs = [];
-      planting.logs.unshift({
-        date: getRelativeDateISO(0),
-        text
-      });
-
-      document.getElementById('log-action-note').value = '';
-      saveState();
-      renderLogEntries();
-      renderTrackingDashboard();
-      showToast('Entrée ajoutée au journal.', 'success');
-    }
-
-    // =========================================================================
-    // 7. INITIALISATION GLOBALE
-    // =========================================================================
-    function renderAll() {
-      renderCanvas1();
-      renderZoneInspector();
-      renderPlantLibrary();
-      renderCanvas2();
-      renderPlanningView();
-      updateTasksBadge();
-      lucide.createIcons();
-    }
-
+    // --- INITIALISATION ---
     window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      switchTab(appState.currentTab || 1);
+      const terrainSelect = document.getElementById('terrain-size-select');
+      if (terrainSelect) {
+        terrainSelect.value = String(state.terrainHeight || 580);
+      }
+      renderCanvas1();
+      renderZoneInspector();
+      renderPlantLibrary();
+      renderCanvas2();
+      renderPlanningAndTracking();
+      switchTab(state.activeTab || 1);
+      refreshIcons();
     });
   </script>
 </body>
