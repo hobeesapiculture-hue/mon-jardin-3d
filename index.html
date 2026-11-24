@@ -222,7 +222,7 @@
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm">
         <div>
           <h2 class="font-serif text-2xl font-bold text-sage-700">1. Modéliser mon espace jardin</h2>
-          <p class="text-sm text-sage-500 mt-0.5">Ajoutez vos carrés potagers, parcelles de pleine terre ou vergers à l'échelle, puis déplacez-les librement sur le plan.</p>
+          <p class="text-sm text-sage-500 mt-0.5">Ajoutez vos carrés potagers, parcelles de pleine terre ou vergers, puis déplacez-les librement sur le plan.</p>
         </div>
 
         <!-- Boutons d'ajout rapide de zones -->
@@ -233,6 +233,15 @@
           </button>
           <button type="button" onclick="addZone('parcelle')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-soil-200/50 hover:bg-soil-200 text-soil-700 border border-soil-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
             <i data-lucide="rows-3" class="w-4 h-4"></i>
+            <span>+ Parcelle de terre</span>
+          </button>
+          <button type="button" onclick="addZone('verger')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-100 hover:bg-sage-200 text-sage-700 border border-sage-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
+            <i data-lucide="trees" class="w-4 h-4"></i>
+            <span>+ Verger</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Barre de taille directe du terrain -->
       <div class="bg-white px-5 py-3.5 rounded-2xl border border-sage-200 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-3">
@@ -265,24 +274,22 @@
         </div>
 
         <span id="terrain-size-summary" class="text-xs font-medium text-sage-600 bg-sage-50 border border-sage-200 px-3 py-1.5 rounded-xl">
-          Terrain : 1000×800 cm (10.0 × 8.0 m) • Repère : 1 m = 72 px
-        </span>
-      </div>
+          Terrain : 1000×800 cm (10 × 8 m) • Repère : 1 m = 72 px
+            <!-- Réglage direct de la hauteur du cadre (px) & Zoom -->
+            <div class="flex flex-wrap items-center gap-2 text-xs text-sage-500">
+              <div class="flex items-center gap-1 bg-sage-50 border border-sage-200 rounded-lg px-1.5 py-0.5 text-sage-700" role="group" aria-label="Contrôles de zoom du plan">
+                <button type="button" onclick="stepZoom(-0.1)" title="Zoom arrière (-10%)" aria-label="Zoom arrière" class="p-1 rounded hover:bg-sage-200/70 text-sage-700 transition cursor-pointer">
+                  <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                </button>
+                <span id="zoom-level-label-1" class="px-1.5 font-bold text-[11px] min-w-[44px] text-center select-none">100 %</span>
+                <button type="button" onclick="stepZoom(0.1)" title="Zoom avant (+10%)" aria-label="Zoom avant" class="p-1 rounded hover:bg-sage-200/70 text-sage-700 transition cursor-pointer">
+                  <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="resetZoom()" title="Réinitialiser le zoom (100%)" class="px-1.5 py-0.5 rounded hover:bg-sage-200/70 text-[11px] font-semibold text-sage-600 transition cursor-pointer">
+                  100 %
+                </button>
+              </div>
 
-      <!-- Espace de travail : Plan interactif à gauche + Inspecteur de propriétés à droite -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        <!-- Canevas du jardin (8 colonnes) -->
-        <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
-            <div class="flex items-center gap-4 text-xs font-medium text-sage-600">
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-wood-100 border-2 border-wood-500 inline-block"></span> Carré potager</span>
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-soil-200 border border-dashed border-soil-500 inline-block"></span> Parcelle</span>
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-sage-100 border border-sage-500 inline-block"></span> Verger</span>
-            </div>
-
-            <!-- Réglage direct de la hauteur du cadre (px) -->
-            <div class="flex items-center gap-2 text-xs text-sage-500">
               <label for="terrain-size-select">Hauteur cadre :</label>
               <select id="terrain-size-select" onchange="changeTerrainHeight(this.value)" class="bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-medium focus:outline-none cursor-pointer">
                 <option value="460">460px</option>
@@ -293,15 +300,17 @@
             </div>
           </div>
 
-          <!-- Zone interactive Drag & Drop (défilement fluide si terrain grand) -->
-          <div class="w-full rounded-xl border-2 border-sage-300 overflow-auto bg-[#EBF2EC]" style="max-height: 760px;">
-            <div id="garden-canvas-1" class="garden-canvas-bg relative select-none transition-all" style="width: 720px; height: 576px;">
-              <!-- Les zones sont injectées ici par JS -->
+          <!-- Zone interactive Drag & Drop (défilement fluide si terrain grand ou zoomé) -->
+          <div id="garden-canvas-1-scroll" class="w-full rounded-xl border-2 border-sage-300 overflow-auto bg-[#EBF2EC]" style="max-height: 760px;">
+            <div id="garden-canvas-1-zoom-box" class="relative" style="width: 720px; height: 576px;">
+              <div id="garden-canvas-1" class="garden-canvas-bg relative select-none" style="width: 720px; height: 576px; transform-origin: top left;">
+                <!-- Les zones sont injectées ici par JS -->
+              </div>
             </div>
           </div>
           <p class="text-xs text-sage-500 flex items-center gap-1.5">
             <i data-lucide="move" class="w-3.5 h-3.5 text-sage-600"></i>
-            <span>Astuce : Modifiez la taille de votre terrain ci-dessus ou glissez une zone vers le bord pour agrandir automatiquement l'espace.</span>
+            <span>Astuce : Modifiez la taille de votre terrain, zoomez (boutons ou Ctrl/Alt + molette) ou glissez une zone vers le bord pour agrandir automatiquement l'espace.</span>
           </p>
         </div>
 
@@ -452,10 +461,27 @@
         <div class="lg:col-span-7 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3 min-w-0">
           <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
             <h3 class="font-serif text-lg font-bold text-sage-700">Plan du jardin (Cliquez sur un emplacement)</h3>
-            <span class="text-xs text-sage-500">Cliquez sur une case occupée pour modifier ou retirer</span>
-          <div class="w-full rounded-xl border-2 border-sage-300 overflow-auto bg-[#EBF2EC]" style="max-height: 760px;">
-            <div id="garden-canvas-2" class="garden-canvas-bg relative select-none" style="width: 720px; height: 576px;">
-              <!-- Zones et emplacements cliquables injectés via JS -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1 bg-sage-50 border border-sage-200 rounded-lg px-1.5 py-0.5 text-sage-700" role="group" aria-label="Contrôles de zoom du plan de plantation">
+                <button type="button" onclick="stepZoom(-0.1)" title="Zoom arrière (-10%)" aria-label="Zoom arrière" class="p-1 rounded hover:bg-sage-200/70 text-sage-700 transition cursor-pointer">
+                  <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                </button>
+                <span id="zoom-level-label-2" class="px-1.5 font-bold text-[11px] min-w-[44px] text-center select-none">100 %</span>
+                <button type="button" onclick="stepZoom(0.1)" title="Zoom avant (+10%)" aria-label="Zoom avant" class="p-1 rounded hover:bg-sage-200/70 text-sage-700 transition cursor-pointer">
+                  <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="resetZoom()" title="Réinitialiser le zoom (100%)" class="px-1.5 py-0.5 rounded hover:bg-sage-200/70 text-[11px] font-semibold text-sage-600 transition cursor-pointer">
+                  100 %
+                </button>
+              </div>
+              <span class="text-xs text-sage-500">Cliquez sur une case occupée pour modifier ou retirer</span>
+            </div>
+          </div>
+          <div id="garden-canvas-2-scroll" class="w-full rounded-xl border-2 border-sage-300 overflow-auto bg-[#EBF2EC]" style="max-height: 760px;">
+            <div id="garden-canvas-2-zoom-box" class="relative" style="width: 720px; height: 576px;">
+              <div id="garden-canvas-2" class="garden-canvas-bg relative select-none" style="width: 720px; height: 576px; transform-origin: top left;">
+                <!-- Zones et emplacements cliquables injectés via JS -->
+              </div>
             </div>
           </div>
         </div>
@@ -849,6 +875,8 @@
     const MAX_AUTO_SNAPSHOTS = 10;
     // Repère fixe d'affichage : 0.72 px par cm (soit 72 px pour 1 m / 100 cm)
     const FIXED_PX_PER_CM = 0.72;
+    const MIN_ZOOM = 0.5;
+    const MAX_ZOOM = 2.0;
 
     // Bibliothèque initiale de variétés (légumes, aromates, fruits & verger)
     const DEFAULT_PLANTS = [
@@ -912,8 +940,54 @@
         .replace(/"/g, '&quot;');
     }
 
+    function normalizeZoneType(rawType, name = '') {
+      const val = String(rawType || '').toLowerCase().trim();
+      if (val === 'carre' || val === 'carré' || val === 'potager' || val === 'carre_potager') return 'carre';
+      if (val === 'parcelle' || val === 'terre' || val === 'pleine_terre' || val === 'plot') return 'parcelle';
+      if (val === 'verger' || val === 'orchard' || val === 'arbres') return 'verger';
+      const lowerName = String(name || '').toLowerCase();
+      if (lowerName.includes('parcelle') || lowerName.includes('terre')) return 'parcelle';
+      if (lowerName.includes('verger') || lowerName.includes('fruit')) return 'verger';
+      return 'carre';
+    }
+
+    function normalizeZoneItem(rawZone, index = 0) {
+      const z = rawZone && typeof rawZone === 'object' ? rawZone : {};
+      const type = normalizeZoneType(z.type || z.kind || z.category, z.name);
+      const defaultName = type === 'parcelle'
+        ? `Parcelle de Terre #${index + 1}`
+        : type === 'verger'
+          ? `Verger #${index + 1}`
+          : `Carré Potager #${index + 1}`;
+      const defaultDims = type === 'parcelle'
+        ? { w: 216, h: 144, realW: 300, realH: 200, cols: 4, rows: 2 }
+        : type === 'verger'
+          ? { w: 252, h: 180, realW: 350, realH: 250, cols: 3, rows: 2 }
+          : { w: 144, h: 144, realW: 200, realH: 200, cols: 3, rows: 3 };
+
+      const w = Math.max(40, Math.min(800, Number(z.w) || defaultDims.w));
+      const h = Math.max(40, Math.min(800, Number(z.h) || defaultDims.h));
+      const realW = Math.max(20, Math.min(20000, Number(z.realW) || Math.round(w / FIXED_PX_PER_CM)));
+      const realH = Math.max(20, Math.min(20000, Number(z.realH) || Math.round(h / FIXED_PX_PER_CM)));
+
+      return {
+        id: String(z.id || `zone-${index + 1}-${Date.now()}`),
+        type,
+        name: String(z.name || defaultName),
+        x: Math.max(0, Number(z.x) || 24),
+        y: Math.max(0, Number(z.y) || 24),
+        w,
+        h,
+        realW,
+        realH,
+        cols: Math.max(1, Math.min(8, parseInt(z.cols, 10) || defaultDims.cols)),
+        rows: Math.max(1, Math.min(8, parseInt(z.rows, 10) || defaultDims.rows)),
+        notes: typeof z.notes === 'string' ? z.notes : ''
+      };
+    }
+
     function createDemoState() {
-      const z1 = {
+      const z1 = normalizeZoneItem({
         id: 'zone-1',
         type: 'carre',
         name: 'Carré Potager Nord',
@@ -926,8 +1000,9 @@
         cols: 3,
         rows: 3,
         notes: 'Plein soleil, terreau et compost maison'
-      };
-      const z2 = {
+      }, 0);
+
+      const z2 = normalizeZoneItem({
         id: 'zone-2',
         type: 'parcelle',
         name: 'Parcelle Légumes',
@@ -940,8 +1015,9 @@
         cols: 4,
         rows: 2,
         notes: 'Terre franche amendée à l’automne'
-      };
-      const z3 = {
+      }, 1);
+
+      const z3 = normalizeZoneItem({
         id: 'zone-3',
         type: 'verger',
         name: 'Verger Fruitier',
@@ -954,11 +1030,12 @@
         cols: 3,
         rows: 2,
         notes: 'Espace fruitiers abrité du vent'
-      };
+      }, 2);
 
       return {
         schemaVersion: SCHEMA_VERSION,
         activeTab: 1,
+        zoomLevel: 1.0,
         terrainWidth: Math.round(1000 * FIXED_PX_PER_CM),
         terrainHeight: Math.round(800 * FIXED_PX_PER_CM),
         terrainRealW: 1000,
@@ -1028,6 +1105,86 @@
     let activeCarePlantingId = null;
     let confirmCallback = null;
 
+    function clampZoom(val) {
+      const num = Number(val);
+      if (!Number.isFinite(num)) return 1.0;
+      const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, num));
+      return Math.round(clamped * 100) / 100;
+    }
+
+    function getZoomLevel() {
+      const z = clampZoom(state.zoomLevel ?? 1.0);
+      state.zoomLevel = z;
+      return z;
+    }
+
+    function updateZoomLabels() {
+      const pct = `${Math.round(getZoomLevel() * 100)} %`;
+      ['zoom-level-label-1', 'zoom-level-label-2'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = pct;
+      });
+    }
+
+    function applyZoomToCanvases() {
+      const zoom = getZoomLevel();
+      updateZoomLabels();
+
+      [
+        { canvasId: 'garden-canvas-1', boxId: 'garden-canvas-1-zoom-box' },
+        { canvasId: 'garden-canvas-2', boxId: 'garden-canvas-2-zoom-box' }
+      ].forEach(({ canvasId, boxId }) => {
+        const canvas = document.getElementById(canvasId);
+        const box = document.getElementById(boxId);
+        if (!canvas) return;
+        const rawW = parseFloat(canvas.style.width) || canvas.offsetWidth || 720;
+        const rawH = parseFloat(canvas.style.height) || canvas.offsetHeight || 576;
+        canvas.style.transformOrigin = 'top left';
+        canvas.style.transform = `scale(${zoom})`;
+        if (box) {
+          box.style.width = `${Math.round(rawW * zoom)}px`;
+          box.style.height = `${Math.round(rawH * zoom)}px`;
+        }
+      });
+    }
+
+    function setZoomLevel(nextZoom, persist = true) {
+      const clamped = clampZoom(nextZoom);
+      if (clamped === state.zoomLevel) {
+        applyZoomToCanvases();
+        return;
+      }
+      state.zoomLevel = clamped;
+      applyZoomToCanvases();
+      if (persist) scheduleSave();
+    }
+
+    function stepZoom(delta) {
+      setZoomLevel(getZoomLevel() + delta, true);
+    }
+
+    function resetZoom() {
+      setZoomLevel(1.0, true);
+      showToast('Zoom réinitialisé à 100 %.', 'info');
+    }
+
+    function bindCanvasWheelZoom() {
+      [
+        { scrollId: 'garden-canvas-1-scroll', canvasId: 'garden-canvas-1' },
+        { scrollId: 'garden-canvas-2-scroll', canvasId: 'garden-canvas-2' }
+      ].forEach(({ scrollId, canvasId }) => {
+        const container = document.getElementById(scrollId) || document.getElementById(canvasId);
+        if (!container || container.dataset.wheelZoomBound === '1') return;
+        container.dataset.wheelZoomBound = '1';
+        container.addEventListener('wheel', (e) => {
+          if (!e.ctrlKey && !e.altKey) return;
+          e.preventDefault();
+          const delta = e.deltaY < 0 ? 0.1 : -0.1;
+          stepZoom(delta);
+        }, { passive: false });
+      });
+    }
+
     function nowFormattedFr() {
       return new Date().toLocaleString('fr-FR', {
         day: '2-digit',
@@ -1048,6 +1205,7 @@
         ...demo,
         ...base,
         schemaVersion: SCHEMA_VERSION,
+        zoomLevel: clampZoom(base.zoomLevel ?? 1.0),
         terrainRealW: realW,
         terrainRealH: realH,
         terrainWidth: Math.max(360, Math.min(4800, Number(base.terrainWidth) || defaultW)),
@@ -1358,7 +1516,6 @@
     function saveState() {
       try {
         state.schemaVersion = SCHEMA_VERSION;
-        state.trueScale = Boolean(state.trueScaleMode);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         recordAutoSnapshot('Sauvegarde auto');
         setAutosaveIndicator(false);
@@ -1436,103 +1593,6 @@
       refreshIcons();
     }
 
-    // --- PARTIE 1 : MODÉLISATION DES ZONES & AGRANDISSEMENT AUTO ---
-    function getViewportCanvasWidth(canvasId = 'garden-canvas-1') {
-      if (canvasId === 'garden-canvas-1') {
-        const scrollWrap = document.getElementById('garden-canvas-1-scroll');
-        if (scrollWrap && scrollWrap.clientWidth > 60) return scrollWrap.clientWidth;
-      }
-      const canvas = document.getElementById(canvasId);
-      const rectW = canvas ? canvas.clientWidth : 0;
-      return rectW > 60 ? rectW : 760;
-    }
-
-    function getEffectiveCanvasWidth(canvasId = 'garden-canvas-1') {
-      const baseW = getViewportCanvasWidth(canvasId);
-      return Math.max(baseW, Number(state.terrainWidth) || 0);
-    }
-
-    function getEffectiveCanvasHeight() {
-      return Math.max(360, Number(state.terrainHeight) || 580);
-    }
-
-    function applyCanvasDimensions(canvasId = 'garden-canvas-1') {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
-      const baseW = getViewportCanvasWidth(canvasId);
-      const effW = getEffectiveCanvasWidth(canvasId);
-      const effH = getEffectiveCanvasHeight();
-      canvas.style.height = `${effH}px`;
-      if (effW > baseW) {
-        canvas.style.width = `${effW}px`;
-        canvas.style.minWidth = `${effW}px`;
-      } else {
-        canvas.style.width = '100%';
-        canvas.style.minWidth = '100%';
-      }
-    }
-
-    // Calcule le facteur pixels par centimètre afin que le terrain (cm) tienne dans le cadre (px)
-    function getPixelsPerCm(canvasId = 'garden-canvas-1') {
-      const canvasW = Math.max(120, getEffectiveCanvasWidth(canvasId) - 16);
-      const canvasH = Math.max(120, getEffectiveCanvasHeight() - 16);
-      const realW = Math.max(50, state.terrainRealW || 1000);
-      const realH = Math.max(50, state.terrainRealH || 800);
-      return Math.min(canvasW / realW, canvasH / realH);
-    }
-
-    function applyTrueScaleToZone(zone, canvasId = 'garden-canvas-1') {
-      if (!zone || !state.trueScaleMode) return;
-      const pxPerCm = getPixelsPerCm(canvasId);
-      zone.w = Math.max(24, Math.round((zone.realW || 100) * pxPerCm));
-      zone.h = Math.max(24, Math.round((zone.realH || 100) * pxPerCm));
-      zone.x = Math.max(0, zone.x || 0);
-      zone.y = Math.max(0, zone.y || 0);
-    }
-
-    function syncAllZonesToTrueScale(canvasId = 'garden-canvas-1') {
-      if (!state.trueScaleMode) return;
-      state.zones.forEach((z) => applyTrueScaleToZone(z, canvasId));
-    }
-
-    // Agrandit automatiquement le plan si une zone approche ou dépasse le bord droit / bas
-    function ensureCanvasFitsZone(zone, canvasId = 'garden-canvas-1') {
-      if (!zone) return false;
-      zone.x = Math.max(0, Math.round(zone.x || 0));
-      zone.y = Math.max(0, Math.round(zone.y || 0));
-      zone.w = Math.max(24, Math.round(zone.w || 120));
-      zone.h = Math.max(24, Math.round(zone.h || 120));
-
-      const needRight = zone.x + zone.w + EDGE_MARGIN;
-      const needBottom = zone.y + zone.h + EDGE_MARGIN;
-      const currentW = getEffectiveCanvasWidth(canvasId);
-      const currentH = getEffectiveCanvasHeight();
-      let expanded = false;
-
-      if (needRight > currentW) {
-        const nextW = Math.min(8000, Math.max(needRight, currentW + EXPAND_STEP));
-        const prevW = Math.max(1, currentW);
-        state.terrainWidth = nextW;
-        if (state.trueScaleMode) {
-          state.terrainRealW = Math.min(20000, Math.max(state.terrainRealW || 1000, Math.round((state.terrainRealW || 1000) * (nextW / prevW))));
-          syncTerrainInputsFromState();
-        }
-        expanded = true;
-      }
-
-      if (needBottom > currentH) {
-        const nextH = Math.min(8000, Math.max(needBottom, currentH + EXPAND_STEP));
-        const prevH = Math.max(1, currentH);
-        state.terrainHeight = nextH;
-        if (state.trueScaleMode) {
-          state.terrainRealH = Math.min(20000, Math.max(state.terrainRealH || 800, Math.round((state.terrainRealH || 800) * (nextH / prevH))));
-          syncTerrainInputsFromState();
-        }
-        expanded = true;
-      }
-
-      if (expanded) {
-        applyCanvasDimensions(canvasId);
     // --- PARTIE 1 : TAILLE DU TERRAIN & MODÉLISATION DES ZONES ---
     function getTerrainPixelBounds() {
       const minW = Math.max(360, Math.round((state.terrainRealW || 1000) * FIXED_PX_PER_CM));
@@ -1605,7 +1665,8 @@
       scheduleSave();
     }
 
-    function addZone(type) {
+    function addZone(rawType) {
+      const type = normalizeZoneType(rawType);
       const count = state.zones.filter((z) => z.type === type).length + 1;
       const labels = {
         carre: `Carré Potager #${count}`,
@@ -1620,7 +1681,7 @@
       const cfg = dims[type] || dims.carre;
       const offset = (state.zones.length * 24) % 140;
 
-      const zone = {
+      const zone = normalizeZoneItem({
         id: `zone-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         type,
         name: labels[type] || `Zone #${count}`,
@@ -1633,7 +1694,7 @@
         cols: cfg.cols,
         rows: cfg.rows,
         notes: ''
-      };
+      }, state.zones.length);
 
       state.zones.push(zone);
       state.selectedZoneId = zone.id;
@@ -1663,16 +1724,20 @@
       formBox?.classList.remove('hidden');
 
       const badge = document.getElementById('insp-badge');
+      const gridLabel = document.getElementById('insp-grid-label');
       if (badge) {
         if (zone.type === 'carre') {
           badge.textContent = 'Carré potager';
           badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-wood-100 text-wood-700';
+          if (gridLabel) gridLabel.textContent = 'Subdivisions (Cases)';
         } else if (zone.type === 'parcelle') {
           badge.textContent = 'Parcelle';
           badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-soil-200 text-soil-700';
+          if (gridLabel) gridLabel.textContent = 'Rangs & Parcelles';
         } else {
           badge.textContent = 'Verger';
           badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-sage-100 text-sage-700';
+          if (gridLabel) gridLabel.textContent = 'Emplacements d’arbres';
         }
       }
 
@@ -1700,7 +1765,8 @@
       if (notesEl) notesEl.value = zone.notes || '';
       if (gridSummaryEl) {
         const total = (zone.cols || 1) * (zone.rows || 1);
-        gridSummaryEl.textContent = `${zone.cols} × ${zone.rows} (${total} cases)`;
+        const unit = zone.type === 'verger' ? 'emplacements' : 'cases';
+        gridSummaryEl.textContent = `${zone.cols} × ${zone.rows} (${total} ${unit})`;
       }
     }
 
@@ -1786,6 +1852,7 @@
             <p class="font-serif text-lg font-semibold">Votre terrain est vide</p>
             <p class="text-xs text-sage-500 mt-1">Utilisez les boutons « + Carré potager », « + Parcelle de terre » ou « + Verger » ci-dessus.</p>
           </div>`;
+        applyZoomToCanvases();
         return;
       }
 
@@ -1832,6 +1899,8 @@
         el.addEventListener('pointerdown', (e) => startZoneDrag(e, zone));
         canvas.appendChild(el);
       });
+
+      applyZoomToCanvases();
     }
 
     function startZoneDrag(e, zone) {
@@ -1847,11 +1916,12 @@
       const startPointerY = e.clientY;
       const origX = zone.x;
       const origY = zone.y;
+      const zoom = getZoomLevel();
       let moved = false;
 
       const onPointerMove = (moveEvent) => {
-        const dx = moveEvent.clientX - startPointerX;
-        const dy = moveEvent.clientY - startPointerY;
+        const dx = (moveEvent.clientX - startPointerX) / zoom;
+        const dy = (moveEvent.clientY - startPointerY) / zoom;
         if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
 
         zone.x = Math.round(Math.max(0, origX + dx));
@@ -1962,6 +2032,7 @@
               Retourner à la modélisation
             </button>
           </div>`;
+        applyZoomToCanvases();
         return;
       }
 
@@ -2024,6 +2095,8 @@
         el.appendChild(grid);
         canvas.appendChild(el);
       });
+
+      applyZoomToCanvases();
     }
 
     function openPlantingModal(zone, cellIndex, existingPlanting) {
@@ -2559,10 +2632,12 @@
       getTerrainPixelBounds();
       saveState();
       updateTerrainSizeSummary();
+      bindCanvasWheelZoom();
       renderCanvas1();
       renderZoneInspector();
       renderPlantLibrary();
       renderCanvas2();
+      applyZoomToCanvases();
       renderPlanningAndTracking();
       switchTab(state.activeTab || 1);
       refreshIcons();
