@@ -146,6 +146,9 @@
 
           <!-- Boutons Actions rapides (Mobile) -->
           <div class="flex md:hidden items-center gap-1.5">
+            <button type="button" onclick="openSaveManagerModal()" title="Sauvegarder & Versions" class="p-2 rounded-lg bg-sage-600 text-white hover:bg-sage-700 cursor-pointer">
+              <i data-lucide="save" class="w-4 h-4"></i>
+            </button>
             <button type="button" onclick="exportData()" title="Exporter JSON" class="p-2 rounded-lg bg-sage-50 text-sage-600 hover:bg-sage-100 cursor-pointer">
               <i data-lucide="download" class="w-4 h-4"></i>
             </button>
@@ -178,6 +181,11 @@
 
         <!-- Actions de sauvegarde / réinitialisation (Desktop) -->
         <div class="hidden md:flex items-center gap-2">
+          <button type="button" onclick="openSaveManagerModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-sage-600 text-white hover:bg-sage-700 transition shadow-sm cursor-pointer">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span>Sauvegarder</span>
+            <span id="named-saves-count-badge" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-bold">0</span>
+          </button>
           <button type="button" onclick="exportData()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-sage-50 text-sage-700 border border-sage-200 hover:bg-sage-100 transition cursor-pointer">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Exporter</span>
@@ -202,545 +210,84 @@
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
   <!-- ===================================================================== -->
-  <!-- CONTENU PRINCIPAL                                                     -->
+  <!-- MODALE 5 : MENU SAUVEGARDER, SNAPSHOTS NOMMÉS & VERSIONS             -->
   <!-- ===================================================================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- =================================================================== -->
-    <!-- PARTIE 1 : CRÉATION ET MODÉLISATION DU JARDIN                       -->
-    <!-- =================================================================== -->
-    <section id="view-1" class="space-y-6">
-      <!-- En-tête de section -->
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm">
-        <div>
-          <h2 class="font-serif text-2xl font-bold text-sage-700">1. Modéliser mon espace jardin</h2>
-          <p class="text-sm text-sage-500 mt-0.5">Ajoutez vos carrés potagers, parcelles de pleine terre ou vergers, puis déplacez-les librement sur le plan.</p>
-        </div>
-
-        <!-- Boutons d'ajout rapide de zones -->
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button type="button" onclick="addZone('carre')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-wood-100 hover:bg-wood-300/40 text-wood-700 border border-wood-300 font-semibold text-sm transition shadow-sm cursor-pointer">
-            <i data-lucide="grid" class="w-4 h-4"></i>
-            <span>+ Carré potager</span>
-          </button>
-          <button type="button" onclick="addZone('parcelle')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-soil-200/50 hover:bg-soil-200 text-soil-700 border border-soil-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
-            <i data-lucide="rows-3" class="w-4 h-4"></i>
-            <span>+ Parcelle de terre</span>
-          </button>
-          <button type="button" onclick="addZone('verger')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sage-100 hover:bg-sage-200 text-sage-700 border border-sage-500/40 font-semibold text-sm transition shadow-sm cursor-pointer">
-            <i data-lucide="trees" class="w-4 h-4"></i>
-            <span>+ Verger</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Espace de travail : Plan interactif + Inspecteur de propriétés -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        <!-- Canevas du jardin (8 colonnes) -->
-        <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
-            <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-sage-600">
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-wood-100 border-2 border-wood-500 inline-block"></span> Carré potager</span>
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-soil-200 border border-dashed border-soil-500 inline-block"></span> Parcelle</span>
-              <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-sage-100 border border-sage-500 inline-block"></span> Verger</span>
-            </div>
-
-            <!-- Réglage hauteur terrain -->
-            <div class="flex flex-wrap items-center gap-2 text-xs text-sage-500">
-              <label for="terrain-real-w-input" class="flex items-center gap-1">
-                <span>Larg. (cm) :</span>
-                <input type="number" id="terrain-real-w-input" min="150" max="10000" step="20" oninput="changeTerrainRealDimensions(parseInt(this.value, 10), parseInt(document.getElementById('terrain-real-h-input')?.value, 10))" class="w-20 bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-semibold focus:outline-none focus:border-sage-500" />
-              </label>
-              <label for="terrain-real-h-input" class="flex items-center gap-1">
-                <span>Haut. (cm) :</span>
-                <input type="number" id="terrain-real-h-input" min="150" max="10000" step="20" oninput="changeTerrainRealDimensions(parseInt(document.getElementById('terrain-real-w-input')?.value, 10), parseInt(this.value, 10))" class="w-20 bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-semibold focus:outline-none focus:border-sage-500" />
-              </label>
-              <span>Cadre :</span>
-              <select id="terrain-size-select" onchange="changeTerrainHeight(this.value)" class="bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-medium focus:outline-none cursor-pointer">
-                <option value="460">Petit (460px)</option>
-                <option value="580" selected>Moyen (580px)</option>
-                <option value="720">Grand (720px)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Barre d'échelle réelle & bascule mode libre -->
-          <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-sage-50 border border-sage-200 text-xs">
-            <label class="flex items-center gap-2 font-semibold text-sage-700 cursor-pointer select-none">
-              <input type="checkbox" id="scale-mode-toggle" onchange="toggleTrueScaleMode(this.checked)" class="rounded accent-sage-600 w-4 h-4 cursor-pointer" />
-              <span>Échelle réelle</span>
-            </label>
-            <div id="scale-indicator-badge" class="font-mono text-[11px] text-sage-600 bg-white px-2.5 py-1 rounded-lg border border-sage-200">
-              100 cm = — px
-            </div>
-          </div>
-
-          <!-- Zone interactive Drag & Drop -->
-          <div id="garden-canvas-1" class="garden-canvas-bg relative w-full rounded-xl border-2 border-sage-300 overflow-hidden select-none transition-all" style="height: 580px;">
-            <!-- Les zones sont injectées ici par JS -->
-          </div>
-          <p class="text-xs text-sage-500 flex items-center gap-1.5">
-            <i data-lucide="move" class="w-3.5 h-3.5 text-sage-600 shrink-0"></i>
-            <span>Astuce : Cliquez et glissez une zone pour la déplacer. Cliquez dessus pour modifier ses dimensions et subdivisions à droite.</span>
-          </p>
-        </div>
-
-        <!-- Panneau de configuration de la zone sélectionnée (4 colonnes) -->
-        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm lg:sticky lg:top-24">
-          <div id="zone-inspector-empty" class="text-center py-10 space-y-3">
-            <div class="w-12 h-12 rounded-2xl bg-sage-50 text-sage-500 mx-auto flex items-center justify-center">
-              <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-serif text-lg font-semibold text-sage-700">Aucune zone sélectionnée</h3>
-            <p class="text-xs text-sage-500 max-w-xs mx-auto">Cliquez sur un carré potager, une parcelle ou un verger sur le plan pour personnaliser son nom, sa taille et ses cases.</p>
-          </div>
-
-          <div id="zone-inspector-form" class="hidden space-y-4">
-            <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-              <div class="flex items-center gap-2">
-                <span id="insp-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">Type</span>
-                <h3 class="font-serif text-lg font-bold text-sage-700">Propriétés</h3>
-              </div>
-              <button type="button" onclick="deleteSelectedZone()" class="p-2 rounded-lg text-terracotta-600 hover:bg-terracotta-100 transition cursor-pointer" title="Supprimer cette zone">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-
-            <!-- Nom -->
-            <div>
-              <label for="insp-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la zone</label>
-              <input type="text" id="insp-name" oninput="updateSelectedZone('name', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
-            </div>
-
-            <!-- Dimensions réelles affichées (cm) -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="insp-real-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur réelle (cm)</label>
-                <input type="number" id="insp-real-w" min="20" max="5000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-              </div>
-              <div>
-                <label for="insp-real-h" class="block text-xs font-semibold text-sage-600 mb-1">Longueur réelle (cm)</label>
-                <input type="number" id="insp-real-h" min="20" max="5000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-              </div>
-            </div>
-
-            <!-- Taille visuelle sur le plan (synchronisée en mode échelle réelle) -->
-            <div id="insp-px-sliders-box" class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="insp-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (<span id="insp-w-val">160</span>px)</label>
-                <input type="range" id="insp-w" min="40" max="700" step="5" oninput="updateSelectedZone('w', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
-              </div>
-              <div>
-                <label for="insp-h" class="block text-xs font-semibold text-sage-600 mb-1">Hauteur plan (<span id="insp-h-val">160</span>px)</label>
-                <input type="range" id="insp-h" min="40" max="700" step="5" oninput="updateSelectedZone('h', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
-              </div>
-            </div>
-
-            <!-- Taille visuelle sur le plan -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="insp-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (<span id="insp-w-val">160</span>px)</label>
-                <input type="range" id="insp-w" min="110" max="420" step="10" oninput="updateSelectedZone('w', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
-              </div>
-              <div>
-                <label for="insp-h" class="block text-xs font-semibold text-sage-600 mb-1">Hauteur plan (<span id="insp-h-val">160</span>px)</label>
-                <input type="range" id="insp-h" min="110" max="420" step="10" oninput="updateSelectedZone('h', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
-              </div>
-            </div>
-
-            <!-- Découpage en cases / rangs / emplacements -->
-            <div class="p-3.5 rounded-xl bg-sage-50 border border-sage-200 space-y-3">
-              <div class="flex items-center justify-between">
-                <span id="insp-grid-label" class="text-xs font-bold text-sage-700">Subdivisions (Cases)</span>
-                <span id="insp-grid-summary" class="text-xs font-semibold text-sage-500">3 × 3 (9 cases)</span>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label for="insp-cols" class="block text-[11px] text-sage-600 mb-1">Colonnes</label>
-                  <input type="number" id="insp-cols" min="1" max="8" oninput="updateSelectedZoneGrid('cols', parseInt(this.value, 10)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
-                </div>
-                <div>
-                  <label for="insp-rows" class="block text-[11px] text-sage-600 mb-1">Lignes / Rangs</label>
-                  <input type="number" id="insp-rows" min="1" max="8" oninput="updateSelectedZoneGrid('rows', parseInt(this.value, 10)||1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Notes sur le sol / exposition -->
-            <div>
-              <label for="insp-notes" class="block text-xs font-semibold text-sage-600 mb-1">Exposition &amp; Qualité du sol</label>
-              <textarea id="insp-notes" rows="2" placeholder="Ex: Plein soleil, terre enrichie au compost..." oninput="updateSelectedZone('notes', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500"></textarea>
-            </div>
-
-            <div class="pt-2">
-              <button type="button" onclick="switchTab(2)" class="w-full py-2.5 px-4 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
-                <span>Passer aux plantations</span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- PARTIE 2 : PLANTATION                                               -->
-    <!-- =================================================================== -->
-    <section id="view-2" class="hidden space-y-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm">
-        <div>
-          <h2 class="font-serif text-2xl font-bold text-sage-700">2. Planter mes cultures</h2>
-          <p class="text-sm text-sage-500 mt-0.5">Sélectionnez une plante dans la bibliothèque puis cliquez sur une case de votre jardin pour l'installer.</p>
-        </div>
-        <button type="button" onclick="openCustomPlantModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold text-sm transition shadow-sm self-start md:self-auto cursor-pointer">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>Créer une plante personnalisée</span>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        <!-- Bibliothèque de plantes (5 colonnes) -->
-        <div class="lg:col-span-5 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-serif text-lg font-bold text-sage-700">Bibliothèque de plantes</h3>
-            <span id="plant-count-label" class="text-xs font-medium text-sage-500">12 variétés</span>
-          </div>
-
-          <!-- Recherche et filtre catégorie -->
-          <div class="flex flex-col sm:flex-row gap-2">
-            <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 text-sage-400 absolute left-3 top-2.5"></i>
-              <input type="text" id="plant-search" oninput="renderPlantLibrary()" placeholder="Rechercher une plante..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500" />
-            </div>
-            <select id="plant-category-filter" onchange="renderPlantLibrary()" class="px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700 focus:outline-none cursor-pointer">
-              <option value="all">Toutes catégories</option>
-              <option value="legume">Légumes</option>
-              <option value="aromate">Aromates</option>
-              <option value="fruit">Fruits &amp; Verger</option>
-            </select>
-          </div>
-
-          <!-- Bandeau plante sélectionnée -->
-          <div id="active-plant-banner" class="p-3 rounded-xl bg-sage-600 text-white flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-3">
-              <span id="active-plant-emoji" class="text-2xl bg-white/15 w-10 h-10 rounded-lg flex items-center justify-center">🍅</span>
-              <div>
-                <div class="text-xs text-sage-200">Plante prête à planter :</div>
-                <div id="active-plant-name" class="font-bold text-sm">Tomate</div>
-              </div>
-            </div>
-            <span class="text-[11px] bg-white/20 px-2.5 py-1 rounded-lg font-medium">Cliquez sur une case →</span>
-          </div>
-
-          <!-- Liste des plantes -->
-          <div id="plant-library-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 max-h-[480px] overflow-y-auto pr-1">
-            <!-- Cartes plantes injectées via JS -->
-          </div>
-        </div>
-
-        <!-- Plan interactif de plantation (7 colonnes) -->
-        <div class="lg:col-span-7 bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
-            <h3 class="font-serif text-lg font-bold text-sage-700">Plan du jardin (Cliquez sur un emplacement)</h3>
-            <span class="text-xs text-sage-500">Cliquez sur une case occupée pour modifier ou retirer</span>
-          </div>
-
-          <div id="garden-canvas-2" class="garden-canvas-bg relative w-full rounded-xl border-2 border-sage-300 overflow-auto select-none" style="height: 580px;">
-            <!-- Zones et emplacements cliquables injectés via JS -->
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- PARTIE 3 : PLANNING ET SUIVI DES PLANTATIONS                        -->
-    <!-- =================================================================== -->
-    <section id="view-3" class="hidden space-y-6">
-
-      <!-- Résumé & KPIs -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-sage-100 text-sage-600 flex items-center justify-center shrink-0">
-            <i data-lucide="sprout" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-sage-500">Cultures en place</div>
-            <div id="kpi-active-count" class="font-serif text-2xl font-bold text-sage-700">0</div>
-          </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-            <i data-lucide="droplets" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-sage-500">Actions conseillées</div>
-            <div id="kpi-tasks-count" class="font-serif text-2xl font-bold text-amber-700">0</div>
-          </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-terracotta-100 text-terracotta-600 flex items-center justify-center shrink-0">
-            <i data-lucide="shopping-basket" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-sage-500">Prêtes à récolter</div>
-            <div id="kpi-ready-count" class="font-serif text-2xl font-bold text-terracotta-600">0</div>
-          </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-sage-500">Récoltes terminées</div>
-            <div id="kpi-harvested-count" class="font-serif text-2xl font-bold text-emerald-700">0</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Frise Chronologique / Calendrier des récoltes -->
-      <div class="bg-white p-5 rounded-2xl border border-sage-200 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 class="font-serif text-lg font-bold text-sage-700">Calendrier &amp; Frise chronologique des cultures</h3>
-            <p class="text-xs text-sage-500">Visualisez la période de croissance et l'estimation de récolte sur l'année.</p>
-          </div>
-          <div class="flex items-center gap-3 text-xs">
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-sage-500 inline-block"></span> Croissance</span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-terracotta-500 inline-block"></span> Récolte estimée</span>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <div id="timeline-container" class="min-w-[680px]">
-            <!-- En-tête des mois et barres injectés via JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Grille inférieure : Rappels automatiques (4 col) + Tableau de bord des cultures (8 col) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-        <!-- Tâches & Rappels intelligents (4 colonnes) -->
-        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-            <div class="flex items-center gap-2">
-              <i data-lucide="bell-ring" class="w-5 h-5 text-terracotta-500"></i>
-              <h3 class="font-serif text-lg font-bold text-sage-700">Tâches &amp; Rappels</h3>
-            </div>
-            <span class="text-xs font-semibold text-sage-500">Auto-générés</span>
-          </div>
-
-          <div id="tasks-list" class="space-y-2.5">
-            <!-- Rappels injectés via JS -->
-          </div>
-        </div>
-
-        <!-- Tableau de bord & Journal d'entretien (8 colonnes) -->
-        <div class="lg:col-span-8 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sage-100 pb-3">
-            <h3 class="font-serif text-lg font-bold text-sage-700">Suivi détaillé des plantations</h3>
-            <div class="flex items-center gap-2">
-              <select id="tracking-filter" onchange="renderTrackingDashboard()" class="px-3 py-1.5 rounded-xl border border-sage-200 bg-cream text-xs font-medium text-sage-700 cursor-pointer">
-                <option value="active">Cultures actives</option>
-                <option value="all">Toutes (inclus récoltées)</option>
-                <option value="recolte">Récoltées uniquement</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="plantings-tracking-list" class="space-y-3">
-            <!-- Fiches de suivi injectées via JS -->
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ===================================================================== -->
-  <!-- MODALE 1 : PLANTER / MODIFIER UNE PLANTATION DANS UNE CASE            -->
-  <!-- ===================================================================== -->
-  <div id="modal-planting" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sage-200 space-y-4">
+  <div id="modal-save-manager" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-sage-200 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-        <div>
-          <h3 id="modal-planting-title" class="font-serif text-xl font-bold text-sage-700">Installer une culture</h3>
-          <p id="modal-planting-subtitle" class="text-xs text-sage-500">Zone : Carré Potager • Case #1</p>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-serif text-xl font-bold text-sage-700">Sauvegardes &amp; Versions</h3>
+            <p class="text-xs text-sage-500">Protégez votre jardin contre les mises à jour de version ou nettoyages du navigateur.</p>
+          </div>
         </div>
-        <button type="button" onclick="closeModal('modal-planting')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
+        <button type="button" onclick="closeModal('modal-save-manager')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Alerte compagnonnage -->
-      <div id="companion-alert" class="hidden p-3 rounded-xl text-xs space-y-1"></div>
-
-      <div class="space-y-3">
-        <div>
-          <label for="modal-plant-select" class="block text-xs font-semibold text-sage-600 mb-1">Plante choisie</label>
-          <select id="modal-plant-select" onchange="checkCompanionPreview()" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500"></select>
+      <!-- Explication de sécurité anti-perte -->
+      <div class="p-3.5 rounded-xl bg-sage-50 border border-sage-200 text-xs text-sage-700 space-y-1">
+        <div class="font-bold flex items-center gap-1.5">
+          <i data-lucide="info" class="w-4 h-4 text-sage-600 shrink-0"></i>
+          <span>Comment éviter de tout recommencer lors d'une mise à jour ?</span>
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label for="modal-plant-date" class="block text-xs font-semibold text-sage-600 mb-1">Date de plantation</label>
-            <input type="date" id="modal-plant-date" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-          </div>
-          <div>
-            <label for="modal-plant-status" class="block text-xs font-semibold text-sage-600 mb-1">Statut actuel</label>
-            <select id="modal-plant-status" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
-              <option value="semis">🌱 Semis</option>
-              <option value="croissance">🌿 En croissance</option>
-              <option value="floraison">🌼 Floraison</option>
-              <option value="pret">🧺 Prêt à récolter</option>
-              <option value="recolte">✅ Récolté</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label for="modal-plant-notes" class="block text-xs font-semibold text-sage-600 mb-1">Notes / Variété précise</label>
-          <input type="text" id="modal-plant-notes" placeholder="Ex: Cœur de Bœuf, tuteurage installé..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-        </div>
+        <p class="text-sage-600 leading-relaxed">
+          Votre jardin est enregistré automatiquement et récupéré même en cas de changement de version (schéma v2 + migration automatique des anciennes clés). Pour une sécurité absolue avant une mise à jour ou sur un autre appareil, créez une <strong>sauvegarde nommée</strong> ou téléchargez un <strong>fichier de secours (.json)</strong>.
+        </p>
       </div>
 
-      <div class="flex items-center justify-between pt-3 border-t border-sage-100 gap-2">
-        <button type="button" id="btn-remove-planting" onclick="removeCurrentPlanting()" class="hidden px-3 py-2 rounded-xl bg-terracotta-100 text-terracotta-600 hover:bg-terracotta-500 hover:text-white text-xs font-semibold transition cursor-pointer">
-          Retirer
-        </button>
-        <div class="flex items-center gap-2 ml-auto">
-          <button type="button" onclick="closeModal('modal-planting')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
-            Annuler
+      <!-- Enregistrer une sauvegarde nommée maintenant -->
+      <form onsubmit="createNamedSnapshotFromModal(event)" class="p-4 rounded-xl bg-cream border border-sage-200 space-y-3">
+        <label for="named-save-input" class="block text-xs font-bold text-sage-700">
+          Enregistrer une sauvegarde nommée maintenant
+        </label>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="named-save-input" placeholder="Ex: Plan Printemps 2026, Avant modification verger..." class="flex-1 px-3 py-2 rounded-xl border border-sage-200 bg-white text-sm focus:outline-none focus:border-sage-500" />
+          <button type="submit" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer shrink-0">
+            <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+            <span>Enregistrer</span>
           </button>
-          <button type="button" onclick="savePlantingModal()" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
-            Enregistrer
+        </div>
+
+        <!-- Actions fichier de secours JSON -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-sage-100">
+          <button type="button" onclick="exportData()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-xs font-semibold transition cursor-pointer">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Télécharger un fichier de secours (.json)</span>
           </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODALE 2 : CRÉER UNE PLANTE PERSONNALISÉE                              -->
-  <!-- ===================================================================== -->
-  <div id="modal-custom-plant" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sage-200 space-y-4">
-      <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-        <div>
-          <h3 class="font-serif text-xl font-bold text-sage-700">Nouvelle plante personnalisée</h3>
-          <p class="text-xs text-sage-500">Ajoutez votre propre variété à la bibliothèque du jardin.</p>
-        </div>
-        <button type="button" onclick="closeModal('modal-custom-plant')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <form id="custom-plant-form" onsubmit="saveCustomPlant(event)" class="space-y-3">
-        <div class="grid grid-cols-4 gap-3">
-          <div>
-            <label for="custom-plant-emoji" class="block text-xs font-semibold text-sage-600 mb-1">Emoji</label>
-            <input type="text" id="custom-plant-emoji" value="🌿" maxlength="4" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-center text-lg focus:outline-none focus:border-sage-500" />
-          </div>
-          <div class="col-span-3">
-            <label for="custom-plant-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la plante</label>
-            <input type="text" id="custom-plant-name" required placeholder="Ex: Courge Butternut, Pommier Gala..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label for="custom-plant-category" class="block text-xs font-semibold text-sage-600 mb-1">Catégorie</label>
-            <select id="custom-plant-category" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
-              <option value="legume">Légume</option>
-              <option value="aromate">Aromate</option>
-              <option value="fruit">Fruit &amp; Verger</option>
-            </select>
-          </div>
-          <div>
-            <label for="custom-plant-days" class="block text-xs font-semibold text-sage-600 mb-1">Durée récolte (jours)</label>
-            <input type="number" id="custom-plant-days" min="15" max="730" value="75" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-          </div>
-        </div>
-
-        <div>
-          <label for="custom-plant-water" class="block text-xs font-semibold text-sage-600 mb-1">Fréquence d'arrosage (jours)</label>
-          <input type="number" id="custom-plant-water" min="1" max="30" value="4" required class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-sage-100">
-          <button type="button" onclick="closeModal('modal-custom-plant')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
-            Annuler
-          </button>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
-            Ajouter à la bibliothèque
-          </button>
+          <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-xs font-semibold transition cursor-pointer">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>Restaurer depuis un fichier (.json)</span>
+            <input type="file" accept=".json" onchange="importData(event)" class="hidden" />
+          </label>
         </div>
       </form>
-    </div>
-  </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODALE 3 : AJOUTER UNE NOTE D'ENTRETIEN                               -->
-  <!-- ===================================================================== -->
-  <div id="modal-care-note" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sage-200 space-y-4">
-      <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-        <div>
-          <h3 class="font-serif text-xl font-bold text-sage-700">Note d'entretien</h3>
-          <p id="care-note-subtitle" class="text-xs text-sage-500">Culture sélectionnée</p>
+      <!-- Liste des sauvegardes nommées -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-serif text-base font-bold text-sage-700">Sauvegardes nommées</h4>
+          <span id="modal-named-saves-total" class="text-xs text-sage-500">0 sauvegarde</span>
         </div>
-        <button type="button" onclick="closeModal('modal-care-note')" class="p-1.5 rounded-lg text-sage-400 hover:bg-sage-100 hover:text-sage-700 cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <div id="named-saves-list" class="space-y-2"></div>
       </div>
 
-      <form onsubmit="saveCareNote(event)" class="space-y-3">
-        <div>
-          <label for="care-note-type" class="block text-xs font-semibold text-sage-600 mb-1">Type d'intervention</label>
-          <select id="care-note-type" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500">
-            <option value="Arrosage">💧 Arrosage</option>
-            <option value="Paillage / Compost">🍂 Paillage / Compost</option>
-            <option value="Taille / Tuteurage">✂️ Taille / Tuteurage</option>
-            <option value="Observation">🔍 Observation</option>
-          </select>
+      <!-- Historique automatique de sécurité (10 derniers points de contrôle) -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-serif text-base font-bold text-sage-700">Points de sécurité automatiques</h4>
+          <span class="text-xs text-sage-500">10 derniers max</span>
         </div>
-        <div>
-          <label for="care-note-text" class="block text-xs font-semibold text-sage-600 mb-1">Détails</label>
-          <textarea id="care-note-text" rows="3" required placeholder="Ex: Arrosage abondant au pied, ajout de paillis..." class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500"></textarea>
-        </div>
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-sage-100">
-          <button type="button" onclick="closeModal('modal-care-note')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
-            Annuler
-          </button>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold transition shadow-sm cursor-pointer">
-            Ajouter au journal
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+        <div id="auto-snapshots-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+      </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODALE 4 : CONFIRMATION (Remplace confirm())                          -->
-  <!-- ===================================================================== -->
-  <div id="modal-confirm" class="fixed inset-0 bg-sage-700/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-sage-200 space-y-4">
-      <h3 id="confirm-title" class="font-serif text-lg font-bold text-sage-700">Confirmer l'action</h3>
-      <p id="confirm-message" class="text-xs text-sage-600 leading-relaxed">Êtes-vous sûr ?</p>
-      <div class="flex items-center justify-end gap-2 pt-2 border-t border-sage-100">
-        <button type="button" onclick="closeModal('modal-confirm')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
-          Annuler
-        </button>
-        <button type="button" id="confirm-ok-btn" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition cursor-pointer">
-          Confirmer
+      <div class="flex justify-end pt-2 border-t border-sage-100">
+        <button type="button" onclick="closeModal('modal-save-manager')" class="px-4 py-2 rounded-xl bg-sage-50 text-sage-700 hover:bg-sage-100 text-xs font-semibold transition cursor-pointer">
+          Fermer
         </button>
       </div>
     </div>
@@ -750,7 +297,17 @@
   <!-- SCRIPT APPLICATIF                                                     -->
   <!-- ===================================================================== -->
   <script>
-    const STORAGE_KEY = 'mon_jardin_app_v1';
+    const SCHEMA_VERSION = 2;
+    const STORAGE_KEY = 'mon_jardin_app_v2';
+    const LEGACY_STORAGE_KEYS = [
+      'mon_jardin_app_v1',
+      'mon_jardin_state_v1',
+      'mon_jardin_state',
+      'mon_jardin_data'
+    ];
+    const NAMED_SAVES_KEY = 'mon_jardin_named_saves_v1';
+    const AUTO_SNAPSHOTS_KEY = 'mon_jardin_auto_snapshots_v1';
+    const MAX_AUTO_SNAPSHOTS = 10;
 
     // Bibliothèque initiale de variétés (légumes, aromates, fruits & verger)
     const DEFAULT_PLANTS = [
@@ -859,6 +416,7 @@
       };
 
       return {
+        schemaVersion: SCHEMA_VERSION,
         activeTab: 1,
         terrainHeight: 580,
         terrainRealW: 1000,
@@ -921,32 +479,321 @@
     }
 
     let state = loadState();
+    let namedSaves = loadNamedSaves();
+    let autoSnapshots = loadAutoSnapshots();
     let saveTimer = null;
+    let lastAutoSnapshotTime = 0;
     let activeCellContext = null; // { zoneId, cellIndex, existingPlanting }
     let activeCarePlantingId = null;
     let confirmCallback = null;
 
+    function nowFormattedFr() {
+      return new Date().toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function normalizeState(parsed, demo) {
+      const base = parsed && typeof parsed === 'object' ? parsed : {};
+      return {
+        ...demo,
+        ...base,
+        schemaVersion: SCHEMA_VERSION,
+        terrainRealW: Math.max(150, Math.min(10000, Number(base.terrainRealW) || demo.terrainRealW)),
+        terrainRealH: Math.max(150, Math.min(10000, Number(base.terrainRealH) || demo.terrainRealH)),
+        trueScaleMode: typeof base.trueScaleMode === 'boolean' ? base.trueScaleMode : true,
+        customPlants: Array.isArray(base.customPlants) ? base.customPlants : [],
+        zones: Array.isArray(base.zones) ? base.zones : demo.zones,
+        plantings: Array.isArray(base.plantings) ? base.plantings : demo.plantings,
+        dismissedTasks: Array.isArray(base.dismissedTasks) ? base.dismissedTasks : []
+      };
+    }
+
+    function looksLikeGardenState(obj) {
+      return Boolean(obj && typeof obj === 'object' && Array.isArray(obj.zones) && Array.isArray(obj.plantings));
+    }
+
+    function recoverLegacyStateFromStorage(demo) {
+      for (const key of LEGACY_STORAGE_KEYS) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (looksLikeGardenState(parsed)) {
+            return normalizeState(parsed, demo);
+          }
+        } catch (err) {
+          console.warn('Clé legacy ignorée :', key, err);
+        }
+      }
+
+      // Recherche générique dans localStorage en cas de changement de nom de clé lors d'une mise à jour
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || k === STORAGE_KEY || k === NAMED_SAVES_KEY || k === AUTO_SNAPSHOTS_KEY) continue;
+          const raw = localStorage.getItem(k);
+          if (!raw || raw.length < 20) continue;
+          const parsed = JSON.parse(raw);
+          if (looksLikeGardenState(parsed)) {
+            return normalizeState(parsed, demo);
+          }
+        }
+      } catch (err) {
+        console.warn('Scan localStorage interrompu :', err);
+      }
+      return null;
+    }
+
     function loadState() {
+      const demo = createDemoState();
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return createDemoState();
-        const parsed = JSON.parse(raw);
-        const demo = createDemoState();
-        return {
-          ...demo,
-          ...parsed,
-          terrainRealW: Math.max(150, Math.min(10000, Number(parsed.terrainRealW) || demo.terrainRealW)),
-          terrainRealH: Math.max(150, Math.min(10000, Number(parsed.terrainRealH) || demo.terrainRealH)),
-          trueScaleMode: typeof parsed.trueScaleMode === 'boolean' ? parsed.trueScaleMode : true,
-          customPlants: Array.isArray(parsed.customPlants) ? parsed.customPlants : [],
-          zones: Array.isArray(parsed.zones) ? parsed.zones : demo.zones,
-          plantings: Array.isArray(parsed.plantings) ? parsed.plantings : demo.plantings,
-          dismissedTasks: Array.isArray(parsed.dismissedTasks) ? parsed.dismissedTasks : []
-        };
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (looksLikeGardenState(parsed)) {
+            const normalized = normalizeState(parsed, demo);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+            return normalized;
+          }
+        }
+        const recovered = recoverLegacyStateFromStorage(demo);
+        if (recovered) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(recovered));
+          return recovered;
+        }
+        return demo;
       } catch (err) {
         console.error('Erreur chargement localStorage :', err);
-        return createDemoState();
+        return recoverLegacyStateFromStorage(demo) || demo;
       }
+    }
+
+    function loadNamedSaves() {
+      try {
+        const raw = localStorage.getItem(NAMED_SAVES_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed.filter((s) => s && s.id && looksLikeGardenState(s.data)) : [];
+      } catch (err) {
+        console.error('Erreur chargement sauvegardes nommées :', err);
+        return [];
+      }
+    }
+
+    function persistNamedSaves() {
+      try {
+        localStorage.setItem(NAMED_SAVES_KEY, JSON.stringify(namedSaves));
+        updateNamedSavesBadge();
+      } catch (err) {
+        console.error('Erreur sauvegarde snapshots nommés :', err);
+        showToast('Impossible d’enregistrer la sauvegarde nommée.', 'error');
+      }
+    }
+
+    function loadAutoSnapshots() {
+      try {
+        const raw = localStorage.getItem(AUTO_SNAPSHOTS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed.filter((s) => s && s.id && looksLikeGardenState(s.data)).slice(0, MAX_AUTO_SNAPSHOTS) : [];
+      } catch (err) {
+        console.error('Erreur chargement auto-snapshots :', err);
+        return [];
+      }
+    }
+
+    function persistAutoSnapshots() {
+      try {
+        localStorage.setItem(AUTO_SNAPSHOTS_KEY, JSON.stringify(autoSnapshots.slice(0, MAX_AUTO_SNAPSHOTS)));
+      } catch (err) {
+        console.warn('Erreur sauvegarde auto-snapshots :', err);
+      }
+    }
+
+    function buildStateSummary(st) {
+      const zCount = Array.isArray(st?.zones) ? st.zones.length : 0;
+      const pCount = Array.isArray(st?.plantings) ? st.plantings.length : 0;
+      const scaleTxt = st?.trueScaleMode ? 'Échelle réelle' : 'Mode libre';
+      return `${zCount} zone${zCount > 1 ? 's' : ''} • ${pCount} culture${pCount > 1 ? 's' : ''} • ${scaleTxt}`;
+    }
+
+    function recordAutoSnapshot(reason = 'Sauvegarde auto') {
+      const now = Date.now();
+      if (now - lastAutoSnapshotTime < 15000 && autoSnapshots.length > 0) return;
+      lastAutoSnapshotTime = now;
+      const cleanCopy = normalizeState(JSON.parse(JSON.stringify(state)), createDemoState());
+      const entry = {
+        id: `auto-${now}-${Math.floor(Math.random() * 1000)}`,
+        createdAt: nowFormattedFr(),
+        reason,
+        summary: buildStateSummary(cleanCopy),
+        data: cleanCopy
+      };
+      autoSnapshots = [entry, ...autoSnapshots].slice(0, MAX_AUTO_SNAPSHOTS);
+      persistAutoSnapshots();
+    }
+
+    function updateNamedSavesBadge() {
+      const badge = document.getElementById('named-saves-count-badge');
+      if (badge) badge.textContent = String(namedSaves.length);
+    }
+
+    function openSaveManagerModal() {
+      const input = document.getElementById('named-save-input');
+      if (input) input.value = '';
+      renderSaveManagerLists();
+      openModal('modal-save-manager');
+    }
+
+    function createNamedSnapshotFromModal(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('named-save-input');
+      const customName = (input?.value || '').trim();
+      const label = customName || `Sauvegarde du ${nowFormattedFr()}`;
+      const cleanCopy = normalizeState(JSON.parse(JSON.stringify(state)), createDemoState());
+
+      const snap = {
+        id: `snap-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        name: label,
+        createdAt: nowFormattedFr(),
+        summary: buildStateSummary(cleanCopy),
+        data: cleanCopy
+      };
+
+      namedSaves = [snap, ...namedSaves];
+      persistNamedSaves();
+      if (input) input.value = '';
+      renderSaveManagerLists();
+      showToast(`Sauvegarde "${label}" enregistrée.`, 'success');
+    }
+
+    function renameNamedSnapshot(id) {
+      const snap = namedSaves.find((s) => s.id === id);
+      if (!snap) return;
+      const suffix = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      snap.name = `${snap.name} (${suffix})`;
+      persistNamedSaves();
+      renderSaveManagerLists();
+      showToast('Nom de sauvegarde mis à jour.', 'info');
+    }
+
+    function deleteNamedSnapshot(id) {
+      namedSaves = namedSaves.filter((s) => s.id !== id);
+      persistNamedSaves();
+      renderSaveManagerLists();
+      showToast('Sauvegarde nommée supprimée.', 'info');
+    }
+
+    function downloadSnapshotById(id, isAuto = false) {
+      const pool = isAuto ? autoSnapshots : namedSaves;
+      const snap = pool.find((s) => s.id === id);
+      if (!snap) return;
+      const payload = {
+        ...snap.data,
+        backupMeta: {
+          name: snap.name || snap.reason || 'Sauvegarde',
+          createdAt: snap.createdAt,
+          schemaVersion: SCHEMA_VERSION
+        }
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mon-jardin-sauvegarde-${todayStr()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Fichier de secours téléchargé.', 'success');
+    }
+
+    function restoreSnapshotById(id, isAuto = false) {
+      const pool = isAuto ? autoSnapshots : namedSaves;
+      const snap = pool.find((s) => s.id === id);
+      if (!snap || !looksLikeGardenState(snap.data)) return;
+      const label = snap.name || snap.reason || snap.createdAt;
+      openConfirmModal(
+        `Restaurer "${label}" ?`,
+        `Votre jardin actuel sera remplacé par cette sauvegarde (${snap.summary} • ${snap.createdAt}).`,
+        () => {
+          recordAutoSnapshot('Avant restauration');
+          state = normalizeState(JSON.parse(JSON.stringify(snap.data)), createDemoState());
+          saveState();
+          syncTerrainInputsFromState();
+          closeModal('modal-save-manager');
+          switchTab(state.activeTab || 1);
+          showToast(`Sauvegarde "${label}" restaurée.`, 'success');
+        }
+      );
+    }
+
+    function renderSaveManagerLists() {
+      const namedEl = document.getElementById('named-saves-list');
+      const totalEl = document.getElementById('modal-named-saves-total');
+      const autoEl = document.getElementById('auto-snapshots-list');
+      updateNamedSavesBadge();
+
+      if (totalEl) {
+        totalEl.textContent = `${namedSaves.length} sauvegarde${namedSaves.length > 1 ? 's' : ''}`;
+      }
+
+      if (namedEl) {
+        if (namedSaves.length === 0) {
+          namedEl.innerHTML = `<div class="p-3.5 rounded-xl bg-cream border border-sage-200 text-xs text-sage-500 text-center">Aucune sauvegarde nommée pour le moment. Utilisez le formulaire ci-dessus pour en créer une.</div>`;
+        } else {
+          namedEl.innerHTML = namedSaves.map((s) => `
+            <div class="p-3 rounded-xl bg-cream border border-sage-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-sage-700 truncate">${escapeHtml(s.name)}</div>
+                <div class="text-[11px] text-sage-500">${escapeHtml(s.createdAt)} • ${escapeHtml(s.summary)}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="restoreSnapshotById('${s.id}', false)" class="px-2.5 py-1.5 rounded-lg bg-sage-600 hover:bg-sage-700 text-white text-[11px] font-semibold transition cursor-pointer">
+                  Restaurer
+                </button>
+                <button type="button" onclick="downloadSnapshotById('${s.id}', false)" title="Exporter JSON" class="p-1.5 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 cursor-pointer">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="renameNamedSnapshot('${s.id}')" title="Horodater / Renommer" class="p-1.5 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 cursor-pointer">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="deleteNamedSnapshot('${s.id}')" title="Supprimer" class="p-1.5 rounded-lg bg-terracotta-100 hover:bg-terracotta-500 text-terracotta-600 hover:text-white cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>`).join('');
+        }
+      }
+
+      if (autoEl) {
+        if (autoSnapshots.length === 0) {
+          autoEl.innerHTML = `<div class="p-3 rounded-xl bg-cream border border-sage-200 text-xs text-sage-500 text-center">Les points de sécurité automatiques s'enregistrent au fil de vos modifications.</div>`;
+        } else {
+          autoEl.innerHTML = autoSnapshots.map((s) => `
+            <div class="p-2.5 rounded-xl bg-cream/80 border border-sage-200 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-xs font-semibold text-sage-700 truncate">${escapeHtml(s.reason || 'Sauvegarde auto')}</div>
+                <div class="text-[11px] text-sage-500">${escapeHtml(s.createdAt)} • ${escapeHtml(s.summary)}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="restoreSnapshotById('${s.id}', true)" class="px-2.5 py-1 rounded-lg bg-sage-100 hover:bg-sage-200 text-sage-700 text-[11px] font-semibold transition cursor-pointer">
+                  Restaurer
+                </button>
+                <button type="button" onclick="downloadSnapshotById('${s.id}', true)" title="Exporter JSON" class="p-1.5 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 cursor-pointer">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>`).join('');
+        }
+      }
+
+      refreshIcons();
     }
 
     function setAutosaveIndicator(saving) {
@@ -964,7 +811,9 @@
 
     function saveState() {
       try {
+        state.schemaVersion = SCHEMA_VERSION;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        recordAutoSnapshot('Sauvegarde auto');
         setAutosaveIndicator(false);
       } catch (err) {
         console.error('Erreur sauvegarde localStorage :', err);
@@ -2044,15 +1893,11 @@
         try {
           const parsed = JSON.parse(String(ev.target?.result || '{}'));
           if (!Array.isArray(parsed.zones)) throw new Error('Format invalide');
-          state = {
-            ...createDemoState(),
-            ...parsed,
-            customPlants: Array.isArray(parsed.customPlants) ? parsed.customPlants : [],
-            zones: parsed.zones,
-            plantings: Array.isArray(parsed.plantings) ? parsed.plantings : [],
-            dismissedTasks: Array.isArray(parsed.dismissedTasks) ? parsed.dismissedTasks : []
-          };
+          recordAutoSnapshot('Avant import JSON');
+          state = normalizeState(parsed, createDemoState());
           saveState();
+          syncTerrainInputsFromState();
+          closeModal('modal-save-manager');
           switchTab(state.activeTab || 1);
           showToast('Données importées avec succès.', 'success');
         } catch (err) {
@@ -2065,14 +1910,15 @@
     }
 
     function resetToDemo() {
+      recordAutoSnapshot('Avant réinitialisation');
       state = createDemoState();
       saveState();
+      syncTerrainInputsFromState();
       switchTab(1);
       showToast('Jardin réinitialisé avec l’exemple par défaut.', 'info');
     }
 
-    // --- INITIALISATION ---
-    window.addEventListener('DOMContentLoaded', () => {
+    function syncTerrainInputsFromState() {
       const terrainSelect = document.getElementById('terrain-size-select');
       if (terrainSelect) {
         terrainSelect.value = String(state.terrainHeight || 580);
@@ -2089,9 +1935,16 @@
       if (scaleToggle) {
         scaleToggle.checked = Boolean(state.trueScaleMode);
       }
+    }
+
+    // --- INITIALISATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      syncTerrainInputsFromState();
+      updateNamedSavesBadge();
       if (state.trueScaleMode) {
         syncAllZonesToTrueScale('garden-canvas-1');
       }
+      saveState();
       updateScaleIndicator();
       renderCanvas1();
       renderZoneInspector();
