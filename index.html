@@ -254,27 +254,14 @@
             <label for="terrain-real-w-input" class="font-medium">Largeur (cm) :</label>
             <input type="number" id="terrain-real-w-input" min="200" max="10000" step="50" value="1000" oninput="setTerrainSizeCm(parseInt(this.value, 10), state.terrainRealH)" class="w-24 px-2.5 py-1 rounded-lg border border-sage-200 bg-cream text-xs font-semibold text-sage-700 focus:outline-none focus:border-sage-500" />
           </div>
+      <!-- Espace de travail : Plan interactif au-dessus + Légende & Propriétés en horizontal en dessous -->
+      <div class="space-y-6">
 
-          <div class="flex items-center gap-1.5 text-xs text-sage-600">
-            <label for="terrain-real-h-input" class="font-medium">Hauteur (cm) :</label>
-            <input type="number" id="terrain-real-h-input" min="200" max="10000" step="50" value="800" oninput="setTerrainSizeCm(state.terrainRealW, parseInt(this.value, 10))" class="w-24 px-2.5 py-1 rounded-lg border border-sage-200 bg-cream text-xs font-semibold text-sage-700 focus:outline-none focus:border-sage-500" />
-          </div>
+        <!-- Canevas du jardin pleine largeur -->
+        <div class="bg-white p-4 rounded-2xl border border-sage-200 shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage-100">
+            <span class="text-xs font-semibold text-sage-700">Plan interactif du terrain</span>
 
-          <div class="flex flex-wrap items-center gap-1.5 text-xs">
-            <button type="button" onclick="applyTerrainPreset(600, 500)" class="px-2.5 py-1 rounded-lg bg-sage-50 hover:bg-sage-100 text-sage-700 border border-sage-200 font-medium transition cursor-pointer">
-              6×5 m
-            </button>
-            <button type="button" onclick="applyTerrainPreset(1000, 800)" class="px-2.5 py-1 rounded-lg bg-sage-50 hover:bg-sage-100 text-sage-700 border border-sage-200 font-medium transition cursor-pointer">
-              10×8 m
-            </button>
-            <button type="button" onclick="applyTerrainPreset(1600, 1200)" class="px-2.5 py-1 rounded-lg bg-sage-50 hover:bg-sage-100 text-sage-700 border border-sage-200 font-medium transition cursor-pointer">
-              16×12 m
-            </button>
-          </div>
-        </div>
-
-        <span id="terrain-size-summary" class="text-xs font-medium text-sage-600 bg-sage-50 border border-sage-200 px-3 py-1.5 rounded-xl">
-          Terrain : 1000×800 cm (10 × 8 m) • Repère : 1 m = 72 px
             <!-- Réglage direct de la hauteur du cadre (px) & Zoom -->
             <div class="flex flex-wrap items-center gap-2 text-xs text-sage-500">
               <div class="flex items-center gap-1 bg-sage-50 border border-sage-200 rounded-lg px-1.5 py-0.5 text-sage-700" role="group" aria-label="Contrôles de zoom du plan">
@@ -314,35 +301,48 @@
           </p>
         </div>
 
-        <!-- Panneau de configuration de la zone sélectionnée sur le côté droit (4 colonnes) -->
-        <aside id="properties-panel" aria-label="Propriétés de la zone" class="lg:col-span-4 bg-white p-5 rounded-2xl border border-sage-200 shadow-sm sticky top-24">
-          <div id="zone-inspector-empty" class="text-center py-10 space-y-3">
-            <div class="w-12 h-12 rounded-2xl bg-sage-50 text-sage-500 mx-auto flex items-center justify-center">
-              <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
+        <!-- Bandeau horizontal Légende : Carré potager / Parcelle / Verger -->
+        <div aria-label="Légende des zones" class="bg-white px-5 py-3 rounded-2xl border border-sage-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <span class="text-xs font-bold text-sage-700">Légende des zones :</span>
+          <div class="flex flex-wrap items-center gap-5 text-xs font-medium text-sage-600">
+            <span class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-wood-100 border-2 border-wood-500 inline-block"></span> Carré potager</span>
+            <span class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-soil-200 border border-dashed border-soil-500 inline-block"></span> Parcelle</span>
+            <span class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-sage-100 border border-sage-500 inline-block"></span> Verger</span>
+          </div>
+        </div>
+
+        <!-- Panneau horizontal de configuration de la zone sélectionnée sous le plan -->
+        <section id="properties-panel" aria-label="Propriétés de la zone" class="bg-white p-5 rounded-2xl border border-sage-200 shadow-sm">
+          <div id="zone-inspector-empty" class="text-center py-6 space-y-2">
+            <div class="w-11 h-11 rounded-2xl bg-sage-50 text-sage-500 mx-auto flex items-center justify-center">
+              <i data-lucide="mouse-pointer-click" class="w-5 h-5"></i>
             </div>
             <h3 class="font-serif text-lg font-semibold text-sage-700">Aucune zone sélectionnée</h3>
-            <p class="text-xs text-sage-500 max-w-xs mx-auto">Cliquez sur un carré potager, une parcelle ou un verger sur le plan pour personnaliser son nom, sa taille et ses cases.</p>
+            <p class="text-xs text-sage-500 max-w-md mx-auto">Cliquez sur un carré potager, une parcelle ou un verger sur le plan pour personnaliser son nom, sa taille, sa rotation et ses cases.</p>
           </div>
 
           <div id="zone-inspector-form" class="hidden space-y-4">
-            <div class="flex items-center justify-between border-b border-sage-100 pb-3">
-              <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-sage-100 pb-3">
+              <div class="flex items-center gap-2.5">
                 <span id="insp-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">Type</span>
                 <h3 class="font-serif text-lg font-bold text-sage-700">Propriétés</h3>
               </div>
-              <button type="button" onclick="deleteSelectedZone()" class="p-2 rounded-lg text-terracotta-600 hover:bg-terracotta-100 transition cursor-pointer" title="Supprimer cette zone">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="deleteSelectedZone()" class="p-2 rounded-lg text-terracotta-600 hover:bg-terracotta-100 transition cursor-pointer" title="Supprimer cette zone">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
             </div>
 
-            <!-- Nom -->
-            <div>
-              <label for="insp-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la zone</label>
-              <input type="text" id="insp-name" oninput="updateSelectedZone('name', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
-            </div>
+            <!-- Rangée horizontale principale : Nom + Dimensions réelles (cm) + Taille plan (px) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 items-end">
+              <!-- Nom -->
+              <div class="xl:col-span-2">
+                <label for="insp-name" class="block text-xs font-semibold text-sage-600 mb-1">Nom de la zone</label>
+                <input type="text" id="insp-name" oninput="updateSelectedZone('name', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm font-medium focus:outline-none focus:border-sage-500" />
+              </div>
 
-            <!-- Dimensions réelles affichées (cm) -->
-            <div class="grid grid-cols-2 gap-3">
+              <!-- Dimensions réelles affichées (cm) -->
               <div>
                 <label for="insp-real-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur (cm)</label>
                 <input type="number" id="insp-real-w" min="20" max="20000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value, 10) || 100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
@@ -351,10 +351,8 @@
                 <label for="insp-real-h" class="block text-xs font-semibold text-sage-600 mb-1">Longueur (cm)</label>
                 <input type="number" id="insp-real-h" min="20" max="20000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value, 10) || 100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
               </div>
-            </div>
 
-            <!-- Taille visuelle de la zone sur le plan (px) -->
-            <div class="grid grid-cols-2 gap-3">
+              <!-- Taille visuelle de la zone sur le plan (px) -->
               <div>
                 <label for="insp-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (<span id="insp-w-val">180</span>px)</label>
                 <input type="range" id="insp-w" min="40" max="640" step="4" oninput="updateSelectedZone('w', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
@@ -365,38 +363,67 @@
               </div>
             </div>
 
-            <!-- Découpage en cases / rangs / emplacements -->
-            <div class="p-3.5 rounded-xl bg-sage-50 border border-sage-200 space-y-3">
-              <div class="flex items-center justify-between">
-                <span id="insp-grid-label" class="text-xs font-bold text-sage-700">Subdivisions (Cases)</span>
-                <span id="insp-grid-summary" class="text-xs font-semibold text-sage-500">3 × 3 (9 cases)</span>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label for="insp-cols" class="block text-[11px] text-sage-600 mb-1">Colonnes</label>
-                  <input type="number" id="insp-cols" min="1" max="8" oninput="updateSelectedZoneGrid('cols', parseInt(this.value, 10) || 1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+            <!-- Rangée horizontale secondaire : Rotation + Subdivisions + Notes + Bouton étape 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+              <!-- Orientation / Rotation -->
+              <div class="lg:col-span-5 p-3.5 rounded-xl bg-cream border border-sage-200 flex flex-col justify-between gap-2.5">
+                <div class="flex items-center justify-between">
+                  <label for="insp-rotation" class="text-xs font-bold text-sage-700 flex items-center gap-1.5">
+                    <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-sage-600"></i>
+                    <span>Rotation de la zone</span>
+                  </label>
+                  <span id="insp-rotation-label" class="px-2 py-0.5 rounded-md bg-sage-100 text-sage-700 text-xs font-bold">0°</span>
                 </div>
-                <div>
-                  <label for="insp-rows" class="block text-[11px] text-sage-600 mb-1">Lignes / Rangs</label>
-                  <input type="number" id="insp-rows" min="1" max="8" oninput="updateSelectedZoneGrid('rows', parseInt(this.value, 10) || 1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+
+                <div class="flex items-center gap-2.5">
+                  <input type="range" id="insp-rotation-range" min="-180" max="180" step="5" value="0" oninput="updateSelectedZoneRotation(parseFloat(this.value))" class="flex-1 accent-sage-600 cursor-pointer" aria-label="Curseur d'angle de rotation" />
+                  <div class="relative w-20 shrink-0">
+                    <input type="number" id="insp-rotation" min="-360" max="360" step="1" value="0" oninput="updateSelectedZoneRotation(parseFloat(this.value))" class="w-full px-2 py-1 pr-5 rounded-lg border border-sage-200 bg-white text-xs font-bold text-sage-700 text-right focus:outline-none focus:border-sage-500" />
+                    <span class="text-[11px] text-sage-500 absolute right-2 top-1 pointer-events-none">°</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button type="button" onclick="stepSelectedZoneRotation(-90)" class="px-2 py-1 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-[11px] font-semibold transition cursor-pointer">-90°</button>
+                  <button type="button" onclick="stepSelectedZoneRotation(-15)" class="px-2 py-1 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-[11px] font-semibold transition cursor-pointer">-15°</button>
+                  <button type="button" onclick="stepSelectedZoneRotation(15)" class="px-2 py-1 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-[11px] font-semibold transition cursor-pointer">+15°</button>
+                  <button type="button" onclick="stepSelectedZoneRotation(90)" class="px-2 py-1 rounded-lg bg-white hover:bg-sage-100 text-sage-700 border border-sage-200 text-[11px] font-semibold transition cursor-pointer">+90°</button>
+                  <button type="button" onclick="updateSelectedZoneRotation(0)" class="ml-auto px-2 py-1 rounded-lg bg-sage-50 hover:bg-sage-100 text-sage-600 border border-sage-200 text-[11px] font-semibold transition cursor-pointer">Réinitialiser</button>
                 </div>
               </div>
-            </div>
 
-            <!-- Notes sur le sol / exposition -->
-            <div>
-              <label for="insp-notes" class="block text-xs font-semibold text-sage-600 mb-1">Exposition &amp; Qualité du sol</label>
-              <textarea id="insp-notes" rows="2" placeholder="Ex: Plein soleil, terre enrichie au compost..." oninput="updateSelectedZone('notes', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500"></textarea>
-            </div>
+              <!-- Découpage en cases / rangs / emplacements -->
+              <div class="lg:col-span-4 p-3.5 rounded-xl bg-sage-50 border border-sage-200 flex flex-col justify-between gap-3">
+                <div class="flex items-center justify-between">
+                  <span id="insp-grid-label" class="text-xs font-bold text-sage-700">Subdivisions (Cases)</span>
+                  <span id="insp-grid-summary" class="text-xs font-semibold text-sage-500">3 × 3 (9 cases)</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="insp-cols" class="block text-[11px] text-sage-600 mb-1">Colonnes</label>
+                    <input type="number" id="insp-cols" min="1" max="8" oninput="updateSelectedZoneGrid('cols', parseInt(this.value, 10) || 1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+                  </div>
+                  <div>
+                    <label for="insp-rows" class="block text-[11px] text-sage-600 mb-1">Lignes / Rangs</label>
+                    <input type="number" id="insp-rows" min="1" max="8" oninput="updateSelectedZoneGrid('rows', parseInt(this.value, 10) || 1)" class="w-full px-2.5 py-1.5 rounded-lg border border-sage-200 bg-white text-sm font-semibold" />
+                  </div>
+                </div>
+              </div>
 
-            <div class="pt-2">
-              <button type="button" onclick="switchTab(2)" class="w-full py-2.5 px-4 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
-                <span>Passer aux plantations</span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </button>
+              <!-- Notes sur le sol / exposition + Bouton suivant -->
+              <div class="lg:col-span-3 flex flex-col justify-between gap-2.5">
+                <div>
+                  <label for="insp-notes" class="block text-xs font-semibold text-sage-600 mb-1">Exposition &amp; Qualité du sol</label>
+                  <textarea id="insp-notes" rows="2" placeholder="Ex: Plein soleil, terre enrichie au compost..." oninput="updateSelectedZone('notes', this.value)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-xs focus:outline-none focus:border-sage-500"></textarea>
+                </div>
+                <button type="button" onclick="switchTab(2)" class="w-full py-2.5 px-4 rounded-xl bg-sage-600 hover:bg-sage-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
+                  <span>Passer aux plantations</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
             </div>
           </div>
-        </aside>
+        </section>
 
       </div>
     </section>
@@ -969,6 +996,8 @@
       const h = Math.max(40, Math.min(800, Number(z.h) || defaultDims.h));
       const realW = Math.max(20, Math.min(20000, Number(z.realW) || Math.round(w / FIXED_PX_PER_CM)));
       const realH = Math.max(20, Math.min(20000, Number(z.realH) || Math.round(h / FIXED_PX_PER_CM)));
+      const rawRotation = Number(z.rotation);
+      const rotation = Number.isFinite(rawRotation) ? Math.max(-360, Math.min(360, Math.round(rawRotation * 10) / 10)) : 0;
 
       return {
         id: String(z.id || `zone-${index + 1}-${Date.now()}`),
@@ -980,6 +1009,7 @@
         h,
         realW,
         realH,
+        rotation,
         cols: Math.max(1, Math.min(8, parseInt(z.cols, 10) || defaultDims.cols)),
         rows: Math.max(1, Math.min(8, parseInt(z.rows, 10) || defaultDims.rows)),
         notes: typeof z.notes === 'string' ? z.notes : ''
@@ -997,6 +1027,7 @@
         h: 144,
         realW: 200,
         realH: 200,
+        rotation: 0,
         cols: 3,
         rows: 3,
         notes: 'Plein soleil, terreau et compost maison'
@@ -1012,6 +1043,7 @@
         h: 144,
         realW: 300,
         realH: 200,
+        rotation: 0,
         cols: 4,
         rows: 2,
         notes: 'Terre franche amendée à l’automne'
@@ -1027,6 +1059,7 @@
         h: 180,
         realW: 350,
         realH: 250,
+        rotation: 0,
         cols: 3,
         rows: 2,
         notes: 'Espace fruitiers abrité du vent'
@@ -1525,6 +1558,10 @@
       }
     }
 
+    function saveToStorage() {
+      saveState();
+    }
+
     function scheduleSave() {
       setAutosaveIndicator(true);
       clearTimeout(saveTimer);
@@ -1760,6 +1797,7 @@
       if (hEl) hEl.value = zone.h;
       if (wValEl) wValEl.textContent = zone.w;
       if (hValEl) hValEl.textContent = zone.h;
+      syncRotationControls(zone.rotation || 0);
       if (colsEl) colsEl.value = zone.cols;
       if (rowsEl) rowsEl.value = zone.rows;
       if (notesEl) notesEl.value = zone.notes || '';
@@ -1768,6 +1806,55 @@
         const unit = zone.type === 'verger' ? 'emplacements' : 'cases';
         gridSummaryEl.textContent = `${zone.cols} × ${zone.rows} (${total} ${unit})`;
       }
+    }
+
+    function normalizeAngleDeg(deg) {
+      const num = Number(deg);
+      if (!Number.isFinite(num)) return 0;
+      let wrapped = ((num + 180) % 360 + 360) % 360 - 180;
+      if (Math.abs(wrapped + 180) < 1e-6 && num > 0) wrapped = 180;
+      return Math.round(wrapped * 10) / 10;
+    }
+
+    function syncRotationControls(deg) {
+      const val = normalizeAngleDeg(deg);
+      const labelEl = document.getElementById('insp-rotation-label');
+      const rangeEl = document.getElementById('insp-rotation-range');
+      const numEl = document.getElementById('insp-rotation');
+      if (labelEl) labelEl.textContent = `${val}°`;
+      if (rangeEl) rangeEl.value = String(Math.max(-180, Math.min(180, val)));
+      if (numEl && document.activeElement !== numEl) numEl.value = String(val);
+    }
+
+    function applyZoneDomTransform(zone) {
+      if (!zone) return;
+      const deg = Number(zone.rotation) || 0;
+      [
+        document.querySelector(`#garden-canvas-1 [data-zone-id="${zone.id}"]`),
+        document.querySelector(`#garden-canvas-2 [data-zone-id="${zone.id}"]`)
+      ].forEach((el) => {
+        if (!el) return;
+        el.style.transformOrigin = 'center center';
+        el.style.transform = `rotate(${deg}deg)`;
+      });
+    }
+
+    function updateSelectedZoneRotation(deg) {
+      const zone = getSelectedZone();
+      if (!zone) return;
+      if (!Number.isFinite(Number(deg))) return;
+      const clamped = Math.max(-360, Math.min(360, Math.round(Number(deg) * 10) / 10));
+      zone.rotation = clamped;
+      syncRotationControls(clamped);
+      applyZoneDomTransform(zone);
+      saveToStorage();
+    }
+
+    function stepSelectedZoneRotation(deltaDeg) {
+      const zone = getSelectedZone();
+      if (!zone) return;
+      const next = normalizeAngleDeg((Number(zone.rotation) || 0) + Number(deltaDeg || 0));
+      updateSelectedZoneRotation(next);
     }
 
     function updateSelectedZone(field, value) {
@@ -1863,14 +1950,35 @@
           : zone.type === 'parcelle'
             ? 'zone-parcelle'
             : 'zone-verger';
-        const selectedClass = zone.id === state.selectedZoneId ? 'zone-selected' : '';
+        const isSelected = zone.id === state.selectedZoneId;
+        const selectedClass = isSelected ? 'zone-selected' : '';
+        const rotDeg = Number(zone.rotation) || 0;
 
+        el.dataset.zoneId = zone.id;
         el.className = `rounded-xl p-2.5 flex flex-col justify-between cursor-grab active:cursor-grabbing transition-shadow ${typeClass} ${selectedClass}`;
         el.style.position = 'absolute';
         el.style.left = `${zone.x}px`;
         el.style.top = `${zone.y}px`;
         el.style.width = `${zone.w}px`;
         el.style.height = `${zone.h}px`;
+        el.style.transformOrigin = 'center center';
+        el.style.transform = `rotate(${rotDeg}deg)`;
+
+        if (isSelected) {
+          const handle = document.createElement('button');
+          handle.type = 'button';
+          handle.dataset.rotateHandle = 'true';
+          handle.title = 'Glisser pour faire pivoter (Maintenir Maj. pour crans de 15°)';
+          handle.setAttribute('aria-label', `Faire pivoter ${zone.name}`);
+          handle.className = 'w-6 h-6 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white border-2 border-white shadow-md flex items-center justify-center cursor-ew-resize z-30';
+          handle.style.position = 'absolute';
+          handle.style.top = '-14px';
+          handle.style.left = '50%';
+          handle.style.transform = 'translateX(-50%)';
+          handle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>`;
+          handle.addEventListener('pointerdown', (ev) => startZoneRotateDrag(ev, zone, el));
+          el.appendChild(handle);
+        }
 
         const cols = Math.max(1, zone.cols || 1);
         const rows = Math.max(1, zone.rows || 1);
@@ -1903,7 +2011,48 @@
       applyZoomToCanvases();
     }
 
+    function startZoneRotateDrag(e, zone, zoneEl) {
+      if (e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      state.selectedZoneId = zone.id;
+      renderZoneInspector();
+
+      const targetEl = zoneEl || document.querySelector(`#garden-canvas-1 [data-zone-id="${zone.id}"]`);
+      const rect = targetEl ? targetEl.getBoundingClientRect() : null;
+      const centerX = rect ? rect.left + rect.width / 2 : e.clientX;
+      const centerY = rect ? rect.top + rect.height / 2 : e.clientY;
+      const startPointerAngleRad = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+      const startRotationDeg = Number(zone.rotation) || 0;
+
+      const onPointerMove = (moveEvent) => {
+        const curAngleRad = Math.atan2(moveEvent.clientY - centerY, moveEvent.clientX - centerX);
+        const deltaDeg = ((curAngleRad - startPointerAngleRad) * 180) / Math.PI;
+        let nextDeg = startRotationDeg + deltaDeg;
+        if (moveEvent.shiftKey) {
+          nextDeg = Math.round(nextDeg / 15) * 15;
+        } else {
+          nextDeg = Math.round(nextDeg);
+        }
+        nextDeg = normalizeAngleDeg(nextDeg);
+        zone.rotation = nextDeg;
+        syncRotationControls(nextDeg);
+        applyZoneDomTransform(zone);
+      };
+
+      const onPointerUp = () => {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        saveToStorage();
+      };
+
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    }
+
     function startZoneDrag(e, zone) {
+      if (e.target && e.target.closest && e.target.closest('[data-rotate-handle="true"]')) return;
       if (e.button !== undefined && e.button !== 0) return;
       e.preventDefault();
       e.stopPropagation();
@@ -2043,13 +2192,17 @@
           : zone.type === 'parcelle'
             ? 'zone-parcelle'
             : 'zone-verger';
+        const rotDeg = Number(zone.rotation) || 0;
 
+        el.dataset.zoneId = zone.id;
         el.className = `rounded-xl p-2.5 flex flex-col justify-between ${typeClass}`;
         el.style.position = 'absolute';
         el.style.left = `${zone.x}px`;
         el.style.top = `${zone.y}px`;
         el.style.width = `${zone.w}px`;
         el.style.height = `${zone.h}px`;
+        el.style.transformOrigin = 'center center';
+        el.style.transform = `rotate(${rotDeg}deg)`;
 
         const header = document.createElement('div');
         header.className = 'flex items-center justify-between gap-1 mb-1';
