@@ -247,13 +247,32 @@
             </div>
 
             <!-- Réglage hauteur terrain -->
-            <div class="flex items-center gap-2 text-xs text-sage-500">
-              <span>Terrain :</span>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-sage-500">
+              <label for="terrain-real-w-input" class="flex items-center gap-1">
+                <span>Larg. (cm) :</span>
+                <input type="number" id="terrain-real-w-input" min="150" max="10000" step="20" oninput="changeTerrainRealDimensions(parseInt(this.value, 10), parseInt(document.getElementById('terrain-real-h-input')?.value, 10))" class="w-20 bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-semibold focus:outline-none focus:border-sage-500" />
+              </label>
+              <label for="terrain-real-h-input" class="flex items-center gap-1">
+                <span>Haut. (cm) :</span>
+                <input type="number" id="terrain-real-h-input" min="150" max="10000" step="20" oninput="changeTerrainRealDimensions(parseInt(document.getElementById('terrain-real-w-input')?.value, 10), parseInt(this.value, 10))" class="w-20 bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-semibold focus:outline-none focus:border-sage-500" />
+              </label>
+              <span>Cadre :</span>
               <select id="terrain-size-select" onchange="changeTerrainHeight(this.value)" class="bg-sage-50 border border-sage-200 rounded-lg px-2 py-1 text-sage-700 font-medium focus:outline-none cursor-pointer">
                 <option value="460">Petit (460px)</option>
                 <option value="580" selected>Moyen (580px)</option>
                 <option value="720">Grand (720px)</option>
               </select>
+            </div>
+          </div>
+
+          <!-- Barre d'échelle réelle & bascule mode libre -->
+          <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-sage-50 border border-sage-200 text-xs">
+            <label class="flex items-center gap-2 font-semibold text-sage-700 cursor-pointer select-none">
+              <input type="checkbox" id="scale-mode-toggle" onchange="toggleTrueScaleMode(this.checked)" class="rounded accent-sage-600 w-4 h-4 cursor-pointer" />
+              <span>Échelle réelle</span>
+            </label>
+            <div id="scale-indicator-badge" class="font-mono text-[11px] text-sage-600 bg-white px-2.5 py-1 rounded-lg border border-sage-200">
+              100 cm = — px
             </div>
           </div>
 
@@ -297,12 +316,24 @@
             <!-- Dimensions réelles affichées (cm) -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label for="insp-real-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur (cm)</label>
-                <input type="number" id="insp-real-w" min="40" max="2000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
+                <label for="insp-real-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur réelle (cm)</label>
+                <input type="number" id="insp-real-w" min="20" max="5000" step="10" oninput="updateSelectedZone('realW', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
               </div>
               <div>
-                <label for="insp-real-h" class="block text-xs font-semibold text-sage-600 mb-1">Longueur (cm)</label>
-                <input type="number" id="insp-real-h" min="40" max="2000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
+                <label for="insp-real-h" class="block text-xs font-semibold text-sage-600 mb-1">Longueur réelle (cm)</label>
+                <input type="number" id="insp-real-h" min="20" max="5000" step="10" oninput="updateSelectedZone('realH', parseInt(this.value, 10)||100)" class="w-full px-3 py-2 rounded-xl border border-sage-200 bg-cream text-sm focus:outline-none focus:border-sage-500" />
+              </div>
+            </div>
+
+            <!-- Taille visuelle sur le plan (synchronisée en mode échelle réelle) -->
+            <div id="insp-px-sliders-box" class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="insp-w" class="block text-xs font-semibold text-sage-600 mb-1">Largeur plan (<span id="insp-w-val">160</span>px)</label>
+                <input type="range" id="insp-w" min="40" max="700" step="5" oninput="updateSelectedZone('w', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
+              </div>
+              <div>
+                <label for="insp-h" class="block text-xs font-semibold text-sage-600 mb-1">Hauteur plan (<span id="insp-h-val">160</span>px)</label>
+                <input type="range" id="insp-h" min="40" max="700" step="5" oninput="updateSelectedZone('h', parseInt(this.value, 10))" class="w-full accent-sage-600 cursor-pointer" />
               </div>
             </div>
 
@@ -830,6 +861,9 @@
       return {
         activeTab: 1,
         terrainHeight: 580,
+        terrainRealW: 1000,
+        terrainRealH: 800,
+        trueScaleMode: true,
         selectedZoneId: z1.id,
         selectedPlantId: 'tomate',
         customPlants: [],
@@ -901,6 +935,9 @@
         return {
           ...demo,
           ...parsed,
+          terrainRealW: Math.max(150, Math.min(10000, Number(parsed.terrainRealW) || demo.terrainRealW)),
+          terrainRealH: Math.max(150, Math.min(10000, Number(parsed.terrainRealH) || demo.terrainRealH)),
+          trueScaleMode: typeof parsed.trueScaleMode === 'boolean' ? parsed.trueScaleMode : true,
           customPlants: Array.isArray(parsed.customPlants) ? parsed.customPlants : [],
           zones: Array.isArray(parsed.zones) ? parsed.zones : demo.zones,
           plantings: Array.isArray(parsed.plantings) ? parsed.plantings : demo.plantings,
@@ -1004,6 +1041,79 @@
     }
 
     // --- PARTIE 1 : MODÉLISATION DES ZONES ---
+    function getCanvasWidthPx(canvasId = 'garden-canvas-1') {
+      const canvas = document.getElementById(canvasId);
+      const rectW = canvas ? canvas.clientWidth : 0;
+      return rectW > 60 ? rectW : 760;
+    }
+
+    // Calcule le facteur pixels par centimètre afin que le terrain (cm) tienne dans le cadre (px)
+    function getPixelsPerCm(canvasId = 'garden-canvas-1') {
+      const canvasW = Math.max(120, getCanvasWidthPx(canvasId) - 16);
+      const canvasH = Math.max(120, (state.terrainHeight || 580) - 16);
+      const realW = Math.max(50, state.terrainRealW || 1000);
+      const realH = Math.max(50, state.terrainRealH || 800);
+      return Math.min(canvasW / realW, canvasH / realH);
+    }
+
+    function applyTrueScaleToZone(zone, canvasId = 'garden-canvas-1') {
+      if (!zone || !state.trueScaleMode) return;
+      const pxPerCm = getPixelsPerCm(canvasId);
+      zone.w = Math.max(24, Math.round((zone.realW || 100) * pxPerCm));
+      zone.h = Math.max(24, Math.round((zone.realH || 100) * pxPerCm));
+      const maxW = Math.max(24, getCanvasWidthPx(canvasId));
+      const maxH = Math.max(24, state.terrainHeight || 580);
+      zone.x = Math.max(0, Math.min(Math.max(0, maxW - zone.w), zone.x || 0));
+      zone.y = Math.max(0, Math.min(Math.max(0, maxH - zone.h), zone.y || 0));
+    }
+
+    function syncAllZonesToTrueScale(canvasId = 'garden-canvas-1') {
+      if (!state.trueScaleMode) return;
+      state.zones.forEach((z) => applyTrueScaleToZone(z, canvasId));
+    }
+
+    function updateScaleIndicator() {
+      const badge = document.getElementById('scale-indicator-badge');
+      if (!badge) return;
+      const pxPerCm = getPixelsPerCm('garden-canvas-1');
+      const perMeterPx = (pxPerCm * 100).toFixed(1);
+      if (state.trueScaleMode) {
+        badge.textContent = `Échelle active : 100 cm (1 m) = ${perMeterPx} px • Terrain ${state.terrainRealW}×${state.terrainRealH} cm`;
+      } else {
+        badge.textContent = `Mode libre (px) • Référence : 100 cm ≈ ${perMeterPx} px`;
+      }
+    }
+
+    function toggleTrueScaleMode(enabled) {
+      state.trueScaleMode = Boolean(enabled);
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+      }
+      updateScaleIndicator();
+      renderZoneInspector();
+      renderCanvas1();
+      if (state.activeTab === 2) renderCanvas2();
+      scheduleSave();
+      showToast(state.trueScaleMode ? 'Échelle réelle activée sur le plan.' : 'Dimensions pixels libres activées.', 'info');
+    }
+
+    function changeTerrainRealDimensions(realW, realH) {
+      if (Number.isFinite(realW) && realW >= 150) {
+        state.terrainRealW = Math.min(10000, realW);
+      }
+      if (Number.isFinite(realH) && realH >= 150) {
+        state.terrainRealH = Math.min(10000, realH);
+      }
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+      }
+      updateScaleIndicator();
+      renderZoneInspector();
+      renderCanvas1();
+      if (state.activeTab === 2) renderCanvas2();
+      scheduleSave();
+    }
+
     function changeTerrainHeight(val) {
       const h = Math.max(360, Math.min(900, parseInt(val, 10) || 580));
       state.terrainHeight = h;
@@ -1011,11 +1121,17 @@
       const c2 = document.getElementById('garden-canvas-2');
       if (c1) c1.style.height = `${h}px`;
       if (c2) c2.style.height = `${h}px`;
-      state.zones.forEach((z) => {
-        if (z.y + z.h > h) {
-          z.y = Math.max(8, h - z.h - 8);
-        }
-      });
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+      } else {
+        state.zones.forEach((z) => {
+          if (z.y + z.h > h) {
+            z.y = Math.max(8, h - z.h - 8);
+          }
+        });
+      }
+      updateScaleIndicator();
+      renderZoneInspector();
       renderCanvas1();
       if (state.activeTab === 2) renderCanvas2();
       scheduleSave();
@@ -1050,6 +1166,10 @@
         rows: cfg.rows,
         notes: ''
       };
+
+      if (state.trueScaleMode) {
+        applyTrueScaleToZone(zone, 'garden-canvas-1');
+      }
 
       state.zones.push(zone);
       state.selectedZoneId = zone.id;
@@ -1106,8 +1226,16 @@
       if (nameEl) nameEl.value = zone.name;
       if (realWEl) realWEl.value = zone.realW;
       if (realHEl) realHEl.value = zone.realH;
-      if (wEl) wEl.value = zone.w;
-      if (hEl) hEl.value = zone.h;
+      if (wEl) {
+        wEl.value = zone.w;
+        wEl.disabled = Boolean(state.trueScaleMode);
+        wEl.classList.toggle('opacity-50', Boolean(state.trueScaleMode));
+      }
+      if (hEl) {
+        hEl.value = zone.h;
+        hEl.disabled = Boolean(state.trueScaleMode);
+        hEl.classList.toggle('opacity-50', Boolean(state.trueScaleMode));
+      }
       if (wValEl) wValEl.textContent = zone.w;
       if (hValEl) hValEl.textContent = zone.h;
       if (colsEl) colsEl.value = zone.cols;
@@ -1123,6 +1251,29 @@
       const zone = getSelectedZone();
       if (!zone) return;
       zone[field] = value;
+
+      if (state.trueScaleMode && (field === 'realW' || field === 'realH')) {
+        applyTrueScaleToZone(zone, 'garden-canvas-1');
+        const wEl = document.getElementById('insp-w');
+        const hEl = document.getElementById('insp-h');
+        if (wEl) wEl.value = zone.w;
+        if (hEl) hEl.value = zone.h;
+        const wLbl = document.getElementById('insp-w-val');
+        const hLbl = document.getElementById('insp-h-val');
+        if (wLbl) wLbl.textContent = zone.w;
+        if (hLbl) hLbl.textContent = zone.h;
+      } else if (!state.trueScaleMode && (field === 'w' || field === 'h')) {
+        const pxPerCm = getPixelsPerCm('garden-canvas-1');
+        if (pxPerCm > 0) {
+          if (field === 'w') zone.realW = Math.max(20, Math.round(value / pxPerCm));
+          if (field === 'h') zone.realH = Math.max(20, Math.round(value / pxPerCm));
+          const realWEl = document.getElementById('insp-real-w');
+          const realHEl = document.getElementById('insp-real-h');
+          if (realWEl && field === 'w') realWEl.value = zone.realW;
+          if (realHEl && field === 'h') realHEl.value = zone.realH;
+        }
+      }
+
       if (field === 'w') {
         const lbl = document.getElementById('insp-w-val');
         if (lbl) lbl.textContent = value;
@@ -1170,6 +1321,10 @@
       const canvas = document.getElementById('garden-canvas-1');
       if (!canvas) return;
       canvas.style.height = `${state.terrainHeight || 580}px`;
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+      }
+      updateScaleIndicator();
       canvas.innerHTML = '';
 
       if (state.zones.length === 0) {
@@ -1216,7 +1371,7 @@
         el.innerHTML = `
           <div class="flex items-center justify-between gap-1 pointer-events-none">
             <span class="text-[11px] font-bold text-sage-700 truncate">${escapeHtml(zone.name)}</span>
-            <span class="text-[10px] font-medium text-sage-600 bg-white/75 px-1.5 py-0.5 rounded shrink-0">${zone.realW}×${zone.realH}cm</span>
+            <span class="text-[10px] font-medium text-sage-600 bg-white/75 px-1.5 py-0.5 rounded shrink-0">${zone.realW}×${zone.realH}cm${state.trueScaleMode ? ' 📏' : ''}</span>
           </div>
           ${cellsHtml}
         `;
@@ -1333,6 +1488,9 @@
       const canvas = document.getElementById('garden-canvas-2');
       if (!canvas) return;
       canvas.style.height = `${state.terrainHeight || 580}px`;
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-2');
+      }
       canvas.innerHTML = '';
 
       if (state.zones.length === 0) {
@@ -1919,6 +2077,22 @@
       if (terrainSelect) {
         terrainSelect.value = String(state.terrainHeight || 580);
       }
+      const realWInput = document.getElementById('terrain-real-w-input');
+      if (realWInput) {
+        realWInput.value = String(state.terrainRealW || 1000);
+      }
+      const realHInput = document.getElementById('terrain-real-h-input');
+      if (realHInput) {
+        realHInput.value = String(state.terrainRealH || 800);
+      }
+      const scaleToggle = document.getElementById('scale-mode-toggle');
+      if (scaleToggle) {
+        scaleToggle.checked = Boolean(state.trueScaleMode);
+      }
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+      }
+      updateScaleIndicator();
       renderCanvas1();
       renderZoneInspector();
       renderPlantLibrary();
@@ -1926,6 +2100,19 @@
       renderPlanningAndTracking();
       switchTab(state.activeTab || 1);
       refreshIcons();
+    });
+
+    window.addEventListener('resize', () => {
+      if (state.trueScaleMode) {
+        syncAllZonesToTrueScale('garden-canvas-1');
+        updateScaleIndicator();
+        renderZoneInspector();
+        renderCanvas1();
+        if (state.activeTab === 2) {
+          syncAllZonesToTrueScale('garden-canvas-2');
+          renderCanvas2();
+        }
+      }
     });
   </script>
 </body>
